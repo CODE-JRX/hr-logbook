@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block title %}Add Visitor/Client — HR Logbook{% endblock %}
+
+{% block content %}
+  <div class="card shadow-sm mx-auto" style="max-width:760px;">
+  {% block head_extra %}
+  <style>
+    .media-frame {
+      width: 100%;
+      aspect-ratio: 4 / 3; /* modern browsers */
+      max-height: 420px;
+      background: #0f1720;
+      border-radius: 8px;
+      border: 3px solid rgba(13,110,253,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .media-frame video { width:100%; height:100%; object-fit:cover; display:block; }
+    /* Make preview match live preview — use cover so framing matches */
+    .media-frame img { width:100%; height:100%; object-fit:cover; display:block; }
+    #previewBox { padding: .5rem; background: #f8fafc; }
+  </style>
+  {% endblock %}
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Add Visitor/Client</h5>
+      <small class="text-muted">All fields marked <span class="text-danger">*</span> are required</small>
+    </div>
+
+    <div class="card-body">
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-warning" role="alert">
+          {% for m in messages %}{{ m }}<br>{% endfor %}
+        </div>
+      {% endif %}
+      {% endwith %}
+
+      <form method="post" novalidate id="addEmployeeForm">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="employee_id" class="form-label">Visitor/Client ID <span class="text-danger">*</span></label>
+            <input class="form-control" type="text" name="employee_id" id="employee_id" required aria-required="true">
+            <div class="form-text">Unique identifier (e.g., 1001). Avoid spaces or special characters.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="department" class="form-label">Department</label>
+            <input class="form-control" type="text" name="department" id="department">
+          </div>
+
+          <div class="col-12">
+            <label for="full_name" class="form-label">Full name <span class="text-danger">*</span></label>
+            <input class="form-control" type="text" name="full_name" id="full_name" required aria-required="true">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Photo <span class="text-danger">*</span></label>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <div class="mx-auto shadow-sm rounded media-frame">
+                  <video id="video" autoplay playsinline style="display:none; border-radius:6px;"></video>
+                  <div id="camera-placeholder" class="text-center text-muted" style="color:#9aa6bc">
+                    <div style="font-size:38px; opacity:0.6">📷</div>
+                    <div style="margin-top:6px;">Camera Preview</div>
+                  </div>
+                  <canvas id="canvas" width="420" height="320" style="display:none; position:absolute; top:0; left:0; border-radius:6px;"></canvas>
+                </div>
+
+                <div class="mt-3 text-center">
+                  <button id="camera-action" type="button" class="btn btn-primary me-2">Start Camera</button>
+                  <button id="file-toggle" type="button" class="btn btn-outline-secondary">Use file</button>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                
+                <div class="mb-2">
+                  
+                  <div class="border rounded p-0 media-frame" id="previewBox">
+                    <div style="text-align:center; width:100%;"> <span class="text-muted">No image captured | Preview</span></div>
+                  </div>
+                </div>
+
+                <div id="fileArea" style="display:none;">
+                  <label for="fileInput" class="form-label">Upload image</label>
+                  <input id="fileInput" class="form-control" type="file" accept="image/*">
+                  <div class="form-text">If camera is unavailable, upload a photo (JPEG/PNG). Max 5MB.</div>
+                </div>
+
+                <div class="mt-3">
+                  <button id="saveBtn" type="submit" class="btn btn-primary" disabled>Save</button>
+                  <a href="{{ url_for('employee.employee_data') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <input type="hidden" name="photo_data" id="photo_data">
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const preview = document.getElementById('preview');
+const placeholder = document.getElementById('camera-placeholder');
+const actionBtn = document.getElementById('camera-action');
+const photoInput = document.getElementById('photo_data');
+const previewBox = document.getElementById('previewBox');
+const fileToggle = document.getElementById('file-toggle');
+const fileArea = document.getElementById('fileArea');
+const fileInput = document.getElementById('fileInput');
+const saveBtn = document.getElementById('saveBtn');
+let stream = null;
+let cameraState = 'stopped'; // 'stopped' | 'started' | 'captured'
+
+actionBtn.addEventListener('click', async () => {
+  try {
+    if (cameraState === 'stopped') {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+      video.srcObject = stream;
+      video.style.display = 'block';
+      placeholder.style.display = 'none';
+      actionBtn.textContent = 'Capture';
+      cameraState = 'started';
+      return;
+    }
+
+    if (cameraState === 'started') {
+      if (!stream) { alert('Start the camera first'); return; }
+
+      const ctx = canvas.getContext('2d');
+      const vw = video.videoWidth || 420;
+      const vh = video.videoHeight || 320;
+      const MAX_W = 800;
+      let targetW = vw;
+      let targetH = vh;
+      if (vw > MAX_W) {
+        const scale = MAX_W / vw;
+        targetW = Math.round(vw * scale);
+        targetH = Math.round(vh * scale);
+      }
+      canvas.width = targetW;
+      canvas.height = targetH;
+      ctx.drawImage(video, 0, 0, targetW, targetH);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      // display in preview box (single canonical preview)
+      previewBox.innerHTML = '';
+      const img = document.createElement('img'); img.src = dataUrl; img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover'; previewBox.appendChild(img);
+      video.style.display = 'none';
+      actionBtn.textContent = 'Stop Camera';
+      cameraState = 'captured';
+      photoInput.value = dataUrl;
+      validateForm();
+      return;
+    }
+
+    if (cameraState === 'captured') {
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      video.srcObject = null;
+      video.style.display = 'none';
+      placeholder.style.display = 'block';
+      preview.style.display = 'none';
+      photoInput.value = '';
+      actionBtn.textContent = 'Start Camera';
+      cameraState = 'stopped';
+      previewBox.innerHTML = '<div style="text-align:center; width:100%;"> <span class="text-muted">No image captured</span></div>';
+      validateForm();
+      return;
+    }
+  } catch (err) {
+    alert('Camera error: ' + err.message);
+  }
+});
+
+// File upload fallback
+fileToggle.addEventListener('click', () => {
+  if (fileArea.style.display === 'none' || fileArea.style.display === '') {
+    fileArea.style.display = 'block';
+    actionBtn.disabled = true;
+    fileToggle.textContent = 'Use camera';
+  } else {
+    fileArea.style.display = 'none';
+    actionBtn.disabled = false;
+    fileToggle.textContent = 'Use file';
+  }
+});
+
+fileInput && fileInput.addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  if (f.size > 5 * 1024 * 1024) { alert('File too large (max 5MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const data = ev.target.result;
+    photoInput.value = data;
+    previewBox.innerHTML = '';
+    const img = document.createElement('img'); img.src = data; img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover'; previewBox.appendChild(img);
+    validateForm();
+  };
+  reader.readAsDataURL(f);
+});
+
+// Basic client-side validation: require visitor/client id, full_name, and photo
+function validateForm(){
+  const emp = document.getElementById('employee_id').value.trim();
+  const name = document.getElementById('full_name').value.trim();
+  const photo = document.getElementById('photo_data').value;
+  saveBtn.disabled = !(emp && name && photo);
+}
+
+['employee_id','full_name'].forEach(id => document.getElementById(id).addEventListener('input', validateForm));
+
+// on submit, disable save button to prevent double submit
+document.getElementById('addEmployeeForm').addEventListener('submit', (e) => {
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+});
+</script>
+{% endblock %}

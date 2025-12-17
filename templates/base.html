@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}HR Logbook{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">
+  <style>
+    :root{ --bg-overlay: rgba(255,255,255,0.85); }
+    .site-logo { height:42px; }
+    body {
+      padding-top: 70px;
+      background-image: url("{{ url_for('static', filename='resources/background-image.png') }}");
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    /* subtle overlay so text remains readable over busy backgrounds */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: var(--bg-overlay);
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* ensure main content and nav appear above the overlay */
+    nav, main, .card, .container, .navbar { position: relative; z-index: 1; }
+    .site-logo { z-index: 2; position: relative; }
+
+    /* Custom navbar to match the Tailwind example (dark blue, white text, green hover) */
+    .site-nav {
+      background: #1e3a8a; /* deep blue */
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .site-nav .nav-link {
+      color: rgba(255,255,255,0.95);
+      padding: 0;
+      margin-left: .75rem;
+      margin-right: .75rem;
+      font-size: .95rem;
+      transition: color .2s ease;
+    }
+    .site-nav .nav-link:hover {
+      color: #10b981; /* green hover */
+      text-decoration: none;
+    }
+    .site-nav .logo-box {
+      width:56px; height:56px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+      overflow:hidden; background: transparent; border: none; padding:0;
+    }
+    .site-nav .logo-box img { width:48px; height:48px; object-fit:contain; display:block; }
+    .site-nav .logo-link { display:flex; align-items:center; gap:.5rem; color:inherit; text-decoration:none; }
+    .site-nav .logo-link:hover { text-decoration:none; opacity:0.95; }
+    .site-nav .title {
+      color: #fff; font-weight:600; margin-left:0.75rem; font-size:1.05rem; line-height:1;
+    }
+    @media (max-width:575px){
+      .site-nav .nav-links { display:none; }
+    }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <nav class="site-nav fixed-top">
+    <div class="container d-flex align-items-center justify-content-between" style="height:64px;">
+      <div class="d-flex align-items-center">
+        <a class="logo-link" href="{{ url_for('employee.home') }}">
+          <div class="logo-box">
+            <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR Logbook logo" class="site-logo">
+          </div>
+          <span class="title">HR Logbook</span>
+        </a>
+      </div>
+
+      <div class="d-flex align-items-center nav-links">
+        <a class="nav-link" href="/employee-log">Visitor/Client Log</a>
+        <a class="nav-link" href="/employees">Visitor/Clients</a>
+        <a class="nav-link" href="/employee-log-report">Reports</a>
+        <a class="nav-link" href="/admin/login">Admin</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

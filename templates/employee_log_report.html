@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Logs Report — HR Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+    .no-print { display: block; }
+    @media print { .no-print { display: none !important; } }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #dee2e6; padding: 8px; text-align: left; }
+  /* Print-friendly layout */
+  @media print {
+    nav, .site-nav, .no-print { display: none !important; }
+    body::before { display: none !important; }
+    .container { max-width: 100% !important; }
+    table { font-size: 11px; }
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function tableToCSV(table) {
+  const rows = Array.from(table.querySelectorAll('tr'));
+  return rows.map(r => Array.from(r.querySelectorAll('th,td')).map(cell => '"' + (cell.textContent || '').replace(/"/g,'""') + '"').join(',')).join('\n');
+}
+
+const exportBtn = document.getElementById('exportCsvBtn');
+if (exportBtn) {
+  exportBtn.addEventListener('click', function(){
+    const tbl = document.getElementById('logsTable');
+    if (!tbl) return alert('No data to export');
+    const csv = tableToCSV(tbl);
+    const filename = 'visitor_client_logs_' + (new Date()).toISOString().slice(0,10) + '.csv';
+    downloadCSV(csv, filename);
+  });
+}
+</script>
+{% endblock %}
+
+{% block content %}
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-0">Visitor/Client Log Report</h5>
+        <small class="text-muted">Showing <strong>{{ logs|length }}</strong> result{{ 's' if logs|length != 1 else '' }}</small>
+      </div>
+      <div class="btn-group no-print" role="group" aria-label="actions">
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterArea" aria-expanded="false">Filters</button>
+        <button class="btn btn-sm btn-outline-success" type="button" onclick="window.print()">Print</button>
+        <button class="btn btn-sm btn-outline-primary" type="button" id="exportCsvBtn">Export CSV</button>
+        <a class="btn btn-sm btn-outline-secondary" href="/employee-log-report">Clear</a>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <div class="collapse mb-3" id="filterArea">
+        <form method="get" class="row g-2 align-items-end">
+          <div class="col-md-3 col-6">
+            <label class="form-label">Purpose</label>
+            <input class="form-control" type="text" name="purpose" value="{{ filters.purpose or '' }}">
+          </div>
+          <div class="col-md-3 col-6">
+            <label class="form-label">Department</label>
+            <select class="form-select" name="department">
+              <option value="">-- All --</option>
+              {% for d in departments %}
+              <option value="{{ d }}" {% if filters.department == d %}selected{% endif %}>{{ d }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2 col-6">
+            <label class="form-label">From</label>
+            <input class="form-control" type="date" name="start_date" value="{{ filters.start_date or '' }}">
+          </div>
+          <div class="col-md-2 col-6">
+            <label class="form-label">To</label>
+            <input class="form-control" type="date" name="end_date" value="{{ filters.end_date or '' }}">
+          </div>
+          <div class="col-md-2 col-12">
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary">Filter</button>
+              <a class="btn btn-outline-secondary" href="/employee-log-report">Clear</a>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="report-area">
+        <div class="table-responsive">
+          <table id="logsTable" class="table table-sm table-striped table-bordered align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Visitor/Client ID</th>
+                <th>Full Name</th>
+                <th>Department</th>
+                <th>Time In</th>
+                <th>Time Out</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for l in logs %}
+              <tr>
+                <td>{{ l.id }}</td>
+                <td>{{ l.employee_id }}</td>
+                <td>{{ l.full_name or '' }}</td>
+                <td>{{ l.department or '' }}</td>
+                <td>{{ l.time_in }}</td>
+                <td>{{ l.time_out or '' }}</td>
+                <td>{{ l.purpose or '' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card-footer text-muted">Total results: <strong>{{ logs|length }}</strong></div>
+  </div>
+{% endblock %}

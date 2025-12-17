@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Visitor/Clients — HR Logbook{% endblock %}
+
+{% block content %}
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Visitor/Client List</h5>
+      <div>
+        <a class="btn btn-primary d-flex align-items-center" href="{{ url_for('employee.add') }}">
+          <!-- plus icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="bi bi-plus" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14" />
+          </svg>
+          <span class="ms-2 d-none d-md-inline">Add Visitor/Client</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+      <table class="table table-striped mb-0">
+      <thead>
+      <tr>
+          <th>Visitor/Client ID</th>
+          <th>Full Name</th>
+          <th>Department</th>
+          <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for e in employees %}
+      <tr>
+          <td>{{ e.employee_id }}</td>
+          <td>{{ e.full_name }}</td>
+          <td>{{ e.department }}</td>
+          <td>
+              <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center" href="{{ url_for('employee.edit', id=e.id) }}" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="me-1"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6 6L21 11l-6-6-6 6z"/></svg>
+                <span class="d-none d-md-inline">Edit</span>
+              </a>
+              <a class="btn btn-sm btn-outline-danger d-inline-flex align-items-center" href="{{ url_for('employee.delete', id=e.id) }}" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="me-1"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 7h12M9 7v10a2 2 0 002 2h2a2 2 0 002-2V7M10 7V5a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
+                <span class="d-none d-md-inline">Delete</span>
+              </a>
+          </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
