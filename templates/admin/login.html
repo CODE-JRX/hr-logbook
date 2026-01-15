@@ -6,13 +6,7 @@
 		<div class="card-body">
 			<h4 class="card-title mb-3">Admin Login</h4>
 
-			{% with messages = get_flashed_messages() %}
-			{% if messages %}
-				<div class="alert alert-warning" role="alert">
-					{% for m in messages %}{{ m }}<br>{% endfor %}
-				</div>
-			{% endif %}
-			{% endwith %}
+			
 
 			<form method="post" action="/admin/login">
 				<div class="mb-3">

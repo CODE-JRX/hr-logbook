@@ -4,7 +4,7 @@ def get_all_employees():
     """Return all rows from the employees table as dictionaries."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, employee_id, full_name, department FROM employees")
+    cursor.execute("SELECT id, employee_id, full_name, department, gender, age FROM employees ORDER BY id DESC")
     data = cursor.fetchall()
     conn.close()
     return data
@@ -14,7 +14,7 @@ def get_employee_by_id(id):
     """Return a single employee by the integer primary key `id`."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, employee_id, full_name, department FROM employees WHERE id=%s", (id,))
+    cursor.execute("SELECT id, employee_id, full_name, department, gender, age FROM employees WHERE id=%s", (id,))
     employee = cursor.fetchone()
     conn.close()
     return employee
@@ -24,25 +24,25 @@ def get_employee_by_employee_id(employee_id):
     """Return a single employee by the `employee_id` field (varchar)."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, employee_id, full_name, department FROM employees WHERE employee_id=%s", (employee_id,))
+    cursor.execute("SELECT id, employee_id, full_name, department, gender, age FROM employees WHERE employee_id=%s", (employee_id,))
     employee = cursor.fetchone()
     conn.close()
     return employee
 
 
-def add_employee(employee_id, full_name, department=None):
+def add_employee(employee_id, full_name, department=None, gender=None, age=None):
     """Insert a new employee row into the employees table."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO employees (employee_id, full_name, department) VALUES (%s, %s, %s)",
-        (employee_id, full_name, department)
+        "INSERT INTO employees (employee_id, full_name, department, gender, age) VALUES (%s, %s, %s, %s, %s)",
+        (employee_id, full_name, department, gender, age)
     )
     conn.commit()
     conn.close()
 
 
-def update_employee(id, employee_id=None, full_name=None, department=None):
+def update_employee(id, employee_id=None, full_name=None, department=None, gender=None, age=None):
     """Update fields for an employee. Only non-None arguments will be updated."""
     # Build dynamic SET clause depending on provided fields
     fields = []
@@ -56,6 +56,12 @@ def update_employee(id, employee_id=None, full_name=None, department=None):
     if department is not None:
         fields.append("department=%s")
         params.append(department)
+    if gender is not None:
+        fields.append("gender=%s")
+        params.append(gender)
+    if age is not None:
+        fields.append("age=%s")
+        params.append(age)
 
     if not fields:
         return  # nothing to update
@@ -72,7 +78,43 @@ def update_employee(id, employee_id=None, full_name=None, department=None):
 
 def delete_employee(id):
     """Delete an employee row by primary key `id`."""
+    # To avoid foreign key constraint errors, remove related resources first:
+    # 1) delete face_embeddings entries that reference this employee_id
+    # 2) delete stored image file in Employees/<employee_id>.jpg if present
+
     conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Lookup employee to obtain the employee_id (varchar) used by other tables
+    cursor.execute("SELECT employee_id FROM employees WHERE id=%s", (id,))
+    row = cursor.fetchone()
+    if row:
+        emp_id = row.get('employee_id')
+        try:
+            # delete face embedding rows referencing this employee_id
+            # use a separate cursor without dictionary results for writes
+            write_cur = conn.cursor()
+            write_cur.execute("DELETE FROM face_embeddings WHERE employee_id=%s", (emp_id,))
+            # remove stored image file if exists
+            try:
+                import os
+                employees_dir = os.path.join(os.getcwd(), 'Employees')
+                file_path = os.path.join(employees_dir, f"{emp_id}.jpg")
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            except Exception:
+                # non-fatal: ignore file removal errors
+                pass
+        except Exception:
+            # If deleting related rows failed, continue to attempt employee delete
+            pass
+    #delete related logs from `logs` table
+    try:
+        write_cur = conn.cursor()
+        write_cur.execute("DELETE FROM logs WHERE employee_id=%s", (emp_id,))
+    except Exception:
+        pass
+    # finally delete the employee row
     cursor = conn.cursor()
     cursor.execute("DELETE FROM employees WHERE id=%s", (id,))
     conn.commit()
@@ -96,3 +138,20 @@ def get_employee_count():
     total = cursor.fetchone()[0]
     conn.close()
     return total
+
+
+def search_employees(query, limit=10):
+    """Search employees by employee_id or full_name (partial match).
+
+    Returns a list of dict rows: {id, employee_id, full_name, department}
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    like_q = f"%{query}%"
+    cursor.execute(
+        "SELECT id, employee_id, full_name, department FROM employees WHERE employee_id LIKE %s OR full_name LIKE %s ORDER BY full_name ASC LIMIT %s",
+        (like_q, like_q, limit)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

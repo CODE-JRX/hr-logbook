@@ -4,11 +4,11 @@
 {% block content %}
   <header class="text-center py-5">
     <div class="container">
-      <h1 class="display-5">Welcome to HR Logbook</h1>
-      <p class="lead text-muted">Fast visitor/client time logging using face recognition — simple, secure, and modern.</p>
+      <h1 class="display-5">Welcome to HRMO Logbook</h1>
+      <p class="lead text-muted">Fast client time logging using face recognition — simple, secure, and modern.</p>
       <div class="d-flex justify-content-center gap-3 mt-4">
-        <a href="/employee-log" class="btn btn-primary btn-lg">Open Visitor/Client Log</a>
-        <a href="/employees" class="btn btn-outline-primary btn-lg">See Visitor/Clients</a>
+        <a href="/employee-log" class="btn btn-primary btn-lg">Open Client Log</a>
+        <a href="/employees" class="btn btn-outline-primary btn-lg">See Clients</a>
       </div>
     </div>
   </header>
@@ -17,15 +17,15 @@
     <div class="row g-4">
       <div class="col-md-4">
         <div class="card card-cta shadow-sm p-3">
-          <h5>Visitor/Client Attendance</h5>
+          <h5>Client Log</h5>
           <p class="text-muted">Quickly log time-in/time-out using face detection and review logs.</p>
           <a href="/employee-log" class="stretched-link"></a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card card-cta shadow-sm p-3">
-          <h5>Visitor/Client Records</h5>
-          <p class="text-muted">Manage visitor/client profiles and photos.</p>
+          <h5>Client Records</h5>
+          <p class="text-muted">Manage client profiles and photos.</p>
           <a href="/employees" class="stretched-link"></a>
         </div>
       </div>
@@ -40,6 +40,6 @@
   </main>
 
   <footer class="text-center py-4 small text-muted border-top">
-    <div class="container">&copy; {{ year }} HR Logbook</div>
+    <div class="container">&copy; {{ year }} HRMO Logbook</div>
   </footer>
 {% endblock %}

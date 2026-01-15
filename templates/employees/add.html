@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Add Visitor/Client — HR Logbook{% endblock %}
+{% block title %}Add Client — HRMO Logbook{% endblock %}
 
 {% block content %}
   <div class="card shadow-sm mx-auto" style="max-width:760px;">
   {% block head_extra %}
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <style>
     .media-frame {
       width: 100%;
@@ -25,23 +28,19 @@
   </style>
   {% endblock %}
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Add Visitor/Client</h5>
+      <h5 class="mb-0">Registration Form</h5>
       <small class="text-muted">All fields marked <span class="text-danger">*</span> are required</small>
     </div>
 
     <div class="card-body">
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="alert alert-warning" role="alert">
-          {% for m in messages %}{{ m }}<br>{% endfor %}
-        </div>
-      {% endif %}
-      {% endwith %}
+     
+     
+      
 
       <form method="post" novalidate id="addEmployeeForm">
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="employee_id" class="form-label">Visitor/Client ID <span class="text-danger">*</span></label>
+            <label for="employee_id" class="form-label">Client ID <span class="text-danger">*</span></label>
             <input class="form-control" type="text" name="employee_id" id="employee_id" required aria-required="true">
             <div class="form-text">Unique identifier (e.g., 1001). Avoid spaces or special characters.</div>
           </div>
@@ -49,6 +48,22 @@
           <div class="col-md-6">
             <label for="department" class="form-label">Department</label>
             <input class="form-control" type="text" name="department" id="department">
+          </div>
+
+          <div class="col-md-6">
+            <label for="gender" class="form-label">Gender</label>
+            <select class="form-select" name="gender" id="gender">
+              <option value="">-- Select --</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label for="age" class="form-label">Age</label>
+            <input class="form-control" type="number" name="age" id="age" min="0" max="150" placeholder="e.g., 35">
           </div>
 
           <div class="col-12">
@@ -208,7 +223,7 @@ fileInput && fileInput.addEventListener('change', (e) => {
   reader.readAsDataURL(f);
 });
 
-// Basic client-side validation: require visitor/client id, full_name, and photo
+// Basic client-side validation: require client id, full_name, and photo
 function validateForm(){
   const emp = document.getElementById('employee_id').value.trim();
   const name = document.getElementById('full_name').value.trim();

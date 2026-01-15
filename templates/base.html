@@ -71,15 +71,31 @@
           <div class="logo-box">
             <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR Logbook logo" class="site-logo">
           </div>
-          <span class="title">HR Logbook</span>
+          <span class="title">HRMO Logbook</span>
         </a>
       </div>
 
       <div class="d-flex align-items-center nav-links">
-        <a class="nav-link" href="/employee-log">Visitor/Client Log</a>
-        <a class="nav-link" href="/employees">Visitor/Clients</a>
-        <a class="nav-link" href="/employee-log-report">Reports</a>
-        <a class="nav-link" href="/admin/login">Admin</a>
+        {% if session.admin_id %}
+          <a class="nav-link" href="/employee-log">Client Log</a>
+          <a class="nav-link" href="/CSM-form" target="_blank" rel="noopener">Satisfactory Form</a>
+          <a class="nav-link" href="/add">Register</a>
+          <a class="nav-link" href="/employees">Clients Record</a>
+          <div class="dropdown d-inline" style="position:relative;">
+            <a class="nav-link dropdown-toggle" href="#" role="button" id="reportsDropdown" data-bs-toggle="dropdown" aria-expanded="false">Reports</a>
+            <ul class="dropdown-menu" aria-labelledby="reportsDropdown" style="min-width:180px;">
+              <li><a class="dropdown-item" href="/employee-log-report">Log Report</a></li>
+              <li><a class="dropdown-item" href="/csm-report">Satisfactory Report</a></li>
+            </ul>
+          </div>
+          <a class="nav-link" href="/admin/dashboard">Admin</a>
+          <a class="nav-link" href="/admin/logout">Logout</a>
+        {% else %}
+          <a class="nav-link" href="/employee-log">Client Log</a>
+          <a class="nav-link" href="/CSM-form" target="_blank" rel="noopener">Satisfactory Form</a>
+          <a class="nav-link" href="/terms-of-use">Register</a>
+          <a class="nav-link" href="/admin/login">Admin</a>
+        {% endif %}
       </div>
     </div>
   </nav>
@@ -89,6 +105,63 @@
   </main>
 
   <script src="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>
+  <script>
+    (function(){
+      // Force visual and value uppercase for text-like inputs and textareas.
+      // Applies to input types: text, search. Excludes email, password, number, date, file, hidden.
+      const allowedTypes = new Set(['text','search']);
+
+      function shouldTransform(el){
+        if(!el) return false;
+        const tag = el.tagName;
+        if(tag === 'TEXTAREA') return true;
+        if(tag !== 'INPUT') return false;
+        return allowedTypes.has((el.type||'').toLowerCase());
+      }
+
+      function toUpperPreserveSelection(el){
+        try{
+          const start = el.selectionStart;
+          const end = el.selectionEnd;
+          el.value = el.value.toUpperCase();
+          // restore selection if possible
+          if(typeof start === 'number' && typeof end === 'number') el.setSelectionRange(start, end);
+        }catch(e){
+          // ignore on elements that don't support selection
+          el.value = el.value.toUpperCase();
+        }
+      }
+
+      document.addEventListener('input', function(e){
+        const el = e.target;
+        if(shouldTransform(el)){
+          toUpperPreserveSelection(el);
+        }
+      }, true);
+
+      // Handle paste to ensure pasted text becomes uppercase
+      document.addEventListener('paste', function(e){
+        const el = e.target;
+        if(!shouldTransform(el)) return;
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const up = text.toUpperCase();
+        // insert at cursor position
+        const start = el.selectionStart || 0;
+        const end = el.selectionEnd || 0;
+        const val = el.value || '';
+        el.value = val.slice(0, start) + up + val.slice(end);
+        const pos = start + up.length;
+        try{ el.setSelectionRange(pos, pos); }catch(_){ }
+        // trigger input event so any listeners update
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }, true);
+
+      // Visual hint: show uppercase in UI (CSS) when focused
+      document.addEventListener('focusin', function(e){ if(shouldTransform(e.target)) e.target.style.textTransform = 'uppercase'; }, true);
+      document.addEventListener('focusout', function(e){ if(shouldTransform(e.target)) e.target.style.textTransform = ''; }, true);
+    })();
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

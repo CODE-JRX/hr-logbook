@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
-{% block title %}Visitor/Clients — HR Logbook{% endblock %}
+{% block title %}Clients — HR Logbook{% endblock %}
 
 {% block content %}
   <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Visitor/Client List</h5>
+      <h5 class="mb-0">Client List</h5>
       <div>
         <a class="btn btn-primary d-flex align-items-center" href="{{ url_for('employee.add') }}">
           <!-- plus icon -->
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="bi bi-plus" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14" />
           </svg>
-          <span class="ms-2 d-none d-md-inline">Add Visitor/Client</span>
+          <span class="ms-2 d-none d-md-inline">Add Client</span>
         </a>
       </div>
     </div>
@@ -21,8 +21,10 @@
       <table class="table table-striped mb-0">
       <thead>
       <tr>
-          <th>Visitor/Client ID</th>
+          <th>Client ID</th>
           <th>Full Name</th>
+          <th>Gender</th>
+          <th>Age</th>
           <th>Department</th>
           <th>Actions</th>
       </tr>
@@ -32,6 +34,8 @@
       <tr>
           <td>{{ e.employee_id }}</td>
           <td>{{ e.full_name }}</td>
+          <td>{{ e.gender or '' }}</td>
+          <td>{{ e.age or '' }}</td>
           <td>{{ e.department }}</td>
           <td>
               <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center" href="{{ url_for('employee.edit', id=e.id) }}" title="Edit">

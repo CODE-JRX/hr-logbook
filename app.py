@@ -26,6 +26,12 @@ def static_resources(filename):
     return send_from_directory('resources', filename)
 
 
+@app.route('/static/webfonts/<path:filename>')
+def static_webfonts(filename):
+    # maps /static/webfonts/... -> files under ./webfonts/
+    return send_from_directory('webfonts', filename)
+
+
 app.register_blueprint(employee_bp)
 
 
