@@ -2,14 +2,14 @@ from db import get_db_connection
 from datetime import datetime
 
 
-def add_time_in(employee_id, purpose=None):
+def add_time_in(employee_id, purpose=None, additional_info=None):
     """Insert a new log with time_in = now."""
     conn = get_db_connection()
     cursor = conn.cursor()
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     cursor.execute(
-        "INSERT INTO logs (employee_id, time_in, purpose) VALUES (%s, %s, %s)",
-        (employee_id, now, purpose)
+        "INSERT INTO logs (employee_id, time_in, purpose, additional_info) VALUES (%s, %s, %s, %s)",
+        (employee_id, now, purpose, additional_info)
     )
     conn.commit()
     conn.close()

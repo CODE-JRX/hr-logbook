@@ -40,14 +40,20 @@
       <form method="post" novalidate id="addEmployeeForm">
         <div class="row g-3">
           <div class="col-md-6">
-            <label for="employee_id" class="form-label">Client ID <span class="text-danger">*</span></label>
-            <input class="form-control" type="text" name="employee_id" id="employee_id" required aria-required="true">
-            <div class="form-text">Unique identifier (e.g., 1001). Avoid spaces or special characters.</div>
+            <label for="department" class="form-label">Department</label>
+            <input class="form-control" type="text" name="department" id="department">
           </div>
 
           <div class="col-md-6">
-            <label for="department" class="form-label">Department</label>
-            <input class="form-control" type="text" name="department" id="department">
+            <label for="client_type" class="form-label">Client Type</label>
+            <select class="form-select" name="client_type" id="client_type">
+              <option value="">-- Select --</option>
+              <option value="EMPLOYEE">EMPLOYEE</option>
+              <option value="STUDENT">STUDENT</option>
+              <option value="APPLICANT">APPLICANT</option>
+              <option value="VISITOR">VISITOR</option>
+              <option value="OTHER">OTHER</option>
+            </select>
           </div>
 
           <div class="col-md-6">
@@ -152,19 +158,39 @@ actionBtn.addEventListener('click', async () => {
       if (!stream) { alert('Start the camera first'); return; }
 
       const ctx = canvas.getContext('2d');
+      // Calculate the visible area in video coordinates to match object-fit: cover
+      const containerW = 420;
+      const containerH = 320;
       const vw = video.videoWidth || 420;
       const vh = video.videoHeight || 320;
+      const scale = Math.max(containerW / vw, containerH / vh);
+      const scaledW = vw * scale;
+      const scaledH = vh * scale;
+      let sourceX = 0, sourceY = 0, sourceW = vw, sourceH = vh;
+      if (scaledW > containerW) {
+        // crop horizontally
+        const cropAmount = (scaledW - containerW) / scale;
+        sourceX = cropAmount / 2;
+        sourceW = vw - cropAmount;
+      } else {
+        // crop vertically
+        const cropAmount = (scaledH - containerH) / scale;
+        sourceY = cropAmount / 2;
+        sourceH = vh - cropAmount;
+      }
+      // Set canvas size to the cropped visible area, then scale down if needed
+      let targetW = sourceW;
+      let targetH = sourceH;
       const MAX_W = 800;
-      let targetW = vw;
-      let targetH = vh;
-      if (vw > MAX_W) {
-        const scale = MAX_W / vw;
-        targetW = Math.round(vw * scale);
-        targetH = Math.round(vh * scale);
+      if (targetW > MAX_W) {
+        const scaleDown = MAX_W / targetW;
+        targetW = Math.round(targetW * scaleDown);
+        targetH = Math.round(targetH * scaleDown);
       }
       canvas.width = targetW;
       canvas.height = targetH;
-      ctx.drawImage(video, 0, 0, targetW, targetH);
+      // Draw only the visible cropped part
+      ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
       // display in preview box (single canonical preview)
       previewBox.innerHTML = '';
@@ -223,15 +249,14 @@ fileInput && fileInput.addEventListener('change', (e) => {
   reader.readAsDataURL(f);
 });
 
-// Basic client-side validation: require client id, full_name, and photo
+// Basic client-side validation: require full_name and photo
 function validateForm(){
-  const emp = document.getElementById('employee_id').value.trim();
   const name = document.getElementById('full_name').value.trim();
   const photo = document.getElementById('photo_data').value;
-  saveBtn.disabled = !(emp && name && photo);
+  saveBtn.disabled = !(name && photo);
 }
 
-['employee_id','full_name'].forEach(id => document.getElementById(id).addEventListener('input', validateForm));
+['full_name'].forEach(id => document.getElementById(id).addEventListener('input', validateForm));
 
 // on submit, disable save button to prevent double submit
 document.getElementById('addEmployeeForm').addEventListener('submit', (e) => {

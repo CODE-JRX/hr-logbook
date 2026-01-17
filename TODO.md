@@ -1,7 +1,6 @@
-# TODO: Modify Employee Data Page
+# TODO: Fix Match and System Log Alignments
 
 ## Tasks
-- [x] Update `models/employee_model.py` to modify `get_all_employees` to accept `search` and `limit` parameters for filtering and limiting results.
-- [x] Update `routes/all_routes.py` to handle query parameters `search` and `limit` in the `employee_data` route, pass them to `get_all_employees`, and render the template with filtered employees.
-- [x] Update `templates/employees/employee_data.html` to add a search input field, a dropdown for row limits (25, 50, 100, all), and ensure the table displays only the limited and filtered rows.
-- [x] Test the changes to ensure search filters by employee_id or full_name, and limit dropdown works correctly.
+- [x] Add 'text-left' class to the paragraph containing "Match:" for left alignment.
+- [x] Change system log item layout from horizontal to vertical (flex-column) with left alignment for uniformity.
+- [x] Fix canvas capture to match visible area: Update canvas drawing logic in employee_log.html and employees/add.html to crop the video frame to the visible area when object-fit: cover is used, ensuring captured images match what users see on screen.

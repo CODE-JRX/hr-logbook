@@ -1,9 +1,15 @@
 from flask import Flask, send_from_directory
 from routes.all_routes import employee_bp
+from datetime import datetime
 
 
 app = Flask(__name__)
 app.secret_key = 'change-this-to-a-secure-random-string'
+
+
+@app.context_processor
+def inject_year():
+    return {'year': datetime.now().year}
 
 
 # Map existing folders into the conventional `/static/...` URL space so templates can

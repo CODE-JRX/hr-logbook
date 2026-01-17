@@ -21,22 +21,24 @@
       <table class="table table-striped mb-0">
       <thead>
       <tr>
-          <th>Client ID</th>
+          <th>Client Type</th>
           <th>Full Name</th>
           <th>Gender</th>
           <th>Age</th>
           <th>Department</th>
+          
           <th>Actions</th>
       </tr>
       </thead>
       <tbody>
       {% for e in employees %}
       <tr>
-          <td>{{ e.employee_id }}</td>
+          <td>{{ e.client_type or '' }}</td>
           <td>{{ e.full_name }}</td>
           <td>{{ e.gender or '' }}</td>
           <td>{{ e.age or '' }}</td>
           <td>{{ e.department }}</td>
+          
           <td>
               <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center" href="{{ url_for('employee.edit', id=e.id) }}" title="Edit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="me-1"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6 6L21 11l-6-6-6 6z"/></svg>

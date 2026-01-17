@@ -4,7 +4,7 @@ def get_all_employees():
     """Return all rows from the employees table as dictionaries."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, employee_id, full_name, department, gender, age FROM employees ORDER BY id DESC")
+    cursor.execute("SELECT id, employee_id, full_name, department, gender, age, client_type FROM employees ORDER BY id DESC")
     data = cursor.fetchall()
     conn.close()
     return data
@@ -14,7 +14,7 @@ def get_employee_by_id(id):
     """Return a single employee by the integer primary key `id`."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, employee_id, full_name, department, gender, age FROM employees WHERE id=%s", (id,))
+    cursor.execute("SELECT id, employee_id, full_name, department, gender, age, client_type FROM employees WHERE id=%s", (id,))
     employee = cursor.fetchone()
     conn.close()
     return employee
@@ -24,25 +24,25 @@ def get_employee_by_employee_id(employee_id):
     """Return a single employee by the `employee_id` field (varchar)."""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, employee_id, full_name, department, gender, age FROM employees WHERE employee_id=%s", (employee_id,))
+    cursor.execute("SELECT id, employee_id, full_name, department, gender, age, client_type FROM employees WHERE employee_id=%s", (employee_id,))
     employee = cursor.fetchone()
     conn.close()
     return employee
 
 
-def add_employee(employee_id, full_name, department=None, gender=None, age=None):
+def add_employee(employee_id, full_name, department=None, gender=None, age=None, client_type=None):
     """Insert a new employee row into the employees table."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO employees (employee_id, full_name, department, gender, age) VALUES (%s, %s, %s, %s, %s)",
-        (employee_id, full_name, department, gender, age)
+        "INSERT INTO employees (employee_id, full_name, department, gender, age, client_type) VALUES (%s, %s, %s, %s, %s, %s)",
+        (employee_id, full_name, department, gender, age, client_type)
     )
     conn.commit()
     conn.close()
 
 
-def update_employee(id, employee_id=None, full_name=None, department=None, gender=None, age=None):
+def update_employee(id, employee_id=None, full_name=None, department=None, gender=None, age=None, client_type=None):
     """Update fields for an employee. Only non-None arguments will be updated."""
     # Build dynamic SET clause depending on provided fields
     fields = []
@@ -62,6 +62,9 @@ def update_employee(id, employee_id=None, full_name=None, department=None, gende
     if age is not None:
         fields.append("age=%s")
         params.append(age)
+    if client_type is not None:
+        fields.append("client_type=%s")
+        params.append(client_type)
 
     if not fields:
         return  # nothing to update
@@ -140,16 +143,28 @@ def get_employee_count():
     return total
 
 
+def get_next_employee_id():
+    """Generate the next employee_id by finding the maximum existing employee_id (as int) and incrementing by 1."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT MAX(CAST(employee_id AS UNSIGNED)) FROM employees")
+    result = cursor.fetchone()
+    max_id = result[0] if result[0] is not None else 0
+    next_id = max_id + 1
+    conn.close()
+    return str(next_id)
+
+
 def search_employees(query, limit=10):
     """Search employees by employee_id or full_name (partial match).
 
-    Returns a list of dict rows: {id, employee_id, full_name, department}
+    Returns a list of dict rows: {id, employee_id, full_name, department, client_type}
     """
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     like_q = f"%{query}%"
     cursor.execute(
-        "SELECT id, employee_id, full_name, department FROM employees WHERE employee_id LIKE %s OR full_name LIKE %s ORDER BY full_name ASC LIMIT %s",
+        "SELECT id, employee_id, full_name, department, client_type FROM employees WHERE employee_id LIKE %s OR full_name LIKE %s ORDER BY full_name ASC LIMIT %s",
         (like_q, like_q, limit)
     )
     rows = cursor.fetchall()

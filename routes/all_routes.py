@@ -44,11 +44,12 @@ def home():
 @employee_bp.route("/add", methods=["GET", "POST"])
 def add():
     if request.method == "POST":
-        employee_id = request.form.get("employee_id")
+        employee_id = get_next_employee_id()
         full_name = request.form.get("full_name")
         department = request.form.get("department")
         gender = request.form.get("gender")
         age = request.form.get("age")
+        client_type = request.form.get("client_type")
 
         # create employee row
         # ensure age is stored as integer when present
@@ -56,7 +57,7 @@ def add():
             age_val = int(age) if age not in (None, '') else None
         except Exception:
             age_val = None
-        add_employee(employee_id, full_name, department, gender, age_val)
+        add_employee(employee_id, full_name, department, gender, age_val, client_type)
 
         # handle captured photo (data URL)
         photo_data = request.form.get("photo_data")
@@ -98,7 +99,7 @@ def add():
         else:
             # Regular user self-registration — show a short confirmation page that
             # redirects to Client Log after a brief delay so the user can read it.
-            message = 'Registration successful. You may now use the Client Log.'
+            message = f'Registration successful. Your Client ID is {employee_id}. You may now use the Client Log.'
             return render_template('registration_success.html', message=message, redirect_url=url_for('employee.employee_log'), delay=3500)
     # Consume any existing flashed messages so previous system messages (login/logout)
     # do not unexpectedly appear on the registration form page.
@@ -115,6 +116,7 @@ def edit(id):
             employee_id=request.form.get("employee_id"),
             full_name=request.form.get("full_name"),
             department=request.form.get("department"),
+            client_type=request.form.get("client_type"),
             gender=request.form.get("gender"),
             age=(int(request.form.get("age")) if request.form.get("age") not in (None, '') else None)
         )
@@ -214,23 +216,26 @@ def search_employee():
 
 @employee_bp.route('/today_logs')
 def today_logs():
-    # return all logs for the current day
+    # return only logs for the current day where clients are still logged in (time_out IS NULL)
     try:
         today = datetime.now().strftime('%Y-%m-%d')
         rows = get_logs(start_date=today, end_date=today)
-        # keep only needed fields
+        # keep only needed fields and filter out logged-out clients
         results = []
         for r in rows:
             ti = r.get('time_in')
             to = r.get('time_out')
-            results.append({
-                'id': r.get('id'),
-                'employee_id': r.get('employee_id'),
-                'full_name': r.get('full_name'),
-                'time_in': str(ti) if ti is not None else None,
-                'time_out': str(to) if to is not None else None,
-                'purpose': r.get('purpose')
-            })
+            # Only include logs where time_out is NULL (still logged in)
+            if to is None:
+                results.append({
+                    'id': r.get('id'),
+                    'employee_id': r.get('employee_id'),
+                    'full_name': r.get('full_name'),
+                    'time_in': str(ti) if ti is not None else None,
+                    'time_out': str(to) if to is not None else None,
+                    'purpose': r.get('purpose'),
+                    'department': r.get('department')
+                })
         return jsonify(results)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -455,15 +460,29 @@ def log_action():
     employee_id = data.get('employee_id')
     action = data.get('action')  # 'time_in' or 'time_out'
     purpose = data.get('purpose')
+    additional_info = data.get('additional_info')
     if not employee_id or action not in ('time_in', 'time_out'):
         return jsonify({'ok': False, 'error': 'Missing or invalid parameters'}), 400
 
     try:
         if action == 'time_in':
-            add_time_in(employee_id, purpose)
+            add_time_in(employee_id, purpose, additional_info)
         else:
             # Do not update purpose on time_out; purpose should come from the original time_in
             add_time_out(employee_id)
+        return jsonify({'ok': True}), 200
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+@employee_bp.route('/logout_client/<employee_id>', methods=['POST'])
+def logout_client(employee_id):
+    # Logout a specific client by setting time_out on their latest active log
+    if not employee_id:
+        return jsonify({'ok': False, 'error': 'Missing employee_id'}), 400
+
+    try:
+        add_time_out(employee_id)
         return jsonify({'ok': True}), 200
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500

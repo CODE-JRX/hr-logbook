@@ -2,6 +2,24 @@
 {% block title %}Client Log — HR Logbook{% endblock %}
 
 {% block content %}
+<style>
+@keyframes scan {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+.modal, .modal-dialog {
+    z-index: 9999 !important;
+}
+.modal-backdrop {
+    display: none !important;
+}
+.site-nav, .fixed-top {
+    z-index: 0 !important;
+}
+.modal-content {
+    pointer-events: auto !important;
+}
+</style>
 	<div class="text-center">
 		<h2 class="mb-1">Client Log (Face Recognition)</h2>
 		<p class="text-muted mb-4">Capture client photo and record entry/exit information</p>
@@ -20,53 +38,72 @@
 				<!-- captured preview overlay (inside camera container so absolute sizing is constrained) -->
 				<canvas id="canvas" width="420" height="420" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px;"></canvas>
 				<img id="preview" src="" alt="Preview" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:6px; background:#0f1720;" />
+				<div id="scan-line" style="display:none; position:absolute; top:0; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, rgba(0,255,0,0.8), transparent); z-index:20; animation: scan 2s linear;"></div>
 				<!-- camera error overlay (shown inside camera container at top) -->
 				<div id="camera-error" style="display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:25; background:rgba(0,0,0,0.6); color:#fff; padding:6px 10px; border-radius:6px; font-weight:600; font-size:0.95rem;">
 					No face detected
 				</div>
 				<!-- camera action button placed inside the camera container -->
-				<button id="camera-action" class="btn btn-primary btn-lg" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); z-index:10; min-width:140px;">Start Camera</button>
+				<button id="camera-action" class="btn btn-lg" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); z-index:10; min-width:140px; background:rgba(0,0,0,0.7); color:white; border:none; border-radius:6px; padding:8px 16px;">Start Camera</button>
 			</div>
 
 			<!-- right column: match card + today's logs -->
 			<div style="width:320px; max-height:460px; overflow:auto; border-radius:8px; border:4px solid rgba(0,0,0,0.06); background:#fff; padding:12px;">
 				<!-- Match (Client) card will appear here (always visible) -->
 				<div id="result" class="mb-3" style="display:block;">
-					<div class="card shadow-sm p-3">
-						<p class="mb-1"><strong>Match (Client):</strong> <span id="match_name"></span> (<span id="match_id"></span>) <small id="match_gender" class="text-muted"></small> <small id="match_age" class="text-muted"></small></p>
+					<div class="card shadow-sm p-3 text-left">
+						<p class="mb-1" style="text-align: left;"><strong>Match:</strong> <span id="match_name" style="color:red;"></span> <small id="match_gender" class="text-muted" style="display:none;"></small> <small id="match_age" class="text-muted" style="display:none;"></small></p>
 						<div class="mb-2">
-							<label for="purpose" class="form-label">Purpose</label>
-							<input id="purpose" placeholder="Reason (e.g., Meeting)" class="form-control">
+							
+							<select id="purpose" class="form-select">
+								<option value="">Select Purpose</option>
+								<option value="Receive Document/s Requested">Receive Document/s Requested</option>
+								<option value="Submit Document/s">Submit Document/s</option>
+								<option value="Request Form/s">Request Form/s</option>
+								<option value="Process Appointment">Process Appointment</option>
+								<option value="Inquire">Inquire</option>
+								<option value="OTHERS">OTHERS</option>
+							</select>
 						</div>
-						<div class="d-flex gap-2">
+						<div class="mb-2" id="additional_info_div">
+							<label for="additional_info" class="form-label">Additional Information</label>
+							<input id="additional_info" placeholder="Please specify..." class="form-control">
+						</div>
+						<div class="d-flex justify-content-center gap-2">
 							<button id="time_in" class="btn btn-success">Time In</button>
-							<button id="time_out" class="btn btn-danger">Time Out</button>
+							<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#overrideModal">Override</button>
 						</div>
 						<p id="action_msg" class="text-success mt-2" style="display:none;"></p>
 					</div>
 				</div>
 
-				<h6 class="mb-2">Today's Logs</h6>
-				<pre id="todayLogs" style="white-space:pre-wrap; font-size:0.9rem; line-height:1.25;">Loading...</pre>
+				<h6 class="mb-2">System Log</h6>
+				<div id="systemLog" style="font-size:0.9rem; line-height:1.25;">Loading...</div>
 			</div>
 		</div>
 
-		<!-- Manual search / fallback for mis-identified faces -->
-		<div class="mt-3" style="max-width:520px; margin:0 auto;">
-		  <div class="card p-2 shadow-sm">
-		    <label for="manual_search" class="form-label mb-1">Search by name or ID (manual override)</label>
-		    <div class="input-group">
-			<input id="manual_search" class="form-control" placeholder="Type name or ID..." aria-label="Search client">
-		      <button id="use_typed" class="btn btn-outline-primary" type="button">Use</button>
+		<!-- Override Modal -->
+		<div class="modal fade" id="overrideModal" tabindex="-1" aria-labelledby="overrideModalLabel" aria-hidden="true" data-bs-backdrop="false">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="overrideModalLabel">Manual Override</h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		        <label for="manual_search" class="form-label mb-1">Search by name or ID (manual override)</label>
+		        <div class="input-group">
+		          <input id="manual_search" class="form-control" placeholder="Type name or ID..." aria-label="Search client" autofocus>
+          <button id="use_typed" class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Use</button>
+		        </div>
+		        <div id="search_suggestions" class="list-group mt-2" style="max-height:160px; overflow:auto; display:none;"></div>
+		        <div class="form-text mt-1">If the camera identifies the wrong person, search and select the correct client or press <strong>Use</strong> to accept the typed ID.</div>
+		      </div>
 		    </div>
-		    <div id="search_suggestions" class="list-group mt-2" style="max-height:160px; overflow:auto; display:none;"></div>
-			<div class="form-text mt-1">If the camera identifies the wrong person, search and select the correct client or press <strong>Use</strong> to accept the typed ID.</div>
 		  </div>
 		</div>
 
-        
-
-		<p id="error" class="text-danger mt-2"></p>
+		<p id="error" style="display:none;" class="text-danger mt-2"></p>
 	</div>
 {% endblock %}
 
@@ -75,14 +112,15 @@
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const preview = document.getElementById('preview');
+const scanLine = document.getElementById('scan-line');
 const placeholder = document.getElementById('camera-placeholder');
 const actionBtn = document.getElementById('camera-action');
 const resultDiv = document.getElementById('result');
 const matchName = document.getElementById('match_name');
-const matchId = document.getElementById('match_id');
 const purposeInput = document.getElementById('purpose');
+const additionalInfoDiv = document.getElementById('additional_info_div');
+const additionalInfoInput = document.getElementById('additional_info');
 const timeInBtn = document.getElementById('time_in');
-const timeOutBtn = document.getElementById('time_out');
 const actionMsg = document.getElementById('action_msg');
 const errorP = document.getElementById('error');
 const cameraError = document.getElementById('camera-error');
@@ -135,13 +173,14 @@ async function performSearch(q){
 			el.textContent = (item.full_name ? item.full_name + ' — ' : '') + item.employee_id;
 			el.dataset.employeeId = item.employee_id;
 			el.dataset.fullName = item.full_name || '';
+			el.setAttribute('data-bs-dismiss', 'modal');
 			el.addEventListener('click', () => {
 				// pick this suggestion
 				currentEmployeeId = el.dataset.employeeId;
-				matchId.textContent = currentEmployeeId;
 				matchName.textContent = el.dataset.fullName || el.dataset.employeeId;
 				resultDiv.style.display = 'block';
 				actionMsg.style.display = 'none';
+				purposeInput.disabled = false;
 				suggestionsBox.style.display = 'none';
 			});
 			suggestionsBox.appendChild(el);
@@ -173,14 +212,20 @@ function useTyped(){
 	if (!v){ errorP.textContent = 'Please type an ID or name before using.'; return; }
 	// use the typed value as employee_id (logs accept any string)
 	currentEmployeeId = v;
-	matchId.textContent = v;
 	matchName.textContent = v;
 	resultDiv.style.display = 'block';
 	actionMsg.style.display = 'none';
 	suggestionsBox.style.display = 'none';
+	// Close the modal
+	const modal = document.getElementById('overrideModal');
+	const bsModal = bootstrap.Modal.getInstance(modal);
+	if (bsModal) bsModal.hide();
 }
 
 if (useTypedBtn) useTypedBtn.addEventListener('click', useTyped);
+
+// Additional info is always visible for all purposes
+
 let stream = null;
 let currentEmployeeId = null;
 let cameraState = 'stopped'; // 'stopped' | 'started' | 'captured'
@@ -209,25 +254,49 @@ actionBtn.addEventListener('click', async () => {
 		// capture
 				if (!stream) { setError('Start the camera first'); return; }
 		const ctx = canvas.getContext('2d');
-		// Preserve aspect ratio: size canvas to video natural size (with max width to limit upload size)
+		// Calculate the visible area in video coordinates to match object-fit: cover
+		const containerW = 420;
+		const containerH = 420;
 		const vw = video.videoWidth || 420;
 		const vh = video.videoHeight || 420;
+		const scale = Math.max(containerW / vw, containerH / vh);
+		const scaledW = vw * scale;
+		const scaledH = vh * scale;
+		let sourceX = 0, sourceY = 0, sourceW = vw, sourceH = vh;
+		if (scaledW > containerW) {
+			// crop horizontally
+			const cropAmount = (scaledW - containerW) / scale;
+			sourceX = cropAmount / 2;
+			sourceW = vw - cropAmount;
+		} else {
+			// crop vertically
+			const cropAmount = (scaledH - containerH) / scale;
+			sourceY = cropAmount / 2;
+			sourceH = vh - cropAmount;
+		}
+		// Set canvas size to the cropped visible area, then scale down if needed
+		let targetW = sourceW;
+		let targetH = sourceH;
 		const MAX_W = 800;
-		let targetW = vw;
-		let targetH = vh;
-		if (vw > MAX_W) {
-			const scale = MAX_W / vw;
-			targetW = Math.round(vw * scale);
-			targetH = Math.round(vh * scale);
+		if (targetW > MAX_W) {
+			const scaleDown = MAX_W / targetW;
+			targetW = Math.round(targetW * scaleDown);
+			targetH = Math.round(targetH * scaleDown);
 		}
 		canvas.width = targetW;
 		canvas.height = targetH;
-		// draw current video frame to canvas using natural aspect ratio
-		ctx.drawImage(video, 0, 0, targetW, targetH);
+		// Draw only the visible cropped part
+		ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
 		// encode as JPEG (quality 0.9)
 		const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 		preview.src = dataUrl;
 		preview.style.display = 'block';
+		scanLine.style.display = 'block';
+		// Reset animation to restart on each capture
+		scanLine.style.animation = 'none';
+		setTimeout(() => {
+			scanLine.style.animation = 'scan 2s linear';
+		}, 10);
 		canvas.style.display = 'none'; // keep canvas hidden; we use it only for capture
 		// show captured overlay and hide live video
 		video.style.display = 'none';
@@ -242,32 +311,30 @@ actionBtn.addEventListener('click', async () => {
 		try {
 			const res = await fetch('/identify', { method: 'POST', body: fd });
 			const body = await res.json();
-				if (body.ok) {
-					currentEmployeeId = body.employee_id;
-					matchName.textContent = body.full_name || '(no name)';
-					matchId.textContent = body.employee_id;
-					const mg = document.getElementById('match_gender');
-					if (mg) mg.textContent = body.gender ? ('• ' + body.gender) : '';
-					const ma = document.getElementById('match_age');
-					if (ma) ma.textContent = body.age ? ('• ' + body.age) : '';
-					resultDiv.style.display = 'block';
-					actionMsg.style.display = 'none';
-				} else {
-						// keep match card visible but indicate no match so operator can use manual override
-					setError(body.error || 'No match');
-					currentEmployeeId = null;
-					matchName.textContent = '(no match)';
-					matchId.textContent = '';
-					const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
-					const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
-					resultDiv.style.display = 'block';
-					actionMsg.style.display = 'none';
-				}
+			if (body.ok) {
+				currentEmployeeId = body.employee_id;
+				matchName.textContent = body.full_name || '(no name)';
+				const mg = document.getElementById('match_gender');
+				if (mg) mg.textContent = body.gender ? ('• ' + body.gender) : '';
+				const ma = document.getElementById('match_age');
+				if (ma) ma.textContent = body.age ? ('• ' + body.age) : '';
+				resultDiv.style.display = 'block';
+				actionMsg.style.display = 'none';
+				purposeInput.disabled = false;
+			} else {
+				// keep match card visible but indicate no match so operator can use manual override
+				setError(body.error || 'No match');
+				currentEmployeeId = null;
+				matchName.textContent = '(no match)';
+				const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
+				const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
+				resultDiv.style.display = 'block';
+				actionMsg.style.display = 'none';
+			}
 		} catch (err) {
 						setError('Identification failed: ' + err.message);
 				currentEmployeeId = null;
 				matchName.textContent = '(no match)';
-				matchId.textContent = '';
 				const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
 				const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
 				resultDiv.style.display = 'block';
@@ -297,31 +364,44 @@ async function sendLog(action) {
 	// For time_in we send purpose; for time_out we do NOT include/modify purpose (purpose preserved from time_in)
 	const purpose = (action === 'time_in') ? (purposeInput.value || null) : null;
 	try {
-		const res = await fetch('/log_action', {
+	const res = await fetch('/log_action', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ employee_id: currentEmployeeId, action, purpose })
+			body: JSON.stringify({ employee_id: currentEmployeeId, action, purpose, additional_info: additionalInfoInput.value || null })
 		});
 		const body = await res.json();
 		if (body.ok) {
-			actionMsg.textContent = (action === 'time_in' ? 'Time in recorded' : 'Time out recorded');
-			actionMsg.style.display = 'block';
+			if (action === 'time_out') {
+				actionMsg.textContent = 'Time out recorded';
+				actionMsg.style.display = 'block';
+			}
 			errorP.textContent = '';
 						if (action === 'time_in') lastPurpose = purposeInput.value || null;
 			// lock purpose after time_in so it isn't accidentally changed
 			if (action === 'time_in') {
 				purposeInput.disabled = true;
 			}
+			// after time_in, clear current match and reset form fields
+			if (action === 'time_in') {
+				currentEmployeeId = null;
+				// clear the match card displayed values
+				matchName.textContent = '';
+				const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
+				const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
+				purposeInput.value = '';
+				additionalInfoInput.value = '';
+				lastPurpose = null;
+			}
 			// after time_out, clear current match and reset purpose input
 				if (action === 'time_out') {
 					currentEmployeeId = null;
 					// keep the match card visible but clear the displayed values so operator can use manual search
 					matchName.textContent = '';
-					matchId.textContent = '';
 					const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
 					const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
 					purposeInput.disabled = false;
 					purposeInput.value = '';
+					additionalInfoInput.value = '';
 					lastPurpose = null;
 				}
 
@@ -338,38 +418,76 @@ async function sendLog(action) {
 }
 
 timeInBtn.addEventListener('click', () => sendLog('time_in'));
-timeOutBtn.addEventListener('click', () => sendLog('time_out'));
 
-// Fetch and show today's logs in the right-side pre element
+// Fetch and show system logs (only logged-in clients) in the right-side div
 async function refreshTodayLogs(){
-	const el = document.getElementById('todayLogs');
+	const el = document.getElementById('systemLog');
 	if (!el) return;
 	try{
 		const res = await fetch('/today_logs');
 		const data = await res.json();
 		if (!Array.isArray(data)){
-			el.textContent = JSON.stringify(data, null, 2);
+			el.innerHTML = '<div class="text-muted">Error loading logs</div>';
 			return;
 		}
 		if (data.length === 0){
-			el.textContent = 'No logs for today.';
+			el.innerHTML = '<div class="text-muted">No active clients.</div>';
 			return;
 		}
-			// format lines: <Name> In <time>  (and)  <Name> Out <time>
-			const lines = [];
-			data.forEach(r => {
-				const fn = r.full_name || '';
-				if (r.time_in) lines.push(`${fn} In ${r.time_in}`);
-				if (r.time_out) lines.push(`${fn} Out ${r.time_out}`);
-			});
-		el.textContent = lines.join('\n');
+		// Create list items for each logged-in client
+		el.innerHTML = '';
+		data.forEach(r => {
+			const item = document.createElement('div');
+			item.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded text-left';
+			// Color coding based on purpose
+			let colorClass = '';
+			const purpose = r.purpose || '';
+			if (purpose.includes('Receive')) colorClass = 'text-primary';
+			else if (purpose.includes('Submit')) colorClass = 'text-success';
+			else if (purpose.includes('Request')) colorClass = 'text-warning';
+			else if (purpose.includes('Process')) colorClass = 'text-info';
+			else if (purpose.includes('Inquire')) colorClass = 'text-secondary';
+			else colorClass = 'text-dark';
+
+			const name = r.full_name || r.employee_id;
+			const timeIn = r.time_in ? new Date(r.time_in).toLocaleTimeString() : 'Unknown';
+			item.innerHTML = `
+				<div class="${colorClass} text-left">
+					<strong>${name}</strong><br>
+					<small>In: ${timeIn} | ${purpose}</small>
+				</div>
+				<button class="btn btn-sm btn-outline-danger" onclick="logoutClient('${r.employee_id}')">Logout</button>
+			`;
+			el.appendChild(item);
+		});
 	}catch(err){
-		el.textContent = 'Failed to load logs: ' + err.message;
+		el.innerHTML = '<div class="text-danger">Failed to load logs: ' + err.message + '</div>';
+	}
+}
+
+// Logout a specific client
+async function logoutClient(employeeId) {
+	try {
+		const res = await fetch('/logout_client/' + encodeURIComponent(employeeId), { method: 'POST' });
+		const body = await res.json();
+		if (body.ok) {
+			// Refresh the logs
+			refreshTodayLogs();
+		} else {
+			alert('Failed to logout client: ' + (body.error || 'Unknown error'));
+		}
+	} catch (err) {
+		alert('Logout failed: ' + err.message);
 	}
 }
 
 // initial load and periodic refresh
 refreshTodayLogs();
 setInterval(refreshTodayLogs, 10000);
+
+// Ensure modal input gets focus when modal opens
+document.getElementById('overrideModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById('manual_search').focus();
+});
 </script>
 {% endblock %}

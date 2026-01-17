@@ -5,8 +5,8 @@
     <h2>Edit Client</h2>
     <form method="post">
         <div class="mb-3">
-            <label class="form-label">Client ID</label>
-            <input class="form-control" type="text" name="employee_id" value="{{ employee.employee_id }}" required>
+            
+            <input  class="form-control" type="hidden" name="employee_id" value="{{ employee.employee_id }}" required>
         </div>
         <div class="mb-3">
             <label class="form-label">Full name</label>
@@ -15,6 +15,17 @@
         <div class="mb-3">
             <label class="form-label">Department</label>
             <input class="form-control" type="text" name="department" value="{{ employee.department }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Client Type</label>
+            <select class="form-select" name="client_type">
+                <option value="" {% if not employee.client_type %}selected{% endif %}>-- Select --</option>
+                <option value="EMPLOYEE" {% if employee.client_type == 'EMPLOYEE' %}selected{% endif %}>EMPLOYEE</option>
+                <option value="STUDENT" {% if employee.client_type == 'STUDENT' %}selected{% endif %}>STUDENT</option>
+                <option value="APPLICANT" {% if employee.client_type == 'APPLICANT' %}selected{% endif %}>APPLICANT</option>
+                <option value="VISITOR" {% if employee.client_type == 'VISITOR' %}selected{% endif %}>VISITOR</option>
+                <option value="OTHER" {% if employee.client_type == 'OTHER' %}selected{% endif %}>OTHER</option>
+            </select>
         </div>
         <div class="mb-3">
             <label class="form-label">Gender</label>
