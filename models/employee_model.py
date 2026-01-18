@@ -170,3 +170,31 @@ def search_employees(query, limit=10):
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+
+def get_employees_filtered(search=None, limit=None):
+    """Return employees filtered by search query and limited by number.
+
+    search: string to search in full_name or employee_id
+    limit: int or 'all' for no limit
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = "SELECT id, employee_id, full_name, department, gender, age, client_type FROM employees"
+    params = []
+    if search:
+        query += " WHERE full_name LIKE %s OR employee_id LIKE %s"
+        like_q = f"%{search}%"
+        params.extend([like_q, like_q])
+    query += " ORDER BY id DESC"
+    if limit and limit != 'all':
+        try:
+            limit_int = int(limit)
+            query += " LIMIT %s"
+            params.append(limit_int)
+        except ValueError:
+            pass  # ignore invalid limit
+    cursor.execute(query, tuple(params))
+    data = cursor.fetchall()
+    conn.close()
+    return data

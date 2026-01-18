@@ -1,14 +1,64 @@
 {% extends 'base.html' %}
 {% block title %}Home — HR Logbook{% endblock %}
 
+{% block head_extra %}
+<style>
+  .hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 80px 0;
+  }
+  .hero-section h1 {
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .hero-section .lead {
+    font-size: 1.25rem;
+    opacity: 0.9;
+  }
+  .feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  .feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+  .feature-card .card-body {
+    padding: 30px;
+  }
+  .feature-card .card-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #667eea;
+  }
+  .feature-card h5 {
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  .btn-hero {
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  .btn-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-  <header class="text-center py-5">
+  <header class="hero-section text-center">
     <div class="container">
-      <h1 class="display-5">Welcome to HRMO Logbook</h1>
-      <p class="lead text-muted">Fast client time logging using face recognition — simple, secure, and modern.</p>
+      <h1 class="display-4"><i class="fas fa-home"></i> Welcome to HRMO Logbook</h1>
+      <p class="lead">Fast client time logging using face recognition — simple, secure, and modern.</p>
       <div class="d-flex justify-content-center gap-3 mt-4">
-        <a href="/employee-log" class="btn btn-primary btn-lg">Open Client Log</a>
-        <a href="/employees" class="btn btn-outline-primary btn-lg">See Clients</a>
+        <a href="/employee-log" class="btn btn-light btn-hero"><i class="fas fa-clipboard-list"></i> Open Client Log</a>
+        <a href="/employees" class="btn btn-outline-light btn-hero"><i class="fas fa-users"></i> See Clients</a>
       </div>
     </div>
   </header>
@@ -16,24 +66,39 @@
   <main class="container my-5">
     <div class="row g-4">
       <div class="col-md-4">
-        <div class="card card-cta shadow-sm p-3">
-          <h5>Client Log</h5>
-          <p class="text-muted">Quickly log time-in/time-out using face detection and review logs.</p>
-          <a href="/employee-log" class="stretched-link"></a>
+        <div class="card feature-card h-100">
+          <div class="card-body text-center">
+            <div class="card-icon">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <h5>Client Log</h5>
+            <p class="text-muted">Quickly log time-in/time-out using face detection and review logs.</p>
+            <a href="/employee-log" class="btn btn-primary btn-hero stretched-link">Get Started</a>
+          </div>
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card card-cta shadow-sm p-3">
-          <h5>Client Records</h5>
-          <p class="text-muted">Manage client profiles and photos.</p>
-          <a href="/employees" class="stretched-link"></a>
+        <div class="card feature-card h-100">
+          <div class="card-body text-center">
+            <div class="card-icon">
+              <i class="fas fa-user-friends"></i>
+            </div>
+            <h5>Client Records</h5>
+            <p class="text-muted">Manage client profiles and photos with ease.</p>
+            <a href="/employees" class="btn btn-success btn-hero stretched-link">Manage Records</a>
+          </div>
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card card-cta shadow-sm p-3">
-          <h5>Admin Dashboard</h5>
-          <p class="text-muted">View analytics and reports. Restricted to administrators.</p>
-          <a href="/admin/login" class="stretched-link"></a>
+        <div class="card feature-card h-100">
+          <div class="card-body text-center">
+            <div class="card-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h5>Admin Dashboard</h5>
+            <p class="text-muted">View analytics and reports. Restricted to administrators.</p>
+            <a href="/admin/login" class="btn btn-warning btn-hero stretched-link">Access Dashboard</a>
+          </div>
         </div>
       </div>
     </div>

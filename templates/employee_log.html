@@ -21,7 +21,7 @@
 }
 </style>
 	<div class="text-center">
-		<h2 class="mb-1">Client Log (Face Recognition)</h2>
+		<h2 class="mb-1"><i class="fas fa-clipboard-list"></i> Client Log (Face Recognition)</h2>
 		<p class="text-muted mb-4">Capture client photo and record entry/exit information</p>
 
 		<div style="display:flex; gap:4px; align-items:flex-start; justify-content:center;">
@@ -54,7 +54,7 @@
 					<div class="card shadow-sm p-3 text-left">
 						<p class="mb-1" style="text-align: left;"><strong>Match:</strong> <span id="match_name" style="color:red;"></span> <small id="match_gender" class="text-muted" style="display:none;"></small> <small id="match_age" class="text-muted" style="display:none;"></small></p>
 						<div class="mb-2">
-							<label for="purpose" class="form-label">Purpose *</label>
+							<label for="purpose" class="form-label"><i class="fas fa-question-circle"></i> Purpose *</label>
 							<select id="purpose" class="form-select">
 								<option value="">Select Purpose</option>
 								<option value="Receive Document/s Requested">Receive Document/s Requested</option>
@@ -66,12 +66,12 @@
 							</select>
 						</div>
 						<div class="mb-2" id="additional_info_div">
-							<label for="additional_info" class="form-label">Additional Information *</label>
+							<label for="additional_info" class="form-label"><i class="fas fa-info-circle"></i> Additional Information *</label>
 							<input id="additional_info" placeholder="Please specify..." class="form-control">
 						</div>
 						<div class="d-flex justify-content-center gap-2">
-							<button id="time_in" class="btn btn-success">Time In</button>
-							<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#overrideModal">Override</button>
+							<button id="time_in" class="btn btn-success"><i class="fas fa-sign-in-alt"></i> Time In</button>
+							<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#overrideModal"><i class="fas fa-edit"></i> Override</button>
 						</div>
 						<p id="action_msg" class="text-success mt-2" style="display:none;"></p>
 					</div>

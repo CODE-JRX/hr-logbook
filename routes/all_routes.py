@@ -29,11 +29,12 @@ def admin_required(f):
     return wrapper
 
 @employee_bp.route("/employees")
-@employee_bp.route("/employees")
 @admin_required
 def employee_data():
-    employees = get_all_employees()
-    return render_template("employees/employee_data.html", employees=employees)
+    search = request.args.get('search', '')
+    limit = request.args.get('limit', '25')
+    employees = get_employees_filtered(search=search, limit=limit)
+    return render_template("employees/employee_data.html", employees=employees, search=search, limit=limit)
 
 
 @employee_bp.route("/")
@@ -252,7 +253,9 @@ def employee_log_report():
 
     logs = get_logs(purpose=purpose, department=department, start_date=start_date, end_date=end_date)
     departments = get_departments()
-    return render_template('employee_log_report.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date}, departments=departments)
+    purposes_data = get_purpose_counts()
+    purposes = [p['purpose'] for p in purposes_data if p['purpose'] != 'Unspecified']  # exclude 'Unspecified' if desired
+    return render_template('employee_log_report.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date}, departments=departments, purposes=purposes)
 
 
 @employee_bp.route('/csm-report')

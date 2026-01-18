@@ -1,6 +1,9 @@
-# TODO: Fix Match and System Log Alignments
+# TODO: Improve UX in /add Form
 
-## Tasks
-- [x] Add 'text-left' class to the paragraph containing "Match:" for left alignment.
-- [x] Change system log item layout from horizontal to vertical (flex-column) with left alignment for uniformity.
-- [x] Fix canvas capture to match visible area: Update canvas drawing logic in employee_log.html and employees/add.html to crop the video frame to the visible area when object-fit: cover is used, ensuring captured images match what users see on screen.
+- [x] Add * indicator to Client Type label and required attribute to select
+- [x] Add * indicator to Gender label and required attribute to select
+- [x] Add * indicator to Age label and required attribute to input
+- [x] Rearrange form fields: Move Full Name to the top
+- [x] Rearrange form fields: Ensure Client Type and Gender are below Full Name
+- [x] Rearrange form fields: Ensure Age and Department are below Client Type and Gender
+- [x] Update JavaScript validation to check Client Type, Gender, and Age, and add event listeners

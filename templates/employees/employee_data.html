@@ -1,10 +1,51 @@
 {% extends 'base.html' %}
 {% block title %}Clients — HR Logbook{% endblock %}
 
+{% block head_extra %}
+<style>
+  .results-card {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    margin-bottom: 20px;
+  }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .results-table thead {
+    background-color: #2c5aa0;
+    color: white;
+  }
+
+  .results-table th, .results-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+
+  .results-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .results-table tbody tr:hover {
+    background-color: #f0f0f0;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
   <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Client List</h5>
+      <h5 class="mb-0"><i class="fas fa-users"></i> Client List</h5>
       <div>
         <a class="btn btn-primary d-flex align-items-center" href="{{ url_for('employee.add') }}">
           <!-- plus icon -->
@@ -16,44 +57,86 @@
       </div>
     </div>
 
+    <!-- Search and Filter Controls -->
+    <div class="card-body border-bottom">
+      <form method="GET" id="filterForm" class="row g-3 align-items-end">
+        <div class="col-md-6">
+          <label for="search" class="form-label"><i class="fas fa-search"></i> Search</label>
+          <input type="text" class="form-control" id="search" name="search" value="{{ search }}" placeholder="Search by name or ID">
+        </div>
+        <div class="col-md-6">
+          <label for="limit" class="form-label"><i class="fas fa-list"></i> Rows per page</label>
+          <select class="form-select" id="limit" name="limit">
+            <option value="25" {% if limit == '25' %}selected{% endif %}>25</option>
+            <option value="50" {% if limit == '50' %}selected{% endif %}>50</option>
+            <option value="100" {% if limit == '100' %}selected{% endif %}>100</option>
+            <option value="all" {% if limit == 'all' %}selected{% endif %}>All</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
     <div class="card-body p-0">
-      <div class="table-responsive">
-      <table class="table table-striped mb-0">
-      <thead>
-      <tr>
-          <th>Client Type</th>
-          <th>Full Name</th>
-          <th>Gender</th>
-          <th>Age</th>
-          <th>Department</th>
-          
-          <th>Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      {% for e in employees %}
-      <tr>
-          <td>{{ e.client_type or '' }}</td>
-          <td>{{ e.full_name }}</td>
-          <td>{{ e.gender or '' }}</td>
-          <td>{{ e.age or '' }}</td>
-          <td>{{ e.department }}</td>
-          
-          <td>
-              <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center" href="{{ url_for('employee.edit', id=e.id) }}" title="Edit">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="me-1"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6 6L21 11l-6-6-6 6z"/></svg>
-                <span class="d-none d-md-inline">Edit</span>
-              </a>
-              <a class="btn btn-sm btn-outline-danger d-inline-flex align-items-center" href="{{ url_for('employee.delete', id=e.id) }}" title="Delete">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="me-1"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 7h12M9 7v10a2 2 0 002 2h2a2 2 0 002-2V7M10 7V5a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
-                <span class="d-none d-md-inline">Delete</span>
-              </a>
-          </td>
-      </tr>
-      {% endfor %}
-      </tbody>
-      </table>
+      <div class="results-card">
+        <div class="table-responsive">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Client Type</th>
+                <th>Full Name</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Department</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for e in employees %}
+              <tr>
+                <td>{{ e.client_type or '' }}</td>
+                <td>{{ e.full_name }}</td>
+                <td>{{ e.gender or '' }}</td>
+                <td>{{ e.age or '' }}</td>
+                <td>{{ e.department }}</td>
+                <td>
+                  <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center" href="{{ url_for('employee.edit', id=e.id) }}" title="Edit">
+                    <i class="fa fa-edit me-1"></i>
+                    <span class="d-none d-md-inline">Edit</span>
+                  </a>
+                  <a class="btn btn-sm btn-outline-danger d-inline-flex align-items-center" href="{{ url_for('employee.delete', id=e.id) }}" title="Delete">
+                    <i class="fa fa-trash me-1"></i>
+                    <span class="d-none d-md-inline">Delete</span>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('search');
+      const limitSelect = document.getElementById('limit');
+      const filterForm = document.getElementById('filterForm');
+
+      // Function to submit form with debounce for search input
+      let searchTimeout;
+      function submitForm() {
+        filterForm.submit();
+      }
+
+      // Submit on search input change (debounced)
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(submitForm, 500); // 500ms delay
+      });
+
+      // Submit on limit select change
+      limitSelect.addEventListener('change', submitForm);
+    });
+  </script>
 {% endblock %}

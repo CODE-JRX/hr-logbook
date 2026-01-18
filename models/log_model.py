@@ -40,7 +40,7 @@ def get_logs(purpose=None, department=None, start_date=None, end_date=None):
     cursor = conn.cursor(dictionary=True)
 
     sql = (
-        "SELECT l.id, l.employee_id, e.full_name, e.department, e.gender, e.age, l.time_in, l.time_out, l.purpose "
+        "SELECT l.id, l.employee_id, e.full_name, e.department, e.gender, e.age, l.time_in, l.time_out, l.purpose, l.additional_info "
         "FROM logs l LEFT JOIN employees e ON l.employee_id = e.employee_id WHERE 1=1"
     )
     params = []
