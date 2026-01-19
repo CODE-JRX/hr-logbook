@@ -134,10 +134,10 @@ if (searchInput) {
         <small class="text-muted">Showing <strong>{{ logs|length }}</strong> result{{ 's' if logs|length != 1 else '' }}</small>
       </div>
       <div class="btn-group no-print" role="group" aria-label="actions">
-        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterArea" aria-expanded="false">Filters</button>
-        <button class="btn btn-sm btn-outline-success" type="button" onclick="window.print()">Print</button>
-        <button class="btn btn-sm btn-outline-primary" type="button" id="exportCsvBtn">Export CSV</button>
-        <a class="btn btn-sm btn-outline-secondary" href="/employee-log-report">Clear</a>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterArea" aria-expanded="false"><i class="fas fa-filter"></i> Filters</button>
+        <button class="btn btn-sm btn-outline-success" type="button" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+        <button class="btn btn-sm btn-outline-primary" type="button" id="exportCsvBtn"><i class="fas fa-download"></i> Export CSV</button>
+        <a class="btn btn-sm btn-outline-secondary" href="/employee-log-report"><i class="fas fa-times"></i> Clear</a>
       </div>
     </div>
 
@@ -173,8 +173,8 @@ if (searchInput) {
           </div>
           <div class="col-md-2 col-12">
             <div class="d-flex gap-2">
-              <button class="btn btn-primary">Filter</button>
-              <a class="btn btn-outline-secondary" href="/employee-log-report">Clear</a>
+              <button class="btn btn-primary"><i class="fas fa-search"></i> Filter</button>
+              <a class="btn btn-outline-secondary" href="/employee-log-report"><i class="fas fa-times"></i> Clear</a>
             </div>
           </div>
         </form>
@@ -196,15 +196,15 @@ if (searchInput) {
         <table id="logsTable" class="results-table">
           <thead>
             <tr>
-              <th>No.</th>
-              <th>Full Name</th>
-              <th>Gender</th>
-              <th>Age</th>
-              <th>Department</th>
-              <th>Purpose</th>
-              <th>Additional Info</th>
-              <th>Time In</th>
-              <th>Time Out</th>
+              <th><i class="fas fa-hashtag"></i> No.</th>
+              <th><i class="fas fa-user"></i> Full Name</th>
+              <th><i class="fas fa-venus-mars"></i> Gender</th>
+              <th><i class="fas fa-birthday-cake"></i> Age</th>
+              <th><i class="fas fa-building"></i> Department</th>
+              <th><i class="fas fa-question-circle"></i> Purpose</th>
+              <th><i class="fas fa-info-circle"></i> Additional Info</th>
+              <th><i class="fas fa-clock"></i> Time In</th>
+              <th><i class="fas fa-clock"></i> Time Out</th>
             </tr>
           </thead>
           <tbody>

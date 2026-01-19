@@ -6,110 +6,96 @@
   <title>{% block title %}HR Logbook{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
-  <style>
-    :root{ --bg-overlay: rgba(255,255,255,0.85); }
-    .site-logo { height:42px; }
-    body {
-      padding-top: 70px;
-      background-image: url("{{ url_for('static', filename='resources/background-image.png') }}");
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-    }
-    /* subtle overlay so text remains readable over busy backgrounds */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: var(--bg-overlay);
-      pointer-events: none;
-      z-index: 0;
-    }
-    /* ensure main content and nav appear above the overlay */
-    nav, main, .card, .container, .navbar { position: relative; z-index: 1; }
-    .site-logo { z-index: 2; position: relative; }
-
-    /* Custom navbar to match the Tailwind example (dark blue, white text, green hover) */
-    .site-nav {
-      background: #1e3a8a; /* deep blue */
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-    .site-nav .nav-link {
-      color: rgba(255,255,255,0.95);
-      padding: 0;
-      margin-left: .75rem;
-      margin-right: .75rem;
-      font-size: .95rem;
-      transition: color .2s ease;
-    }
-    .site-nav .nav-link:hover {
-      color: #10b981; /* green hover */
-      text-decoration: none;
-    }
-    .site-nav .nav-link i {
-      margin-right: 0.25rem;
-    }
-    .site-nav .logo-box {
-      width:56px; height:56px; border-radius:6px; display:flex; align-items:center; justify-content:center;
-      overflow:hidden; background: transparent; border: none; padding:0;
-    }
-    .site-nav .logo-box img { width:48px; height:48px; object-fit:contain; display:block; }
-    .site-nav .logo-link { display:flex; align-items:center; gap:.5rem; color:inherit; text-decoration:none; }
-    .site-nav .logo-link:hover { text-decoration:none; opacity:0.95; }
-    .site-nav .title {
-      color: #fff; font-weight:600; margin-left:0.75rem; font-size:1.05rem; line-height:1;
-    }
-    @media (max-width:575px){
-      .site-nav .nav-links { display:none; }
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="HRMO Logbook: Fast, secure client time logging with face recognition technology.">
+  <meta name="keywords" content="HR logbook, client logging, face recognition, time tracking, HRMO">
+  <meta name="author" content="code:jrx">
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='resources/school-LOGO.png') }}" type="image/png">
+  <!-- Preload critical resources -->
+  <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}" as="style">
+  <link rel="preload" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" as="style">
   {% block head_extra %}{% endblock %}
 </head>
 <body>
-  <nav class="site-nav fixed-top">
-    <div class="container d-flex align-items-center justify-content-between" style="height:64px;">
-      <div class="d-flex align-items-center">
-        <a class="logo-link" href="{{ url_for('employee.home') }}">
-          <div class="logo-box">
-            <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR Logbook logo" class="site-logo">
-          </div>
-          <span class="title">HRMO Logbook</span>
-        </a>
-      </div>
-
-      <div class="d-flex align-items-center nav-links">
-        {% if session.admin_id %}
-          <a class="nav-link" href="/employee-log"><i class="fas fa-clipboard-list"></i>Client Log</a>
-          <a class="nav-link" href="/CSM-form" target="_blank" rel="noopener"><i class="fas fa-file-signature"></i>Satisfactory Form</a>
-          <a class="nav-link" href="/add"><i class="fas fa-user-plus"></i>Register</a>
-          <a class="nav-link" href="/employees"><i class="fas fa-users"></i>Clients Record</a>
-          <div class="dropdown d-inline" style="position:relative;">
-            <a class="nav-link dropdown-toggle" href="#" role="button" id="reportsDropdown" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-chart-line"></i>Reports</a>
-            <ul class="dropdown-menu" aria-labelledby="reportsDropdown" style="min-width:180px;">
-              <li><a class="dropdown-item" href="/employee-log-report">Log Report</a></li>
-              <li><a class="dropdown-item" href="/csm-report">Satisfactory Report</a></li>
-            </ul>
-          </div>
-          <a class="nav-link" href="/admin/dashboard"><i class="fas fa-user-cog"></i>Admin</a>
-          <a class="nav-link" href="/admin/logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
-        {% else %}
-          <a class="nav-link" href="/employee-log"><i class="fas fa-clipboard-list"></i>Client Log</a>
-          <a class="nav-link" href="/CSM-form" target="_blank" rel="noopener"><i class="fas fa-file-signature"></i>Satisfactory Form</a>
-          <a class="nav-link" href="/terms-of-use"><i class="fas fa-user-plus"></i>Register</a>
-          <a class="nav-link" href="/admin/login"><i class="fas fa-sign-in-alt"></i>Admin</a>
-        {% endif %}
+  <nav class="navbar navbar-expand-lg site-nav fixed-top">
+    <div class="container">
+      <a class="navbar-brand logo-link" href="{{ url_for('employee.home') }}">
+        <div class="logo-box">
+          <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR Logbook logo" class="site-logo">
+        </div>
+        <span class="title">HRMO Logbook</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          {% if session.admin_id %}
+            <li class="nav-item">
+              <a class="nav-link" href="/employee-log"><i class="fas fa-clipboard-list"></i>Client Log</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/CSM-form" target="_blank" rel="noopener"><i class="fas fa-file-signature"></i>Satisfactory Form</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/add"><i class="fas fa-user-plus"></i>Register</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/employees"><i class="fas fa-users"></i>Clients Record</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" id="reportsDropdown" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-chart-line"></i>Reports</a>
+              <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+                <li><a class="dropdown-item" href="/employee-log-report">Log Report</a></li>
+                <li><a class="dropdown-item" href="/csm-report">Satisfactory Report</a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/dashboard"><i class="fas fa-user-cog"></i>Admin</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/employee-log"><i class="fas fa-clipboard-list"></i>Client Log</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/CSM-form" target="_blank" rel="noopener"><i class="fas fa-file-signature"></i>Satisfactory Form</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/terms-of-use"><i class="fas fa-user-plus"></i>Register</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/login"><i class="fas fa-sign-in-alt"></i>Admin</a>
+            </li>
+          {% endif %}
+        </ul>
       </div>
     </div>
   </nav>
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <main class="container">
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="text-center py-4 small text-muted border-top">
-    <div class="container">&copy; {{ year }} HRMO Logbook || <small style="color:lightgray;">by code:jrx</small></div>
+  <footer role="contentinfo" class="text-center py-4 mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="text-primary mb-2">HRMO Logbook</h6>
+          <p class="mb-0 small text-muted">Fast, secure client time logging with face recognition technology.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-1">&copy; {{ year }} HRMO Logbook</p>
+          <small class="text-muted">Developed by code:jrx</small>
+        </div>
+      </div>
+    </div>
   </footer>
 
   <script src="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>

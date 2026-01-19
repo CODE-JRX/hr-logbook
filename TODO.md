@@ -1,9 +1,5 @@
-# TODO: Improve UX in /add Form
+# TODO: Add Icons to Employee Log Report
 
-- [x] Add * indicator to Client Type label and required attribute to select
-- [x] Add * indicator to Gender label and required attribute to select
-- [x] Add * indicator to Age label and required attribute to input
-- [x] Rearrange form fields: Move Full Name to the top
-- [x] Rearrange form fields: Ensure Client Type and Gender are below Full Name
-- [x] Rearrange form fields: Ensure Age and Department are below Client Type and Gender
-- [x] Update JavaScript validation to check Client Type, Gender, and Age, and add event listeners
+- [x] Add icons to action buttons in card header (Filters, Print, Export CSV, Clear)
+- [x] Add icons to filter form buttons (Filter, Clear)
+- [x] Add icons to table headers (Full Name, Gender, Age, Department, Purpose, Additional Info, Time In, Time Out)

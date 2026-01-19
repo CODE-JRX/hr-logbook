@@ -269,10 +269,20 @@
         }
         
         .filter-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 15px;
             margin-bottom: 15px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group.full-width {
+            flex: 1 1 100%;
         }
         
         .filter-form button {
@@ -507,52 +517,71 @@
 
 <!-- Filter Section (Screen View) -->
 <div class="filter-section screen-view">
-    <h3 style="margin-bottom: 20px; color: #2c5aa0;">Filter CSM Records</h3>
-    <form method="get" action="/csm-report" class="filter-form">
-        <div>
-            <label for="start_date">Start Date:</label>
-            <input type="date" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
+    <div class="filter-header">
+        <h3 style="margin-bottom: 20px; color: #2c5aa0;"><i class="fas fa-filter"></i> Filter CSM Records</h3>
+        <div class="filter-toggle">
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleFilters()">
+                <i class="fas fa-chevron-up"></i> <span id="toggle-text">Collapse</span>
+            </button>
         </div>
-        <div>
-            <label for="end_date">End Date:</label>
-            <input type="date" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
+    </div>
+    <form method="get" action="/csm-report" class="filter-form" id="filter-form">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="start_date"><i class="fas fa-calendar-alt"></i> Start Date:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
+            </div>
+            <div class="filter-group">
+                <label for="end_date"><i class="fas fa-calendar-alt"></i> End Date:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
+            </div>
+            <div class="filter-group">
+                <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
+                <select id="gender" name="gender">
+                    <option value="">All</option>
+                    <option value="Male" {% if filters.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if filters.gender == 'Female' %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="region"><i class="fas fa-map-marker-alt"></i> Region:</label>
+                <input type="text" id="region" name="region" placeholder="Enter region" value="{{ filters.region or '' }}">
+            </div>
+            <div class="filter-group">
+                <label for="age_min"><i class="fas fa-birthday-cake"></i> Age Min:</label>
+                <input type="number" id="age_min" name="age_min" min="0" value="{{ filters.age_min or '' }}">
+            </div>
+            <div class="filter-group">
+                <label for="age_max"><i class="fas fa-birthday-cake"></i> Age Max:</label>
+                <input type="number" id="age_max" name="age_max" min="0" value="{{ filters.age_max or '' }}">
+            </div>
         </div>
-        <div>
-            <label for="gender">Gender:</label>
-            <select id="gender" name="gender">
-                <option value="">All</option>
-                <option value="Male" {% if filters.gender == 'Male' %}selected{% endif %}>Male</option>
-                <option value="Female" {% if filters.gender == 'Female' %}selected{% endif %}>Female</option>
-            </select>
+        <div class="filter-row">
+            <div class="filter-group full-width">
+                <label for="service"><i class="fas fa-concierge-bell"></i> Service:</label>
+                <select id="service" name="service">
+                    <option value="">All Services</option>
+                    {% for svc in services %}
+                        <option value="{{ svc }}" {% if filters.service == svc %}selected{% endif %}>{{ svc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
-        <div>
-            <label for="region">Region:</label>
-            <input type="text" id="region" name="region" placeholder="Enter region" value="{{ filters.region or '' }}">
-        </div>
-        <div>
-            <label for="age_min">Age Min:</label>
-            <input type="number" id="age_min" name="age_min" min="0" value="{{ filters.age_min or '' }}" style="height: 45px;">
-        </div>
-        <div>
-            <label for="age_max">Age Max:</label>
-            <input type="number" id="age_max" name="age_max" min="0" value="{{ filters.age_max or '' }}" style="height: 45px;">
-        </div>
-        <div>
-            <label for="service">Service:</label>
-            <select id="service" name="service">
-                <option value="">All Services</option>
-                {% for svc in services %}
-                    <option value="{{ svc }}" {% if filters.service == svc %}selected{% endif %}>{{ svc }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
-            <button type="submit" class="btn-primary">Filter</button>
-            <a href="/csm-report" style="padding: 10px 20px; background: #f0f0f0; color: #333; border-radius: 4px; text-decoration: none; font-weight: 600;">Reset</a>
-            <button type="button" class="btn-success" onclick="window.print()">Print All</button>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Filter
+            </button>
+            <a href="/csm-report" class="btn btn-outline-secondary">
+                <i class="fas fa-undo"></i> Reset
+            </a>
+            <button type="button" class="btn btn-success" onclick="window.print()">
+                <i class="fas fa-print"></i> Print All
+            </button>
         </div>
     </form>
-    <p style="margin-top: 15px; color: #666;"><strong>Total Records: {{ csm_forms|length }}</strong></p>
+    <div class="filter-summary">
+        <p><i class="fas fa-chart-bar"></i> <strong>Total Records: {{ csm_forms|length }}</strong></p>
+    </div>
 </div>
 
 <!-- Screen View: Table -->
@@ -862,4 +891,32 @@
     {% endfor %}
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleFilters() {
+    const form = document.getElementById('filter-form');
+    const toggleIcon = document.querySelector('.filter-toggle i');
+    const toggleText = document.getElementById('toggle-text');
+
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+        toggleIcon.className = 'fas fa-chevron-up';
+        toggleText.textContent = 'Collapse';
+    } else {
+        form.style.display = 'none';
+        toggleIcon.className = 'fas fa-chevron-down';
+        toggleText.textContent = 'Expand';
+    }
+}
+
+// Initialize filter form as visible
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filter-form');
+    if (form) {
+        form.style.display = 'block';
+    }
+});
+</script>
 {% endblock %}
