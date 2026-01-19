@@ -42,4 +42,4 @@ app.register_blueprint(employee_bp)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, ssl_context='adhoc')
