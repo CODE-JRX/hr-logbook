@@ -83,16 +83,61 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer role="contentinfo" class="text-center py-4 mt-5">
-    <div class="container">
+  <footer class="site-footer">
+    <div class="footer-container">
       <div class="row">
-        <div class="col-md-6">
-          <h6 class="text-primary mb-2">HRMO Logbook</h6>
-          <p class="mb-0 small text-muted">Fast, secure client time logging with face recognition technology.</p>
+        <!-- Brand Section -->
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="footer-brand">
+            <div class="footer-logo-link">
+              <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HRMO Logbook Logo" class="footer-logo-img">
+              <span class="footer-title">HRMO Logbook</span>
+            </div>
+            <p class="footer-description">Fast, secure client time logging with face recognition technology.</p>
+          </div>
         </div>
-        <div class="col-md-6 text-md-end">
-          <p class="mb-1">&copy; {{ year }} HRMO Logbook</p>
-          <small class="text-muted">Developed by code:jrx</small>
+
+        <!-- Quick Links Section -->
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="footer-section">
+            <h5 class="footer-title">Quick Links</h5>
+            <ul class="footer-links">
+              <li><a href="{{ url_for('employee.home') }}"><i class="fas fa-home"></i> Home</a></li>
+              <li><a href="/employee-log"><i class="fas fa-clipboard-list"></i> Client Log</a></li>
+              <li><a href="/CSM-form" target="_blank" rel="noopener"><i class="fas fa-file-signature"></i> Satisfactory Form</a></li>
+              <li><a href="/terms-of-use"><i class="fas fa-file-contract"></i> Terms of Use</a></li>
+              <li><a href="/privacy-policy"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="col-lg-4 col-md-12 mb-4">
+          <div class="footer-section">
+            <h5 class="footer-title">Contact</h5>
+            <ul class="footer-contact">
+              <li><i class="fas fa-envelope"></i> <a href="mailto:support@hrmologbook.com">support@hrmologbook.com</a></li>
+              <li><i class="fas fa-phone"></i> <a href="tel:+1234567890">+1 (234) 567-890</a></li>
+              <li><i class="fas fa-map-marker-alt"></i> Your Institution Address</li>
+            </ul>
+            <div class="footer-social">
+              <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copyright Section -->
+      <div class="footer-bottom">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <p class="copyright">&copy; {{ year }} HRMO Logbook. All rights reserved.</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <p class="developer">Developed by <a href="#" class="developer-link">code:jrx</a></p>
+          </div>
         </div>
       </div>
     </div>
