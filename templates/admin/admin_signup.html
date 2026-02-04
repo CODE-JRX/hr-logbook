@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Admin Signup — HR Logbook{% endblock %}
+
+{% block content %}
+	<div class="card shadow-sm mx-auto" style="max-width:520px;">
+		<div class="card-body">
+			<h4 class="card-title mb-3">Create Admin Account</h4>
+
+			
+
+			<form method="post" action="/admin/signup">
+				<div class="row">
+					<div class="mb-3 col-12 col-md-6">
+						<label for="first_name" class="form-label">First name</label>
+						<input type="text" class="form-control" id="first_name" name="first_name" required>
+					</div>
+					<div class="mb-3 col-12 col-md-6">
+						<label for="last_name" class="form-label">Last name</label>
+						<input type="text" class="form-control" id="last_name" name="last_name" required>
+					</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="email" class="form-label">Email</label>
+					<input type="email" class="form-control" id="email" name="email" required>
+				</div>
+
+				<div class="mb-3">
+					<label for="password" class="form-label">Password</label>
+					<input type="password" class="form-control" id="password" name="password" required>
+				</div>
+
+				<div class="mb-3">
+					<label for="confirm_password" class="form-label">Confirm Password</label>
+					<input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+				</div>
+
+				<div class="d-grid gap-2">
+					<button class="btn btn-success" type="submit">Create account</button>
+				</div>
+			</form>
+
+			<hr>
+			<p class="small mb-0">Already have an account? <a href="/admin/login">Sign in</a></p>
+		</div>
+	</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+	// Optional: simple client-side password match check
+	const pwd = document.getElementById('password');
+	const cpwd = document.getElementById('confirm_password');
+	const form = document.querySelector('form');
+	form.addEventListener('submit', (e) => {
+		if (pwd.value !== cpwd.value) {
+			e.preventDefault();
+			alert('Passwords do not match');
+		}
+	});
+</script>
+{% endblock %}

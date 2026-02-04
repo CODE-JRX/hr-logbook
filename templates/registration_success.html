@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Registration Successful</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">
+  <style>
+    body { padding: 40px; background: #f8fafc; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    .card { max-width:680px; margin: 40px auto; }
+  </style>
+</head>
+<body>
+  <div class="card shadow-sm">
+    <div class="card-body text-center">
+      <h4 class="card-title">{{ message or 'Success' }}</h4>
+      <p class="text-muted">You will be redirected shortly.</p>
+      <p><a href="{{ redirect_url }}" class="btn btn-primary">Continue now</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Redirect after a short delay (milliseconds)
+    (function(){
+      var delay = {{ delay or 3000 }};
+      setTimeout(function(){ window.location.href = "{{ redirect_url }}"; }, delay);
+    })();
+  </script>
+</body>
+</html>
