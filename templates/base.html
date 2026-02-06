@@ -55,9 +55,9 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" id="reportsDropdown" data-bs-toggle="dropdown"
               aria-expanded="false"><i class="fas fa-chart-line"></i>Reports</a>
             <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="reportsDropdown">
-              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list"></i>Log Report</a>
+              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list" style="margin-right: 5px;"></i>Log Report</a>
               </li>
-              <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature"></i>Satisfactory
+              <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature" style="margin-right: 5px;"></i>Satisfactory
                   Report</a></li>
             </ul>
           </li>
@@ -161,6 +161,7 @@
     </div>
   </footer>
 
+  <script src="{{ url_for('static', filename='scripts/jquery.js') }}"></script>
   <script src="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>
 
   <!-- Global Modal Container for better z-index layering -->

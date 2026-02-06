@@ -49,6 +49,30 @@
   .modal-backdrop {
     z-index: 9999 !important;
   }
+
+  /* Small screen adjustments for better table rendering */
+  @media (max-width: 768px) {
+    .results-table {
+      font-size: 11px;
+    }
+    .results-table th, .results-table td {
+      padding: 6px;
+    }
+    .results-card {
+      overflow-x: auto;
+    }
+    .card-header .btn {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+    .card-header .btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    .card-body .form-control, .card-body .form-select {
+      font-size: 14px;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -70,22 +94,22 @@
 
   <!-- Search and Filter Controls -->
   <div class="card-body border-bottom">
-    <form method="GET" id="filterForm" class="row g-3 align-items-end">
+    <div class="row g-3 align-items-end">
       <div class="col-md-6">
         <label for="search" class="form-label"><i class="fas fa-search"></i> Search</label>
-        <input type="text" class="form-control" id="search" name="search" value="{{ search }}"
+        <input type="text" class="form-control" id="search" value="{{ search }}"
           placeholder="Search by name or ID">
       </div>
       <div class="col-md-6">
         <label for="limit" class="form-label"><i class="fas fa-list"></i> Rows per page</label>
-        <select class="form-select" id="limit" name="limit">
+        <select class="form-select" id="limit">
           <option value="25" {% if limit=='25' %}selected{% endif %}>25</option>
           <option value="50" {% if limit=='50' %}selected{% endif %}>50</option>
           <option value="100" {% if limit=='100' %}selected{% endif %}>100</option>
           <option value="all" {% if limit=='all' %}selected{% endif %}>All</option>
         </select>
       </div>
-    </form>
+    </div>
   </div>
 
   <div class="card-body p-0">
@@ -102,7 +126,7 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="clientTableBody">
             {% for c in clients %}
             <tr>
               <td>{{ c.client_type or '' }}</td>
@@ -130,8 +154,43 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script>
+$(document).ready(function() {
+  var searchTimeout;
 
+  function updateTable() {
+    var search = $('#search').val();
+    var limit = $('#limit').val();
 
+    $.ajax({
+      url: '/clients_ajax',
+      method: 'GET',
+      data: {
+        search: search,
+        limit: limit
+      },
+      success: function(data) {
+        $('#clientTableBody').html(data);
+      },
+      error: function() {
+        console.error('Error updating table');
+      }
+    });
+  }
 
+  // Trigger search on input change with debounce
+  $('#search').on('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(updateTable, 300);
+  });
+
+  // Trigger search on limit change
+  $('#limit').on('change', function() {
+    updateTable();
+  });
+});
+</script>
 {% endblock %}

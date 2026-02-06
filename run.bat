@@ -4,16 +4,9 @@ echo   Starting HRMO Logbook Services...
 echo ===================================
 
 REM --- Set paths ---
-set XAMPP_MYSQL=D:\xampp\
-set PYAPP_DIR=D:\fr-hr-logbook
+set PYAPP_DIR=D:\hrmo-e-logbook-v2
 
-REM --- Start MySQL ---
-echo Starting MySQL service...
-start "" "%XAMPP_MYSQL%\mysql_start.bat"
 
-REM --- Start Apache ---
-echo Starting Apache service...
-start "" "%XAMPP_MYSQL%\apache_start.bat"
 
 REM --- Activate Conda env ---
 echo Activating conda environment "tf"...

@@ -106,6 +106,23 @@ nav {
   z-index: 9999;
 }
 
+.site-nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+[data-theme="dark"] .site-nav::before {
+  background-image: url('../resources/nav-bg-dark.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.2;
+}
+
 .site-nav .nav-link {
   color: var(--text-color);
   padding: 8px 16px;

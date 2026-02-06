@@ -100,6 +100,34 @@
     .card { display: none !important; }
     .results-card { box-shadow: none; border: none; padding: 0; }
   }
+
+  /* Small screen adjustments for better table rendering */
+  @media (max-width: 768px) {
+    .results-table {
+      font-size: 10px;
+      min-width: 1000px;
+    }
+    .results-table th, .results-table td {
+      padding: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .table-responsive {
+      overflow-x: visible;
+    }
+    .results-card {
+      overflow-x: auto;
+    }
+    .search-box input {
+      width: 150px;
+    }
+    .card-footer .d-flex {
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start !important;
+    }
+  }
 </style>
 {% endblock %}
 

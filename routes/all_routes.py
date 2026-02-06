@@ -37,6 +37,15 @@ def client_data():
     clients = get_clients_filtered(search=search, limit=limit)
     return render_template("clients/client_data.html", clients=clients, search=search, limit=limit)
 
+@client_bp.route("/clients_ajax")
+@admin_required
+def client_data_ajax():
+    search = request.args.get('search', '')
+    limit = request.args.get('limit', '25')
+    clients = get_clients_filtered(search=search, limit=limit)
+    # Return only the table rows as HTML
+    return render_template("clients/client_data_rows.html", clients=clients)
+
 
 @client_bp.route("/")
 def home():
@@ -255,8 +264,7 @@ def client_log_report():
 
     logs = get_logs(purpose=purpose, department=department, start_date=start_date, end_date=end_date, limit=limit)
     departments = get_departments()
-    purposes_data = get_purpose_counts()
-    purposes = [p['purpose'] for p in purposes_data if p['purpose'] != 'Unspecified']  # exclude 'Unspecified' if desired
+    purposes = ["Receive Document/s Requested", "Submit Document/s", "Request Form/s", "Process Appointment", "Inquire", "OTHERS"]
     return render_template('client_log_report.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date, 'limit': limit}, departments=departments, purposes=purposes)
 
 
@@ -574,14 +582,16 @@ def log_action():
     data = request.json or {}
     client_id = data.get('client_id')
     action = data.get('action')  # 'time_in' or 'time_out'
-    purpose = data.get('purpose')
+    purposes = data.get('purposes', [])
     additional_info = data.get('additional_info')
     if not client_id or action not in ('time_in', 'time_out'):
         return jsonify({'ok': False, 'error': 'Missing or invalid parameters'}), 400
 
     try:
         if action == 'time_in':
-            add_time_in(client_id, purpose, additional_info)
+            # Convert list of purposes to comma-separated string
+            purpose_str = ', '.join(purposes) if purposes else None
+            add_time_in(client_id, purpose_str, additional_info)
         else:
             # Do not update purpose on time_out; purpose should come from the original time_in
             add_time_out(client_id)
