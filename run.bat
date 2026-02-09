@@ -15,6 +15,6 @@ call conda activate tf
 REM --- Run the python app ---
 echo Running app.py...
 cd /d "%PYAPP_DIR%"
-python app.py
-
+start "" python app.py
+start http://127.0.0.1:5000
 pause

@@ -17,31 +17,39 @@
 
       <div class="row">
         <div class="col-md-3">
-          <div class="card shadow-sm p-3">
-            <h6><i class="fas fa-users"></i> Total Registered Clients</h6>
-            <h2>{{ stats.total_clients }}</h2>
-          </div>
+          <a href="{{ url_for('client.client_data') }}" class="text-decoration-none">
+            <div class="card shadow-sm p-3">
+              <h6><i class="fas fa-users"></i> Total Registered Clients</h6>
+              <h2>{{ stats.total_clients }}</h2>
+            </div>
+          </a>
         </div>
         <div class="col-md-3">
-          <div class="card shadow-sm p-3">
-            <h6><i class="fas fa-clipboard-list"></i> Total Logs</h6>
-            <h2>{{ stats.total_logs }}</h2>
-          </div>
+          <a href="{{ url_for('client.client_log_report') }}" class="text-decoration-none">
+            <div class="card shadow-sm p-3">
+              <h6><i class="fas fa-clipboard-list"></i> Total Logs</h6>
+              <h2>{{ stats.total_logs }}</h2>
+            </div>
+          </a>
         </div>
         <div class="col-md-6">
-          <div class="card shadow-sm p-3">
-            <h6><i class="fas fa-chart-line"></i> Recent Activity (last 14 days)</h6>
-            <canvas id="chartActivity" height="80"></canvas>
-          </div>
+          <a href="{{ url_for('client.client_log_report') }}" class="text-decoration-none">
+            <div class="card shadow-sm p-3">
+              <h6><i class="fas fa-chart-line"></i> Recent Activity (last 14 days)</h6>
+              <canvas id="chartActivity" height="80"></canvas>
+            </div>
+          </a>
         </div>
       </div>
 
       <div class="row mt-3">
         <div class="col-md-12">
-          <div class="card shadow-sm p-3">
-            <h6><i class="fas fa-chart-bar"></i> Purpose Counts</h6>
-            <canvas id="chartPurpose" height="200"></canvas>
-          </div>
+          <a href="{{ url_for('client.client_log_report') }}" class="text-decoration-none">
+            <div class="card shadow-sm p-3">
+              <h6><i class="fas fa-chart-bar"></i> Purpose Counts</h6>
+              <canvas id="chartPurpose" height="200"></canvas>
+            </div>
+          </a>
         </div>
       </div>
     </div>
