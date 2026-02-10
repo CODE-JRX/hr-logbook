@@ -16,18 +16,34 @@
         padding-top: 0;
     }
 
+    /* Hide elements when printing */
+    .no-print { display: block; }
+    @media print { .no-print { display: none !important; } }
+
     /* Filter section styling - uses card background */
     .filter-section {
         background: var(--card-bg);
-        padding: 20px;
-        margin-top: 15px;
-        margin-bottom: 30px;
-        border-radius: 15px;
+        padding: 20px 20px 0 20px;
+        margin-top: 0;
+        margin-bottom: 0;
+        border-radius: 0;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: none;
         backdrop-filter: blur(10px);
         position: relative;
         overflow: hidden;
+    }
+
+    /* remove top rounding when card should have square top corners */
+    .no-top-radius {
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
+    }
+
+    .no-top-radius .card-header {
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
     }
 
     /* Background image for filter section */
@@ -65,8 +81,21 @@
     }
 
     .filter-header h3 {
-        margin-bottom: 20px;
+        margin-bottom: 0;
         color: var(--primary-color);
+    }
+
+    .filter-section::after {
+        display: none;
+    }
+
+    [data-theme="dark"] .btn-secondary {
+        background-color: #374151;
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .btn-secondary:hover {
+        background-color: #4b5563;
     }
 
     .filter-form {
@@ -146,10 +175,11 @@
     /* Results card styling */
     .results-card {
         background: var(--card-bg);
-        padding: 20px;
-        border-radius: 15px;
+        padding: 0 20px 20px 20px;
+        border-radius: 0 0 15px 15px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
+        border-top: none;
         backdrop-filter: blur(10px);
         position: relative;
         overflow: hidden;
@@ -664,18 +694,19 @@
 {% block content %}
 
 <!-- Filter Section (Screen View) -->
-<div class="filter-wrapper" style="padding-top: 15px;">
-    <div class="filter-section screen-view">
-        <div class="filter-header">
-            <h3><i class="fas fa-filter"></i> Filter CSM Records</h3>
-            <div class="filter-toggle">
-                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleFilters()">
-                    <i class="fas fa-chevron-up"></i> <span id="toggle-text">Collapse</span>
-                </button>
-            </div>
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-filter"></i> Filter CSM Records</h5>
+        <div class="d-flex gap-2 no-print" role="group" aria-label="actions">
+            <button class="btn btn-sm btn-outline-success" type="button" onclick="window.print()"><i class="fas fa-print"></i> <span class="d-none d-md-inline">Print</span></button>
+            <a class="btn btn-sm btn-outline-primary" href="/csm-report?export=csv"><i class="fas fa-download"></i> <span class="d-none d-md-inline">Export CSV</span></a>
+            <a class="btn btn-sm btn-outline-secondary" href="/csm-report"><i class="fas fa-times"></i> <span class="d-none d-md-inline">Clear</span></a>
         </div>
+    </div>
 
-        <form method="get" action="/csm-report" class="filter-form" id="filter-form">
+    <div>
+        <div class="filter-section screen-view">
+            <form method="get" action="/csm-report" class="filter-form" id="filter-form">
             <div class="filter-row">
                 <div class="filter-group">
                     <label for="start_date"><i class="fas fa-calendar-alt"></i> Start Date:</label>
@@ -706,16 +737,9 @@
                     <label for="age_max"><i class="fas fa-birthday-cake"></i> Age Max:</label>
                     <input type="number" id="age_max" name="age_max" min="0" value="{{ filters.age_max or '' }}">
                 </div>
-                <div class="filter-group">
-                    <label for="limit"><i class="fas fa-list"></i> Show:</label>
-                    <select id="limit" name="limit"
-                        style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                        <option value="25" {% if filters.limit=='25' %}selected{% endif %}>25</option>
-                        <option value="50" {% if filters.limit=='50' %}selected{% endif %}>50</option>
-                        <option value="all" {% if filters.limit=='all' %}selected{% endif %}>All</option>
-                    </select>
-                </div>
-                <div class="filter-group">
+                <!-- other filter groups above remain unchanged -->
+                <div style="flex: 1 1 100%;"></div>
+                <div class="filter-group" style="min-width:220px; margin-left: auto;">
                     <label for="service"><i class="fas fa-concierge-bell"></i> Service:</label>
                     <select id="service" name="service"
                         style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
@@ -725,70 +749,80 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div style="width:140px; display:flex; align-items:flex-end;">
+                    <button type="submit" class="btn btn-primary w-100" style="margin-left:8px;">
+                        <i class="fas fa-search"></i> <span class="d-none d-md-inline">Filter</span>
+                    </button>
+                </div>
             </div>
-            <div class="filter-actions"
-                style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-start;">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i> Filter
-                </button>
-                <a href="/csm-report" class="btn btn-secondary" style="border: 1px solid var(--border-color);">
-                    <i class="fas fa-undo"></i> Reset
-                </a>
-                <button type="button" class="btn btn-success" onclick="window.print()">
-                    <i class="fas fa-print"></i> Print All
-                </button>
-                <a class="btn btn-outline-primary" href="/csm-report?export=csv" style="border: 1px solid #007bff;">
-                    <i class="fas fa-download"></i> Export CSV
-                </a>
-            </div>
-        </form>
-        <div class="filter-summary">
-            <p><i class="fas fa-chart-bar"></i> <strong>Total Records: {{ csm_forms|length }}</strong></p>
+            </form>
         </div>
     </div>
-
-</div>
-
-<!-- Screen View: Table -->
-<div class="screen-view">
-    {% if csm_forms %}
-    <div class="results-card">
-        <div class="table-responsive">
-            <table id="csm-report" class="results-table">
-                <thead>
-                    <tr>
-                        <th>Control #</th>
-                        <th>Date</th>
-                        <th>Client Type</th>
-                        <th>Gender</th>
-                        <th>Age</th>
-                        <th>Region</th>
-                        <th>Email</th>
-                        <th>Services</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for form in csm_forms %}
-                    <tr>
-                        <td><strong>{{ form.control_no }}</strong></td>
-                        <td>{{ form.date }}</td>
-                        <td>{{ form.client_type or '—' }}</td>
-                        <td>{{ form.sex or '—' }}</td>
-                        <td>{{ form.age or '—' }}</td>
-                        <td>{{ form.region_of_residence or '—' }}</td>
-                        <td>{{ form.email or '—' }}</td>
-                        <td style="font-size: 12px;">{{ form.service_availed or '—' }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="card-body p-0">
+        <div class="screen-view">
+            {% if csm_forms %}
+            <div class="results-card">
+                <div style="padding:12px 0;">
+                    <div class="row g-3 align-items-end no-print" style="display:flex; gap:12px;">
+                        <div style="flex:1; min-width:220px;">
+                            <label for="searchInput" class="form-label"><i class="fas fa-search"></i> Search</label>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search by any column">
+                        </div>
+                        <div style="width:160px;">
+                            <label for="limit" class="form-label"><i class="fas fa-list"></i> Show</label>
+                            <form method="get" action="/csm-report" style="display:inline-flex; align-items:center; gap:8px; width:100%;">
+                                <select id="limit" name="limit" class="form-select" onchange="this.form.submit()">
+                                    <option value="25" {% if filters.limit == '25' %}selected{% endif %}>25</option>
+                                    <option value="50" {% if filters.limit == '50' %}selected{% endif %}>50</option>
+                                    <option value="all" {% if filters.limit == 'all' %}selected{% endif %}>All</option>
+                                </select>
+                                {% for key, value in filters.items() %}
+                                  {% if key != 'limit' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                  {% endif %}
+                                {% endfor %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="csm-report" class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Control #</th>
+                                <th>Date</th>
+                                <th>Client Type</th>
+                                <th>Gender</th>
+                                <th>Age</th>
+                                <th>Region</th>
+                                <th>Email</th>
+                                <th>Services</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in csm_forms %}
+                            <tr>
+                                <td><strong>{{ form.control_no }}</strong></td>
+                                <td>{{ form.date }}</td>
+                                <td>{{ form.client_type or '—' }}</td>
+                                <td>{{ form.sex or '—' }}</td>
+                                <td>{{ form.age or '—' }}</td>
+                                <td>{{ form.region_of_residence or '—' }}</td>
+                                <td>{{ form.email or '—' }}</td>
+                                <td style="font-size: 12px;">{{ form.service_availed or '—' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="results-card" style="text-align: center; color: #999; padding: 40px;">
+                <p>No CSM records found matching the filters.</p>
+            </div>
+            {% endif %}
         </div>
     </div>
-    {% else %}
-    <div class="results-card" style="text-align: center; color: #999; padding: 40px;">
-        <p>No CSM records found matching the filters.</p>
-    </div>
-    {% endif %}
 </div>
 
 <!-- Print View: Full CSM Forms -->
@@ -1127,28 +1161,26 @@
 
 {% block scripts %}
 <script>
-    function toggleFilters() {
-        const form = document.getElementById('filter-form');
-        const toggleIcon = document.querySelector('.filter-toggle i');
-        const toggleText = document.getElementById('toggle-text');
-
-        if (form.style.display === 'none') {
-            form.style.display = 'block';
-            toggleIcon.className = 'fas fa-chevron-up';
-            toggleText.textContent = 'Collapse';
-        } else {
-            form.style.display = 'none';
-            toggleIcon.className = 'fas fa-chevron-down';
-            toggleText.textContent = 'Expand';
-        }
-    }
-
-    // Initialize filter form as visible
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('filter-form');
-        if (form) {
-            form.style.display = 'block';
+// client-side search for CSM report table
+document.addEventListener('DOMContentLoaded', function(){
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+    searchInput.addEventListener('input', function() {
+        const filter = this.value.toLowerCase();
+        const table = document.getElementById('csm-report');
+        if (!table) return;
+        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName('td');
+            let match = false;
+            for (let j = 0; j < cells.length; j++) {
+                if ((cells[j].textContent || '').toLowerCase().indexOf(filter) > -1) {
+                    match = true; break;
+                }
+            }
+            rows[i].style.display = match ? '' : 'none';
         }
     });
+});
 </script>
 {% endblock %}

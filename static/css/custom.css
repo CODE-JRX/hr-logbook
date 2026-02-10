@@ -286,7 +286,7 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 .btn-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
 .btn-primary:hover { background-color: var(--secondary-color) !important; border-color: var(--secondary-color) !important; }
 
-.btn-secondary { background-color: var(--secondary-color) !important; border-color: var(--secondary-color) !important; }
+.btn-secondary { background-color: var(--secondary-color) !important; border-color: var(--secondary-color) !important; color: white !important; }
 .btn-secondary:hover { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
 
 .btn-success { background-color: var(--success-color) !important; border-color: var(--success-color) !important; }
@@ -657,6 +657,10 @@ html {
   color: var(--text-color);
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25);
+}
+
+[data-theme="dark"] .btn-secondary {
+  color: #000 !important;
 }
 
 /* Body and general styles */
@@ -2094,8 +2098,8 @@ textarea:disabled {
 }
 
 /* Highlight elements not using design system colors */
-.debug-mode [style*="background-color"]:not([style*="var(--"],
-.debug-mode [style*="color"]:not([style*="var(--"] {
+.debug-mode [style*="background-color"]:not([style*="var(--"]]),
+.debug-mode [style*="color"]:not([style*="var(--"]) {
   outline: 2px solid #ff6b6b !important;
   outline-offset: 2px !important;
 }
