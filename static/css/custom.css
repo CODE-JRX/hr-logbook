@@ -1,5 +1,566 @@
 /* Custom styles for HRMO Logbook */
 
+/* =================================================================
+   PHASED IMPLEMENTATION PLAN FOR DESIGN SYSTEM UNIFORMITY
+   =================================================================
+
+   This file contains a phased approach to implementing the design system
+   without breaking existing functionality. Apply phases in order.
+
+   PHASE 1 (Non-invasive): Design tokens and utility classes as alternatives
+   PHASE 2 (Selective updates): Global typography and form element updates
+   PHASE 3 (Component updates): Specific component refactoring
+
+   ================================================================= */
+
+/* =================================================================
+   CSS TECHNIQUES FOR UNIFORM DESIGN WITHOUT BREAKING FUNCTIONALITY
+   =================================================================
+
+   This section demonstrates safe CSS techniques for implementing design systems
+   while maintaining backward compatibility and avoiding style conflicts.
+
+   ================================================================= */
+
+/* =================================================================
+   1. CSS SPECIFICITY STRATEGY: Override Styles Safely
+   =================================================================
+   Use higher specificity only when necessary, prefer classes over IDs,
+   and use !important sparingly. Strategy: class > element > universal
+   ================================================================= */
+
+/* LOW SPECIFICITY: Easy to override */
+.btn-safe {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+/* MEDIUM SPECIFICITY: Component-specific override */
+.card .btn-safe {
+  background: var(--secondary-color);
+}
+
+/* HIGH SPECIFICITY: Only when absolutely necessary */
+.card .btn-safe:hover {
+  background: var(--accent-color) !important; /* Use !important only for user interaction states */
+}
+
+/* =================================================================
+   2. FEATURE QUERIES: Test Support Before Applying Styles
+   =================================================================
+   Use @supports to apply modern CSS only when browser supports it
+   ================================================================= */
+
+@supports (display: grid) {
+  .grid-safe {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+/* Fallback for older browsers */
+@supports not (display: grid) {
+  .grid-safe {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+  }
+
+  .grid-safe > * {
+    flex: 1 1 250px;
+  }
+}
+
+/* =================================================================
+   3. PROGRESSIVE ENHANCEMENT: Add New Styles Without Removing Old
+   =================================================================
+   Start with basic styles, then enhance with modern features
+   ================================================================= */
+
+/* BASIC: Works in all browsers */
+.card-basic {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ENHANCEMENT: Add modern features if supported */
+@supports (backdrop-filter: blur(10px)) {
+  .card-basic {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* =================================================================
+   4. CSS CUSTOM PROPERTIES FALLBACKS: Backward Compatibility
+   =================================================================
+   Provide fallbacks for browsers that don't support CSS variables
+   ================================================================= */
+
+/* FALLBACK: Define fallback values before using variables */
+.btn-fallback {
+  /* Fallback color for browsers without CSS variable support */
+  background: #667eea; /* var(--primary-color) */
+  background: var(--primary-color);
+  color: white;
+  color: var(--text-color, #333); /* Fallback inline */
+  padding: 0.5rem; /* var(--spacing-sm) */
+  padding: var(--spacing-sm);
+  border-radius: 4px; /* var(--border-radius) */
+  border-radius: var(--border-radius);
+}
+
+/* =================================================================
+   5. COMPONENT ISOLATION: Scoping Styles to Prevent Leaks
+   =================================================================
+   Use BEM methodology, CSS modules, or scoped classes to isolate components
+   ================================================================= */
+
+/* BEM METHODOLOGY: Block Element Modifier */
+.card-isolated {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.card-isolated__header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: var(--font-weight-semibold);
+}
+
+.card-isolated__body {
+  padding: var(--spacing-lg);
+}
+
+.card-isolated--featured {
+  border: 2px solid var(--primary-color);
+  box-shadow: var(--shadow-lg);
+}
+
+/* SCOPED CLASSES: Prefix to avoid conflicts */
+.ds-card { /* ds = design system */
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+}
+
+.ds-card__title {
+  font-size: var(--font-size-h4);
+  margin-bottom: var(--spacing-sm);
+}
+
+.ds-card__content {
+  color: var(--text-color);
+}
+
+/* =================================================================
+   PHASE 1: NON-INVASIVE - Design Tokens & Utility Classes
+   =================================================================
+   Apply this first - adds new tokens and utilities without affecting existing styles
+   ================================================================= */
+
+:root {
+  /* Existing design tokens (already applied) */
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --accent-color: #f093fb;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --neutral-color: #6c757d;
+
+  /* Typography Scale */
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-size-h1: 2.5rem;
+  --font-size-h2: 2rem;
+  --font-size-h3: 1.75rem;
+  --font-size-h4: 1.5rem;
+  --font-size-h5: 1.25rem;
+  --font-size-h6: 1rem;
+  --font-size-body: 1rem;
+  --font-size-caption: 0.875rem;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+
+  /* Border Radius Scale */
+  --border-radius-sm: 4px;
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  --border-radius-full: 50%;
+
+  /* Shadow System */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.19);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.25);
+
+  /* Animation Durations */
+  --animation-fast: 0.15s;
+  --animation-normal: 0.3s;
+  --animation-slow: 0.5s;
+
+  /* Existing Variables */
+  --bg-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --text-color: #333;
+  --nav-bg: rgba(255, 255, 255, 0.95);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --footer-bg: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  --footer-text: #ecf0f1;
+  --footer-link: #bdc3c7;
+  --border-color: #ddd;
+}
+
+/* PHASE 1: Utility Classes (add these as alternatives to existing styles) */
+.btn-primary-new { background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); padding: var(--spacing-sm) var(--spacing-lg); font-weight: var(--font-weight-semibold); transition: all var(--animation-normal); cursor: pointer; }
+.btn-primary-new:hover { background-color: var(--secondary-color); transform: translateY(-2px); box-shadow: var(--shadow); }
+
+.btn-secondary-new { background-color: var(--secondary-color); color: white; border: none; border-radius: var(--border-radius); padding: var(--spacing-sm) var(--spacing-lg); font-weight: var(--font-weight-semibold); transition: all var(--animation-normal); cursor: pointer; }
+.btn-secondary-new:hover { background-color: var(--primary-color); transform: translateY(-2px); box-shadow: var(--shadow); }
+
+.form-input-new { width: 100%; padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--border-color); border-radius: var(--border-radius); font-size: var(--font-size-body); font-family: var(--font-family); transition: border-color var(--animation-fast); }
+.form-input-new:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25); }
+
+.card-new { background: var(--card-bg); border-radius: var(--border-radius-lg); box-shadow: var(--shadow); overflow: hidden; transition: transform var(--animation-normal), box-shadow var(--animation-normal); }
+.card-new:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+
+.text-h1-new { font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); line-height: 1.2; margin-bottom: var(--spacing-md); }
+.text-h2-new { font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); line-height: 1.3; margin-bottom: var(--spacing-md); }
+.text-body-new { font-size: var(--font-size-body); font-weight: var(--font-weight-normal); line-height: 1.6; color: var(--text-color); }
+
+/* =================================================================
+   PHASE 2: SELECTIVE UPDATES - Global Typography & Form Elements
+   =================================================================
+   Apply after Phase 1 - gradually updates existing elements
+   ================================================================= */
+
+/* PHASE 2: Global Typography Updates (apply to standardize text hierarchy) */
+h1, .h1 { font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); line-height: 1.2; margin-bottom: var(--spacing-md); }
+h2, .h2 { font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); line-height: 1.3; margin-bottom: var(--spacing-md); }
+h3, .h3 { font-size: var(--font-size-h3); font-weight: var(--font-weight-semibold); line-height: 1.4; margin-bottom: var(--spacing-sm); }
+h4, .h4 { font-size: var(--font-size-h4); font-weight: var(--font-weight-semibold); line-height: 1.4; margin-bottom: var(--spacing-sm); }
+h5, .h5 { font-size: var(--font-size-h5); font-weight: var(--font-weight-medium); line-height: 1.5; margin-bottom: var(--spacing-xs); }
+h6, .h6 { font-size: var(--font-size-h6); font-weight: var(--font-weight-medium); line-height: 1.5; margin-bottom: var(--spacing-xs); }
+
+body { font-family: var(--font-family); font-size: var(--font-size-body); font-weight: var(--font-weight-normal); line-height: 1.6; color: var(--text-color); }
+
+/* PHASE 2: Form Element Updates (gradually standardize form controls) */
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="tel"], input[type="url"], textarea, select {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  border-radius: var(--border-radius);
+  transition: border-color var(--animation-fast), box-shadow var(--animation-fast);
+}
+
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="number"]:focus, input[type="tel"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+  outline: none;
+}
+
+/* =================================================================
+   PHASE 3: COMPONENT UPDATES - Specific Component Refactoring
+   =================================================================
+   Apply last - refactor specific components one by one
+   ================================================================= */
+
+/* PHASE 3: Button Component Updates (replace Bootstrap buttons gradually) */
+.btn-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
+.btn-primary:hover { background-color: var(--secondary-color) !important; border-color: var(--secondary-color) !important; }
+
+.btn-secondary { background-color: var(--secondary-color) !important; border-color: var(--secondary-color) !important; }
+.btn-secondary:hover { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
+
+.btn-success { background-color: var(--success-color) !important; border-color: var(--success-color) !important; }
+.btn-warning { background-color: var(--warning-color) !important; border-color: var(--warning-color) !important; }
+.btn-danger { background-color: var(--danger-color) !important; border-color: var(--danger-color) !important; }
+
+/* PHASE 3: Card Component Updates (standardize card styling) */
+.card { border-radius: var(--border-radius-lg) !important; box-shadow: var(--shadow) !important; }
+.card:hover { box-shadow: var(--shadow-lg) !important; }
+
+/* PHASE 3: CSM Form Specific Updates (refactor CSM-form.html styles) */
+.form-page .container { border-radius: var(--border-radius-lg) !important; box-shadow: var(--shadow) !important; }
+.institute-name { font-size: var(--font-size-h3) !important; color: var(--primary-color) !important; }
+.form-title { font-size: var(--font-size-h2) !important; color: var(--danger-color) !important; }
+.section-title { font-size: var(--font-size-h4) !important; color: var(--primary-color) !important; }
+
+/* Utility Classes and Components */
+
+/* Button System */
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--animation-normal);
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--animation-normal);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--animation-normal);
+  cursor: pointer;
+}
+
+.btn-outline:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-color);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: var(--font-weight-normal);
+  transition: all var(--animation-normal);
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Form Components */
+.form-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-body);
+  font-family: var(--font-family);
+  transition: border-color var(--animation-fast);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+.form-select {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-body);
+  font-family: var(--font-family);
+  background-color: var(--card-bg);
+  transition: border-color var(--animation-fast);
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+.form-checkbox {
+  margin-right: var(--spacing-sm);
+  transform: scale(1.2);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
+  font-size: var(--font-size-body);
+}
+
+/* Card Components */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform var(--animation-normal), box-shadow var(--animation-normal);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--card-bg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.card-body {
+  padding: var(--spacing-lg);
+}
+
+.card-footer {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+/* Navigation Patterns */
+.nav-header {
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow);
+  height: 80px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 9999;
+}
+
+.nav-sidebar {
+  background: var(--card-bg);
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+}
+
+.nav-footer {
+  background: var(--footer-bg);
+  color: var(--footer-text);
+  padding: var(--spacing-xl) 0;
+  margin-top: auto;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+/* Typography Classes */
+.text-h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+}
+
+.text-h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+  margin-bottom: var(--spacing-md);
+}
+
+.text-h3 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-sm);
+}
+
+.text-h4 {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-sm);
+}
+
+.text-h5 {
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-xs);
+}
+
+.text-h6 {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-xs);
+}
+
+.text-body {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.text-caption {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.5;
+  color: var(--neutral-color);
+}
+
+.text-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--animation-fast);
+}
+
+.text-link:hover {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
 html {
   margin: 0;
   background: var(--bg-color);
@@ -7,11 +568,58 @@ html {
 
 /* CSS Variables */
 :root {
+  /* Color Palette */
   --primary-color: #667eea;
   --secondary-color: #764ba2;
   --accent-color: #f093fb;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --neutral-color: #6c757d;
+
+  /* Typography Scale */
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-size-h1: 2.5rem;
+  --font-size-h2: 2rem;
+  --font-size-h3: 1.75rem;
+  --font-size-h4: 1.5rem;
+  --font-size-h5: 1.25rem;
+  --font-size-h6: 1rem;
+  --font-size-body: 1rem;
+  --font-size-caption: 0.875rem;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+
+  /* Border Radius Scale */
+  --border-radius-sm: 4px;
   --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  --border-radius-full: 50%;
+
+  /* Shadow System */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.19);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.25);
+
+  /* Animation Durations */
+  --animation-fast: 0.15s;
+  --animation-normal: 0.3s;
+  --animation-slow: 0.5s;
+
+  /* Existing Variables */
   --bg-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   --text-color: #333;
   --nav-bg: rgba(255, 255, 255, 0.95);
@@ -582,6 +1190,195 @@ nav {
     text-align: center;
     margin-top: 10px;
   }
+}
+
+/* Layout Patterns */
+
+/* Page Containers */
+.container-sm {
+  max-width: 576px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.container-md {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.container-lg {
+  max-width: 992px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.container-xl {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+}
+
+.container-full {
+  width: 100%;
+  padding: 0 var(--spacing-md);
+}
+
+/* Grid Systems (Flexbox-based) */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.grid-cols-1 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.grid-cols-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.grid-cols-2 > * {
+  flex: 1 1 calc(50% - var(--spacing-md));
+  min-width: 250px;
+}
+
+.grid-cols-3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.grid-cols-3 > * {
+  flex: 1 1 calc(33.333% - var(--spacing-md));
+  min-width: 200px;
+}
+
+.grid-cols-4 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.grid-cols-4 > * {
+  flex: 1 1 calc(25% - var(--spacing-md));
+  min-width: 150px;
+}
+
+/* Flexbox Utilities */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-auto {
+  flex: auto;
+}
+
+/* Spacing Between Sections */
+.section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section-spacing {
+  padding: var(--spacing-xl) 0;
+}
+
+.section-spacing-sm {
+  padding: var(--spacing-lg) 0;
+}
+
+.section-spacing-lg {
+  padding: var(--spacing-xxl) 0;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 575.98px) {
+  .container-sm,
+  .container-md,
+  .container-lg,
+  .container-xl,
+  .container-full {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .grid-cols-2 > *,
+  .grid-cols-3 > *,
+  .grid-cols-4 > * {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .section {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .section-spacing {
+    padding: var(--spacing-lg) 0;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .grid-cols-3 > *,
+  .grid-cols-4 > * {
+    flex: 1 1 calc(50% - var(--spacing-md));
+    min-width: 200px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .grid-cols-4 > * {
+    flex: 1 1 calc(50% - var(--spacing-md));
+    min-width: 200px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  /* Adjustments for large screens if needed */
+}
+
+@media (min-width: 1200px) {
+  /* Adjustments for extra large screens if needed */
 }
 
 /* CSM Report Styles */
@@ -1278,4 +2075,60 @@ textarea:disabled {
   .checkbox-cell {
     width: 20%;
   }
+}
+
+/* =================================================================
+   DESIGN CONSISTENCY DEBUGGING TOOLS
+   =================================================================
+   Tools to identify and fix design inconsistencies across pages
+   ================================================================= */
+
+/* =================================================================
+   1. DEBUG MODE CSS: Highlight Inconsistent Elements
+   =================================================================
+   Add class="debug-mode" to <body> to visualize design inconsistencies
+   ================================================================= */
+
+.debug-mode * {
+  outline: 1px solid rgba(255, 0, 0, 0.1) !important;
+}
+
+/* Highlight elements not using design system colors */
+.debug-mode [style*="background-color"]:not([style*="var(--"],
+.debug-mode [style*="color"]:not([style*="var(--"] {
+  outline: 2px solid #ff6b6b !important;
+  outline-offset: 2px !important;
+}
+
+/* Highlight elements not using design system fonts */
+.debug-mode [style*="font-family"]:not([style*="var(--font-family"] {
+  outline: 2px solid #ffd93d !important;
+  outline-offset: 2px !important;
+}
+
+/* Highlight elements not using design system spacing */
+.debug-mode [style*="margin"]:not([style*="var(--spacing"],
+.debug-mode [style*="padding"]:not([style*="var(--spacing"] {
+  outline: 2px solid #6bcf7f !important;
+  outline-offset: 2px !important;
+}
+
+/* Highlight buttons not using design system */
+.debug-mode button:not(.btn-primary-new):not(.btn-secondary-new):not(.btn-primary):not(.btn-secondary) {
+  outline: 3px solid #4ecdc4 !important;
+  outline-offset: 3px !important;
+}
+
+/* Highlight forms not using design system */
+.debug-mode input:not(.form-input-new):not(.form-control),
+.debug-mode select:not(.form-select),
+.debug-mode textarea:not(.form-control) {
+  outline: 3px solid #45b7d1 !important;
+  outline-offset: 3px !important;
+}
+
+/* Highlight cards not using design system */
+.debug-mode .card:not(.card-new) {
+  outline: 3px solid #f9ca24 !important;
+  outline-offset: 3px !important;
 }
