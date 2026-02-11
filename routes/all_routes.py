@@ -5,6 +5,7 @@ from models.admin_model import add_admin, get_admin_by_email, verify_admin_crede
 from models.client_model import *
 from models.client_model import search_clients
 from models.face_embedding_model import add_face_embedding, find_best_match
+from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
 from models.csm_form_model import insert_csm_form, get_csm_forms_filtered
 from models.client_model import get_departments
@@ -13,9 +14,11 @@ from models.client_model import get_client_count
 import os
 import base64
 import re
+import io
 import face_recognition
 import numpy as np
 from datetime import datetime
+from bson.objectid import ObjectId
 
 client_bp = Blueprint("client", __name__)
 
@@ -481,9 +484,10 @@ def admin_signup():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm = request.form.get('confirm_password') or request.form.get('confirm')
+        photo_data = request.form.get('photo_data')
 
-        if not (first_name and last_name and email and password):
-            flash('All fields are required')
+        if not (first_name and last_name and email and password and photo_data):
+            flash('All fields are required, including photo')
             return redirect(url_for('client.admin_signup'))
 
         if password != confirm:
@@ -494,13 +498,45 @@ def admin_signup():
             flash('An account with that email already exists')
             return redirect(url_for('client.admin_signup'))
 
+        # Process photo and compute embedding
+        embedding = None
         try:
-            add_admin(first_name, last_name, email, password)
-            flash('Account created. Please sign in.')
-            return redirect(url_for('client.admin_login'))
+            # Extract base64 payload
+            m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
+            if m:
+                img_b64 = m.group(2)
+            else:
+                # fallback if data URL prefix missing
+                img_b64 = photo_data.split(",", 1)[1] if "," in photo_data else photo_data
+
+            image_bytes = base64.b64decode(img_b64)
+
+            # Create admin first to get ID for file name
+            admin_id = add_admin(first_name, last_name, email, password)
+
+            # Save image file
+            admins_dir = os.path.join(os.getcwd(), "Admins")
+            os.makedirs(admins_dir, exist_ok=True)
+            file_path = os.path.join(admins_dir, f"{admin_id}.jpg")
+            with open(file_path, "wb") as f:
+                f.write(image_bytes)
+
+            # Compute face encoding
+            img = face_recognition.load_image_file(file_path)
+            encodings = face_recognition.face_encodings(img)
+            if encodings:
+                embedding = list(encodings[0])
+                # Update admin with embedding
+                db = get_db()
+                db.admins.update_one({"_id": ObjectId(admin_id)}, {"$set": {"face_embedding": embedding}})
+            else:
+                # No face found; optional: remove file or keep for debug
+                flash("No face detected in the uploaded photo; embedding not saved.")
         except Exception as e:
-            flash('Failed to create account: ' + str(e))
-            return redirect(url_for('client.admin_signup'))
+            flash(f"Failed to process photo: {e}")
+
+        flash('Account created. Please sign in.')
+        return redirect(url_for('client.admin_login'))
 
     return render_template('admin/admin_signup.html')
 
@@ -518,9 +554,50 @@ def admin_login():
             return redirect(url_for('client.admin_dashboard'))
         else:
             flash('Invalid credentials')
-            return redirect(url_for('client.admin_login'))
+            return redirect(url_for('client.admin_login', type='password'))
 
-    return render_template('admin/login.html')
+    # If login type is password, show the regular login form
+    if request.args.get('type') == 'password':
+        return render_template('admin/login.html')
+    
+    # Default to face login
+    return render_template('admin/face_login.html')
+
+
+@client_bp.route('/admin/face_login', methods=['POST'])
+def admin_face_login():
+    photo_data = request.form.get('photo_data')
+    if not photo_data:
+        return jsonify({'ok': False, 'error': 'No photo_data provided'}), 400
+
+    try:
+        # Extract base64
+        m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
+        if m:
+            img_b64 = m.group(2)
+        else:
+            img_b64 = photo_data.split(',', 1)[1] if ',' in photo_data else photo_data
+        image_bytes = base64.b64decode(img_b64)
+
+        # Load image into face_recognition
+        img = face_recognition.load_image_file(io.BytesIO(image_bytes))
+        encodings = face_recognition.face_encodings(img)
+        if not encodings:
+            return jsonify({'ok': False, 'error': 'No face detected'}), 200
+
+        encoding = list(encodings[0])
+        admin_id, distance = find_best_admin_match(encoding)
+        if admin_id:
+            # Get admin details
+            db = get_db()
+            admin = db.admins.find_one({"_id": ObjectId(admin_id)})
+            if admin:
+                session['admin_id'] = admin_id
+                session['admin_email'] = admin.get('email')
+                return jsonify({'ok': True}), 200
+        return jsonify({'ok': False, 'error': 'Face not recognized'}), 200
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
 
 
 @client_bp.route('/admin/logout')

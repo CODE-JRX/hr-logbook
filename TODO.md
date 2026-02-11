@@ -1,37 +1,16 @@
-# TODO: Add Face Data Encoding to Admin Signup
+# TODO: Implement Backend Support for Face Encoding in Admin Signup
 
-## Steps to Complete
-
-1. **Update templates/admin/admin_signup.html**
-   - Add photo upload section with camera/file upload, similar to clients/add.html
-   - Include necessary CSS styles for media-frame, video, canvas
-   - Add JavaScript for camera control, face verification, and form validation
-   - Make photo required for signup
-
-2. **Update routes/all_routes.py admin_signup route**
-   - Handle photo_data from form (data URL)
-   - Process face encoding using face_recognition
-   - Store face embedding in face_embeddings collection with client_id as admin's id
-   - Add error handling for face detection failures
-   - Ensure embedding is saved after admin account creation
-
-3. **Test the implementation**
-   - Verify photo upload works
-   - Check face encoding and storage
-   - Ensure admin signup completes with embedding
-
-## Dependent Files
-- templates/admin/admin_signup.html
-- routes/all_routes.py
-- models/face_embedding_model.py (already supports adding embeddings)
-- models/admin_model.py (may need to get admin id after creation)
+## Completed Tasks
+- [x] Update `models/admin_model.py`: Modify `add_admin` to accept `embedding_list` parameter and store it in the admin document.
+- [x] Update `routes/all_routes.py`: In `admin_signup` POST handler, process `photo_data`, save image to "Admins" directory, compute face encoding, and pass to `add_admin`.
+- [x] Add validation for required photo in `admin_signup` route.
+- [x] Add `find_best_admin_match` function in `models/admin_model.py`.
+- [x] Add `/admin/face_login` route in `routes/all_routes.py`.
+- [x] Update `templates/admin/login.html` to make face login the default option.
 
 ## Followup Steps
-- Test admin signup with photo
-- Implement face-based admin login (future task)
-- Handle edge cases like no face detected
-
-## Completed Steps
-- [x] Updated templates/admin/admin_signup.html with photo upload, CSS, and JS
-- [x] Updated routes/all_routes.py admin_signup route to handle photo and store embedding
-- [x] Tested basic functionality (pending user testing)
+- [ ] Install face_recognition_models dependency (in progress).
+- [ ] Test admin signup with photo upload.
+- [ ] Verify photo file saved in "Admins" directory.
+- [ ] Check database for embedding in `admins` collection.
+- [ ] Test face login functionality.
