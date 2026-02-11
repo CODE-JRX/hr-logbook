@@ -158,6 +158,10 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+    font-family: var(--font-family);
+    table-layout: auto;
+    min-width: 1000px;
+    /* Prevent collapse on search */
   }
 
   .results-table thead {
@@ -165,22 +169,19 @@
     color: white !important;
   }
 
-  .results-table th {
-    padding: 5px;
-    border: 1px solid var(--border-color);
-    text-align: center;
-    color: white !important;
-  }
-
+  .results-table th,
   .results-table td {
     padding: 5px;
     border: 1px solid var(--border-color);
     text-align: center;
+    font-family: inherit;
   }
 
-  .results-table tbody tr:nth-child(even) {
+  /* Use class for striping to maintain consistency during filtering */
+  .results-table tbody tr.striped-row {
     background-color: rgba(255, 255, 255, 0.05);
   }
+
 
   .results-table tbody tr:hover {
     background-color: rgba(255, 255, 255, 0.1);
@@ -282,11 +283,13 @@
   // Search functionality
   const searchInput = document.getElementById('searchInput');
   if (searchInput) {
-    searchInput.addEventListener('input', function () {
-      const filter = this.value.toLowerCase();
+    function updateTableStriping() {
+      const filter = searchInput.value.toLowerCase();
       const table = document.getElementById('logsTable');
+      if (!table) return;
       const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
+      let visibleIndex = 0;
       for (let i = 0; i < rows.length; i++) {
         const cells = rows[i].getElementsByTagName('td');
         let match = false;
@@ -296,9 +299,26 @@
             break;
           }
         }
-        rows[i].style.display = match ? '' : 'none';
+
+        if (match) {
+          rows[i].style.display = '';
+          // Dynamically update zebra striping
+          if (visibleIndex % 2 === 1) {
+            rows[i].classList.add('striped-row');
+          } else {
+            rows[i].classList.remove('striped-row');
+          }
+          visibleIndex++;
+        } else {
+          rows[i].style.display = 'none';
+          rows[i].classList.remove('striped-row');
+        }
       }
-    });
+    }
+
+    searchInput.addEventListener('input', updateTableStriping);
+    // Apply initial striping on load
+    updateTableStriping();
   }
 </script>
 {% endblock %}
@@ -335,10 +355,13 @@
   <!-- Filter Controls Section -->
   <div class="card-body border-bottom no-print">
     <form method="get" class="row g-3 align-items-end">
+      <!-- Preserve limit parameter -->
+      <input type="hidden" name="limit" value="{{ filters.limit or '25' }}">
+
       <div class="col-md-3 col-6">
         <label class="form-label"><i class="fas fa-question-circle"></i> Purpose</label>
-        <select class="form-select" name="purpose">
-          <option value="">-- All --</option>
+        <select class="form-select" name="purpose" onchange="this.form.submit()">
+          <option value="">All</option>
           {% for p in purposes %}
           <option value="{{ p }}" {% if filters.purpose==p %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
@@ -346,25 +369,22 @@
       </div>
       <div class="col-md-3 col-6">
         <label class="form-label"><i class="fas fa-building"></i> Department</label>
-        <select class="form-select" name="department">
-          <option value="">-- All --</option>
+        <select class="form-select" name="department" onchange="this.form.submit()">
+          <option value="">All</option>
           {% for d in departments %}
           <option value="{{ d }}" {% if filters.department==d %}selected{% endif %}>{{ d }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="col-md-2 col-6">
+      <div class="col-md-3 col-6">
         <label for="start_date" class="form-label"><i class="fas fa-calendar-alt"></i> From</label>
-        <input class="form-control" type="date" name="start_date" id="start_date"
-          value="{{ filters.start_date or '' }}">
+        <input class="form-control" type="date" name="start_date" id="start_date" value="{{ filters.start_date or '' }}"
+          onchange="this.form.submit()">
       </div>
-      <div class="col-md-2 col-6">
+      <div class="col-md-3 col-6">
         <label for="end_date" class="form-label"><i class="fas fa-calendar-alt"></i> To</label>
-        <input class="form-control" type="date" name="end_date" id="end_date" value="{{ filters.end_date or '' }}">
-      </div>
-      <div class="col-md-2 col-12">
-        <button class="btn btn-primary w-100"><i class="fas fa-search"></i> <span
-            class="d-none d-md-inline">Filter</span></button>
+        <input class="form-control" type="date" name="end_date" id="end_date" value="{{ filters.end_date or '' }}"
+          onchange="this.form.submit()">
       </div>
     </form>
   </div>
