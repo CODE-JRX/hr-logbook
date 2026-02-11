@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+{% block title %}Admin Face Login — HR Logbook{% endblock %}
+
+{% block head_extra %}
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+	.media-frame {
+		width: 100%;
+		aspect-ratio: 4 / 3;
+		/* modern browsers */
+		max-height: 420px;
+		background: #0f1720;
+		border-radius: 8px;
+		border: 3px solid rgba(13, 110, 253, 0.08);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.media-frame video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	/* Make preview match live preview — use cover so framing matches */
+	.media-frame img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	/* Camera guide: subtle broken square shown over the live preview */
+	#face-guide {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 60%;
+		height: 60%;
+		pointer-events: none;
+		z-index: 6;
+	}
+
+	#face-guide .fg-corner {
+		position: absolute;
+		width: clamp(32px, 8%, 56px);
+		height: clamp(32px, 8%, 56px);
+		box-sizing: border-box;
+		border-radius: 4px;
+		border-color: rgba(154, 166, 188, 0.28);
+		border-style: solid;
+	}
+
+	#face-guide .top-left {
+		top: 0;
+		left: 0;
+		border-right: none;
+		border-bottom: none;
+	}
+
+	#face-guide .top-right {
+		top: 0;
+		right: 0;
+		border-left: none;
+		border-bottom: none;
+	}
+
+	#face-guide .bottom-right {
+		bottom: 0;
+		right: 0;
+		border-left: none;
+		border-top: none;
+	}
+
+	#face-guide .bottom-left {
+		bottom: 0;
+		left: 0;
+		border-right: none;
+		border-top: none;
+	}
+
+	#previewBox {
+		padding: .5rem;
+		background: #f8fafc;
+	}
+
+	.message-overlay {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		right: 10px;
+		padding: 6px 10px;
+		border-radius: 6px;
+		color: white;
+		font-weight: bold;
+		text-align: center;
+		z-index: 10;
+		display: none;
+		font-size: 12px;
+		line-height: 1.2;
+		word-wrap: break-word;
+	}
+
+	.message-overlay.success {
+		background-color: rgba(25, 135, 84, 1);
+	}
+
+	.message-overlay.error {
+		background-color: rgba(220, 53, 69, 1);
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<style>
+	@keyframes scan {
+		0% {
+			top: 0;
+		}
+
+		100% {
+			top: 100%;
+		}
+	}
+
+	.modal,
+	.modal-dialog {
+		z-index: 9999 !important;
+	}
+
+	.modal-backdrop {
+		display: none !important;
+	}
+
+	.modal-content {
+		pointer-events: auto !important;
+	}
+
+	.modal-dialog {
+		margin-top: 100px;
+	}
+
+	.admin-face-login-container {
+		display: flex;
+		gap: 4px;
+		align-items: flex-start;
+		justify-content: center;
+	}
+
+	.camera-card {
+		margin: 0;
+		width: 460px;
+		height: 460px;
+		background: #0f1720;
+		border-radius: 8px;
+		border: 4px solid rgba(13, 110, 253, 0.12);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+	}
+
+	/* Face position guide: subtle broken square shown over the camera preview */
+	#face-guide {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 58%;
+		height: 58%;
+		pointer-events: none;
+		z-index: 12;
+	}
+
+	#face-guide .fg-corner {
+		position: absolute;
+		width: clamp(36px, 9%, 60px);
+		height: clamp(36px, 9%, 60px);
+		box-sizing: border-box;
+		border-radius: 4px;
+		/* soft gray that doesn't overpower the UI */
+		border-color: rgba(154, 166, 188, 0.28);
+		border-style: solid;
+		/* show only two sides per corner to create the "broken" square look */
+	}
+
+	#face-guide .top-left {
+		top: 0;
+		left: 0;
+		border-right: none;
+		border-bottom: none;
+	}
+
+	#face-guide .top-right {
+		top: 0;
+		right: 0;
+		border-left: none;
+		border-bottom: none;
+	}
+
+	#face-guide .bottom-right {
+		bottom: 0;
+		right: 0;
+		border-left: none;
+		border-top: none;
+	}
+
+	#face-guide .bottom-left {
+		bottom: 0;
+		left: 0;
+		border-right: none;
+		border-top: none;
+	}
+
+	.login-card {
+		width: 320px;
+		min-height: 460px;
+		max-height: 460px;
+		overflow: auto;
+		border-radius: 8px;
+		border: 4px solid rgba(0, 0, 0, 0.06);
+		background: var(--card-bg);
+		padding: 12px;
+		color: var(--text-color);
+	}
+
+	@media (max-width: 767px) {
+		.admin-face-login-container {
+			flex-direction: column;
+			gap: 16px;
+		}
+
+		.camera-card {
+			width: 100%;
+			height: auto;
+			min-height: 300px;
+		}
+
+		.login-card {
+			width: 100%;
+			max-height: none;
+		}
+	}
+</style>
+<div class="card shadow-lg">
+	<div class="card-body text-center">
+		<div class="admin-face-login-container">
+			<div class="camera-card shadow-lg rounded">
+				<!-- video preview (fills card) -->
+				<video id="video" width="420" height="420" autoplay playsinline muted
+					style="object-fit:cover; width:420px; height:420px; border-radius:6px; display:none;"></video>
+
+				<!-- face position guide (subtle broken square corners) -->
+				<div id="face-guide" aria-hidden="true">
+					<div class="fg-corner top-left"></div>
+					<div class="fg-corner top-right"></div>
+					<div class="fg-corner bottom-right"></div>
+					<div class="fg-corner bottom-left"></div>
+				</div>
+
+				<!-- placeholder when camera not active -->
+				<div id="camera-placeholder" class="text-center text-muted" style="color:#9aa6bc">
+					<div style="font-size:44px; opacity:0.5">📷</div>
+					<div style="margin-top:8px;">Camera Preview</div>
+					<h5 class="mt-3" style="color:#9aa6bc; font-weight:600;">Admin Face Login</h5>
+					<p class="text-muted small" style="color:#9aa6bc;">Capture your photo for face recognition login</p>
+				</div>
+
+				<!-- captured preview overlay (inside camera container so absolute sizing is constrained) -->
+				<canvas id="canvas" width="420" height="420"
+					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px;"></canvas>
+				<img id="preview" src="" alt="Preview"
+					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:6px; background:#0f1720;" />
+				<div id="scan-line"
+					style="display:none; position:absolute; top:0; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, rgba(0,255,0,0.8), transparent); z-index:20; animation: scan 2s linear;">
+				</div>
+				<!-- camera error overlay (shown inside camera container at top) -->
+				<div id="camera-error"
+					style="display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:25; background:rgba(0,0,0,0.6); color:#fff; padding:6px 10px; border-radius:6px; font-weight:600; font-size:0.95rem;">
+					No face detected
+				</div>
+				<!-- camera action button placed inside the camera container -->
+				<button id="camera-action" title="Start or control the camera for face recognition" class="btn btn-lg"
+					style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); z-index:10; min-width:140px; background:rgba(0,0,0,0.7); color:white; border:none; border-radius:6px; padding:8px 16px;">Start
+					Camera</button>
+			</div>
+
+			<!-- Login card -->
+			<div class="login-card">
+				<div class="card shadow-sm p-3 text-left">
+					<h6 class="mb-3 text-center">Face Recognition Login</h6>
+					<p class="text-muted small mb-3">Position your face in the camera and click SCAN to authenticate.
+					</p>
+
+					<div id="login-status" class="alert" style="display:none;"></div>
+
+					<div class="d-flex justify-content-center gap-2 mt-4">
+						<a href="/admin/login?type=password" class="btn btn-outline-secondary"><i
+								class="fas fa-key"></i> Password Login</a>
+					</div>
+
+					<hr class="my-3">
+					<p class="small text-muted mb-0 text-center">Contact an administrator to create an account.</p>
+				</div>
+			</div>
+		</div>
+
+		<p id="error" style="display:none;" class="text-danger mt-2"></p>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+	const video = document.getElementById('video');
+	const canvas = document.getElementById('canvas');
+	const preview = document.getElementById('preview');
+	const scanLine = document.getElementById('scan-line');
+	const placeholder = document.getElementById('camera-placeholder');
+	const actionBtn = document.getElementById('camera-action');
+	const cameraCard = document.querySelector('.camera-card');
+	const loginStatus = document.getElementById('login-status');
+	const errorP = document.getElementById('error');
+	const cameraError = document.getElementById('camera-error');
+
+	function setError(msg) {
+		const m = String(msg || '');
+		const isSpecial = /no face/i.test(m) || /face not detected/i.test(m) || /no faces?/i.test(m) || (/face detected/i.test(m) && /no/i.test(m)) || /no identified client/i.test(m);
+		if (isSpecial) {
+			// show only in cameraError
+			if (cameraError) { cameraError.textContent = msg; cameraError.style.display = 'block'; }
+			// hide page-level error
+			errorP.style.display = 'none';
+		} else {
+			// set page-level error
+			errorP.textContent = msg || '';
+			if (msg) {
+				errorP.style.display = 'block';
+			} else {
+				errorP.style.display = 'none';
+			}
+			// hide camera error
+			if (cameraError) cameraError.style.display = 'none';
+		}
+	}
+
+	let stream = null;
+	let cameraState = 'stopped'; // 'stopped' | 'started' | 'captured'
+
+	// Camera action function
+	async function cameraAction() {
+		setError('');
+		if (cameraState === 'stopped') {
+			// start camera
+			try {
+				stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+				console.log('Stream obtained:', stream);
+				video.srcObject = stream;
+				await video.play(); // Ensure video starts playing
+				console.log('Video playing, dimensions:', video.videoWidth, 'x', video.videoHeight);
+				video.style.display = 'block';
+				placeholder.style.display = 'none';
+				cameraState = 'started';
+				actionBtn.textContent = 'SCAN';
+				setError('');
+			} catch (err) {
+				console.error('Camera error:', err);
+				setError('Could not start camera: ' + err.message);
+			}
+			return;
+		}
+
+		if (cameraState === 'started') {
+			// capture
+			if (!stream) { setError('Start the camera first'); return; }
+			const ctx = canvas.getContext('2d');
+			// Calculate the visible area in video coordinates to match object-fit: cover
+			const containerW = 420;
+			const containerH = 420;
+			const vw = video.videoWidth || 420;
+			const vh = video.videoHeight || 420;
+			const scale = Math.max(containerW / vw, containerH / vh);
+			const scaledW = vw * scale;
+			const scaledH = vh * scale;
+			let sourceX = 0, sourceY = 0, sourceW = vw, sourceH = vh;
+			if (scaledW > containerW) {
+				// crop horizontally
+				const cropAmount = (scaledW - containerW) / scale;
+				sourceX = cropAmount / 2;
+				sourceW = vw - cropAmount;
+			} else {
+				// crop vertically
+				const cropAmount = (scaledH - containerH) / scale;
+				sourceY = cropAmount / 2;
+				sourceH = vh - cropAmount;
+			}
+			// Set canvas size to the cropped visible area, then scale down if needed
+			let targetW = sourceW;
+			let targetH = sourceH;
+			const MAX_W = 800;
+			if (targetW > MAX_W) {
+				const scaleDown = MAX_W / targetW;
+				targetW = Math.round(targetW * scaleDown);
+				targetH = Math.round(targetH * scaleDown);
+			}
+			canvas.width = targetW;
+			canvas.height = targetH;
+			// Draw only the visible cropped part
+			ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
+			// encode as JPEG (quality 0.9)
+			const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+			preview.src = dataUrl;
+			preview.style.display = 'block';
+			scanLine.style.display = 'block';
+			// Reset animation to restart on each capture
+			scanLine.style.animation = 'none';
+			setTimeout(() => {
+				scanLine.style.animation = 'scan 2s linear';
+			}, 10);
+			canvas.style.display = 'none'; // keep canvas hidden; we use it only for capture
+			// show captured overlay and hide live video
+			video.style.display = 'none';
+			// Ensure preview uses contain to avoid any stretching
+			preview.style.objectFit = 'contain';
+			cameraState = 'captured';
+			actionBtn.textContent = 'Stop Camera';
+
+			// send to server for admin face login
+			const fd = new FormData();
+			fd.append('photo_data', dataUrl);
+			try {
+				const res = await fetch('/admin/face_login', { method: 'POST', body: fd });
+				if (res.redirected) {
+					// Successful login, redirect to dashboard
+					window.location.href = res.url;
+					return;
+				}
+				const body = await res.json();
+				if (body.ok) {
+					// Should not reach here if login successful, but handle just in case
+					window.location.href = '/admin/dashboard';
+				} else {
+					setError(body.error || 'Face not recognized. Please ensure you have registered your face during signup.');
+				}
+			} catch (err) {
+				setError('Face login failed: ' + err.message);
+			}
+			return;
+		}
+
+		if (cameraState === 'captured') {
+			// stop camera and reset
+			if (stream) {
+				stream.getTracks().forEach(t => t.stop());
+				stream = null;
+			}
+			video.srcObject = null;
+			video.style.display = 'none';
+			placeholder.style.display = 'block';
+			preview.style.display = 'none';
+			canvas.style.display = 'none';
+			cameraState = 'stopped';
+			actionBtn.textContent = 'Start Camera';
+			return;
+		}
+	}
+
+	// Combined camera button handler
+	actionBtn.addEventListener('click', cameraAction);
+
+	// Make the entire camera card clickable
+	if (cameraCard) {
+		cameraCard.addEventListener('click', (e) => {
+			// Prevent triggering if clicking on the button itself to avoid double execution
+			if (e.target === actionBtn) return;
+			cameraAction();
+		});
+	}
+</script>
+{% endblock %}

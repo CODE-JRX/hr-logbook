@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, get_flashed_messages
 from db import get_db
 from functools import wraps
-from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials
+from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials, get_admin_by_id, update_admin_password
 from models.client_model import *
 from models.client_model import search_clients
 from models.face_embedding_model import add_face_embedding, find_best_match
+from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
 from models.csm_form_model import insert_csm_form, get_csm_forms_filtered
 from models.client_model import get_departments
@@ -13,9 +14,11 @@ from models.client_model import get_client_count
 import os
 import base64
 import re
+import io
 import face_recognition
 import numpy as np
 from datetime import datetime
+from bson.objectid import ObjectId
 
 client_bp = Blueprint("client", __name__)
 
@@ -263,6 +266,33 @@ def client_log_report():
     limit = request.args.get('limit', '25')
 
     logs = get_logs(purpose=purpose, department=department, start_date=start_date, end_date=end_date, limit=limit)
+    
+    # Check if this is an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        from flask import render_template_string
+        # Render only the table body rows
+        html = render_template_string('''
+            {% for l in logs %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ l.full_name or '' }}</td>
+              <td>{{ l.gender or '' }}</td>
+              <td>{{ l.age or '' }}</td>
+              <td>{{ l.department or '' }}</td>
+              <td>{{ l.purpose or '' }}</td>
+              <td>{{ l.additional_info or '' }}</td>
+              <td>{{ l.time_in }}</td>
+              <td>{{ l.time_out or '' }}</td>
+            </tr>
+            {% endfor %}
+            {% if not logs %}
+            <tr>
+              <td colspan="9" class="text-center">No records found</td>
+            </tr>
+            {% endif %}
+        ''', logs=logs)
+        return jsonify({'html': html})
+
     departments = get_departments()
     purposes = ["Receive Document/s Requested", "Submit Document/s", "Request Form/s", "Process Appointment", "Inquire", "OTHERS"]
     return render_template('client_log_report.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date, 'limit': limit}, departments=departments, purposes=purposes)
@@ -310,24 +340,11 @@ def csm_report():
                 q_lower = q.lower()
                 csm_forms = [f for f in csm_forms if any(q_lower in str(f.get(field, '')).lower() for field in ['control_no', 'date', 'client_type', 'sex', 'age', 'region_of_residence', 'email', 'service_availed'])]
 
-            # Render only the table rows
-            from flask import render_template_string
-            html = render_template_string('''
-            {% for form in csm_forms %}
-            <tr>
-                <td><strong>{{ form.control_no }}</strong></td>
-                <td>{{ form.date }}</td>
-                <td>{{ form.client_type or '—' }}</td>
-                <td>{{ form.sex or '—' }}</td>
-                <td>{{ form.age or '—' }}</td>
-                <td>{{ form.region_of_residence or '—' }}</td>
-                <td>{{ form.email or '—' }}</td>
-                <td style="font-size: 12px;">{{ form.service_availed or '—' }}</td>
-            </tr>
-            {% endfor %}
-            ''', csm_forms=csm_forms)
+            # Render both partials
+            html = render_template('partials/csm_report_rows.html', csm_forms=csm_forms)
+            print_html = render_template('partials/csm_report_print_forms.html', csm_forms=csm_forms)
 
-            return jsonify({'html': html})
+            return jsonify({'html': html, 'print_html': print_html})
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
@@ -481,9 +498,10 @@ def admin_signup():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm = request.form.get('confirm_password') or request.form.get('confirm')
+        photo_data = request.form.get('photo_data')
 
-        if not (first_name and last_name and email and password):
-            flash('All fields are required')
+        if not (first_name and last_name and email and password and photo_data):
+            flash('All fields are required, including photo')
             return redirect(url_for('client.admin_signup'))
 
         if password != confirm:
@@ -494,13 +512,45 @@ def admin_signup():
             flash('An account with that email already exists')
             return redirect(url_for('client.admin_signup'))
 
+        # Process photo and compute embedding
+        embedding = None
         try:
-            add_admin(first_name, last_name, email, password)
-            flash('Account created. Please sign in.')
-            return redirect(url_for('client.admin_login'))
+            # Extract base64 payload
+            m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
+            if m:
+                img_b64 = m.group(2)
+            else:
+                # fallback if data URL prefix missing
+                img_b64 = photo_data.split(",", 1)[1] if "," in photo_data else photo_data
+
+            image_bytes = base64.b64decode(img_b64)
+
+            # Create admin first to get ID for file name
+            admin_id = add_admin(first_name, last_name, email, password)
+
+            # Save image file
+            admins_dir = os.path.join(os.getcwd(), "Admins")
+            os.makedirs(admins_dir, exist_ok=True)
+            file_path = os.path.join(admins_dir, f"{admin_id}.jpg")
+            with open(file_path, "wb") as f:
+                f.write(image_bytes)
+
+            # Compute face encoding
+            img = face_recognition.load_image_file(file_path)
+            encodings = face_recognition.face_encodings(img)
+            if encodings:
+                embedding = list(encodings[0])
+                # Update admin with embedding
+                db = get_db()
+                db.admins.update_one({"_id": ObjectId(admin_id)}, {"$set": {"face_embedding": embedding}})
+            else:
+                # No face found; optional: remove file or keep for debug
+                flash("No face detected in the uploaded photo; embedding not saved.")
         except Exception as e:
-            flash('Failed to create account: ' + str(e))
-            return redirect(url_for('client.admin_signup'))
+            flash(f"Failed to process photo: {e}")
+
+        flash('Account created. Please sign in.')
+        return redirect(url_for('client.admin_login'))
 
     return render_template('admin/admin_signup.html')
 
@@ -518,9 +568,50 @@ def admin_login():
             return redirect(url_for('client.admin_dashboard'))
         else:
             flash('Invalid credentials')
-            return redirect(url_for('client.admin_login'))
+            return redirect(url_for('client.admin_login', type='password'))
 
-    return render_template('admin/login.html')
+    # If login type is password, show the regular login form
+    if request.args.get('type') == 'password':
+        return render_template('admin/login.html')
+    
+    # Default to face login
+    return render_template('admin/face_login.html')
+
+
+@client_bp.route('/admin/face_login', methods=['POST'])
+def admin_face_login():
+    photo_data = request.form.get('photo_data')
+    if not photo_data:
+        return jsonify({'ok': False, 'error': 'No photo_data provided'}), 400
+
+    try:
+        # Extract base64
+        m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
+        if m:
+            img_b64 = m.group(2)
+        else:
+            img_b64 = photo_data.split(',', 1)[1] if ',' in photo_data else photo_data
+        image_bytes = base64.b64decode(img_b64)
+
+        # Load image into face_recognition
+        img = face_recognition.load_image_file(io.BytesIO(image_bytes))
+        encodings = face_recognition.face_encodings(img)
+        if not encodings:
+            return jsonify({'ok': False, 'error': 'No face detected'}), 200
+
+        encoding = list(encodings[0])
+        admin_id, distance = find_best_admin_match(encoding)
+        if admin_id:
+            # Get admin details
+            db = get_db()
+            admin = db.admins.find_one({"_id": ObjectId(admin_id)})
+            if admin:
+                session['admin_id'] = admin_id
+                session['admin_email'] = admin.get('email')
+                return jsonify({'ok': True}), 200
+        return jsonify({'ok': False, 'error': 'Face not recognized'}), 200
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
 
 
 @client_bp.route('/admin/logout')
@@ -529,6 +620,45 @@ def admin_logout():
     session.pop('admin_email', None)
     flash('Signed out')
     return render_template('admin/logout.html')
+
+@client_bp.route('/admin/profile')
+@admin_required
+def admin_profile():
+    admin_id = session.get('admin_id')
+    admin = get_admin_by_id(admin_id)
+    if not admin:
+        flash('Admin not found')
+        return redirect(url_for('client.admin_dashboard'))
+    return render_template('admin/admin_profile.html', admin=admin)
+
+@client_bp.route('/admin/change-password', methods=['POST'])
+@admin_required
+def change_password():
+    admin_id = session.get('admin_id')
+    old_password = request.form.get('old_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+
+    if not (old_password and new_password and confirm_password):
+        flash('All password fields are required')
+        return redirect(url_for('client.admin_profile'))
+
+    if new_password != confirm_password:
+        flash('New passwords do not match')
+        return redirect(url_for('client.admin_profile'))
+
+    admin = get_admin_by_id(admin_id)
+    from werkzeug.security import check_password_hash
+    if not check_password_hash(admin.get('password_hash', ''), old_password):
+        flash('Incorrect old password')
+        return redirect(url_for('client.admin_profile'))
+
+    if update_admin_password(admin_id, new_password):
+        flash('Password updated successfully')
+    else:
+        flash('Failed to update password')
+    
+    return redirect(url_for('client.admin_profile'))
 
 
 @client_bp.route('/identify', methods=['POST'])

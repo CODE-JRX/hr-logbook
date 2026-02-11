@@ -2,19 +2,30 @@
 {% block title %}Admin Dashboard — HR Logbook{% endblock %}
 
 {% block head_extra %}
-<style>.card { margin-bottom: 1rem }</style>
+<style>
+  .card {
+    margin-bottom: 1rem
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-  <div class="container-fluid mt-2">
-    <div class="card shadow-sm p-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Admin Dashboard</h3>
-        <div>
-          <a class="btn btn-outline-secondary btn-sm" href="/admin/logout">Logout</a>
-        </div>
+<div class="container-fluid mt-2">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h5>
+      <div>
+        <a class="btn btn-primary btn-sm d-flex align-items-center" href="/admin/signup">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24" class="bi bi-plus" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14" />
+          </svg>
+          <span class="ms-2 d-none d-md-inline">Add Admin</span>
+        </a>
       </div>
+    </div>
 
+    <div class="card-body">
       <div class="row">
         <div class="col-md-3">
           <a href="{{ url_for('client.client_data') }}" class="text-decoration-none">
@@ -54,34 +65,35 @@
       </div>
     </div>
   </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-  <!-- Load Chart.js offline -->
-  <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+<!-- Load Chart.js offline -->
+<script src="{{ url_for('static', filename='js/chart.js') }}"></script>
 
-  <script>
-  async function loadChartData(days=14){
+<script>
+  async function loadChartData(days = 14) {
     const res = await fetch('/admin/chart_data?days=' + days);
     const data = await res.json();
     return data;
   }
 
-  function buildLineChart(ctx, labels, data){
+  function buildLineChart(ctx, labels, data) {
     return new Chart(ctx, {
       type: 'line',
-      data: { labels, datasets: [{ label: 'Entries', data, fill:false, borderColor:'#0d6efd', tension:0.2 }]},
-      options: { responsive:true }
+      data: { labels, datasets: [{ label: 'Entries', data, fill: false, borderColor: '#0d6efd', tension: 0.2 }] },
+      options: { responsive: true }
     });
   }
 
 
 
-  function buildBarChart(ctx, labels, data){
+  function buildBarChart(ctx, labels, data) {
     return new Chart(ctx, {
       type: 'bar',
-      data: { labels, datasets: [{ label:'Count', data, backgroundColor:'#198754' }]},
-      options: { responsive:true }
+      data: { labels, datasets: [{ label: 'Count', data, backgroundColor: '#198754' }] },
+      options: { responsive: true }
     });
   }
 
@@ -97,17 +109,17 @@
   waitForChartJS(async () => {
     const d = await loadChartData(14);
     // by_day -> list of {day, cnt}
-    const days = d.by_day.map(r=> r.day);
-    const dayCounts = d.by_day.map(r=>r.cnt);
+    const days = d.by_day.map(r => r.day);
+    const dayCounts = d.by_day.map(r => r.cnt);
     const ctxA = document.getElementById('chartActivity').getContext('2d');
     buildLineChart(ctxA, days, dayCounts);
 
 
 
-    const pLabels = d.purpose.map(r=>r.purpose);
-    const pCounts = d.purpose.map(r=>r.cnt);
+    const pLabels = d.purpose.map(r => r.purpose);
+    const pCounts = d.purpose.map(r => r.cnt);
     const ctxP = document.getElementById('chartPurpose').getContext('2d');
     buildBarChart(ctxP, pLabels, pCounts);
   });
-  </script>
+</script>
 {% endblock %}

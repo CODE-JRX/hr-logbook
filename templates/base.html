@@ -55,17 +55,28 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" id="reportsDropdown" data-bs-toggle="dropdown"
               aria-expanded="false"><i class="fas fa-chart-line"></i>Reports</a>
             <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="reportsDropdown">
-              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list" style="margin-right: 5px;"></i>Log Report</a>
+              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list"
+                    style="margin-right: 5px;"></i>Log Report</a>
               </li>
-              <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature" style="margin-right: 5px;"></i>Satisfactory
+              <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature"
+                    style="margin-right: 5px;"></i>Satisfactory
                   Report</a></li>
             </ul>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/admin/dashboard"><i class="fas fa-user-cog"></i>Admin</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/admin/logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" id="adminDropdown" data-bs-toggle="dropdown"
+              aria-expanded="false"><i class="fas fa-user-cog"></i>Admin</a>
+            <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu" aria-labelledby="adminDropdown">
+              <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt"
+                    style="margin-right: 5px;"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user-circle"
+                    style="margin-right: 5px;"></i>Profile</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item text-danger" href="/admin/logout"><i class="fas fa-sign-out-alt"
+                    style="margin-right: 5px;"></i>Logout</a></li>
+            </ul>
           </li>
           <li class="nav-item">
             <button id="theme-toggle" class="btn btn-link nav-link" aria-label="Toggle theme">
@@ -100,6 +111,18 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <main class="container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="mt-3">
+      {% for message in messages %}
+      <div class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
   </main>
 

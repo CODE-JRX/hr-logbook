@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, get_flashed_messages
 from db import get_db
 from functools import wraps
-from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials
+from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials, get_admin_by_id, update_admin_password
 from models.client_model import *
 from models.client_model import search_clients
 from models.face_embedding_model import add_face_embedding, find_best_match
@@ -620,6 +620,45 @@ def admin_logout():
     session.pop('admin_email', None)
     flash('Signed out')
     return render_template('admin/logout.html')
+
+@client_bp.route('/admin/profile')
+@admin_required
+def admin_profile():
+    admin_id = session.get('admin_id')
+    admin = get_admin_by_id(admin_id)
+    if not admin:
+        flash('Admin not found')
+        return redirect(url_for('client.admin_dashboard'))
+    return render_template('admin/admin_profile.html', admin=admin)
+
+@client_bp.route('/admin/change-password', methods=['POST'])
+@admin_required
+def change_password():
+    admin_id = session.get('admin_id')
+    old_password = request.form.get('old_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+
+    if not (old_password and new_password and confirm_password):
+        flash('All password fields are required')
+        return redirect(url_for('client.admin_profile'))
+
+    if new_password != confirm_password:
+        flash('New passwords do not match')
+        return redirect(url_for('client.admin_profile'))
+
+    admin = get_admin_by_id(admin_id)
+    from werkzeug.security import check_password_hash
+    if not check_password_hash(admin.get('password_hash', ''), old_password):
+        flash('Incorrect old password')
+        return redirect(url_for('client.admin_profile'))
+
+    if update_admin_password(admin_id, new_password):
+        flash('Password updated successfully')
+    else:
+        flash('Failed to update password')
+    
+    return redirect(url_for('client.admin_profile'))
 
 
 @client_bp.route('/identify', methods=['POST'])

@@ -2,42 +2,42 @@
 {% block title %}Admin Login — HR Logbook{% endblock %}
 
 {% block content %}
-	<div class="card shadow-sm mx-auto" style="max-width:420px;">
-		<div class="card-body">
-			<h4 class="card-title mb-3">Admin Login</h4>
+<div class="card shadow-sm mx-auto" style="max-width:420px;">
+	<div class="card-body">
+		<h4 class="card-title mb-3">Admin Login</h4>
 
-			
 
-			<form method="post" action="/admin/login">
-				<div class="mb-3">
-					<label for="email" class="form-label">Email</label>
-					<input type="email" class="form-control" id="email" name="email" required>
+
+		<form method="post" action="/admin/login">
+			<div class="mb-3">
+				<label for="email" class="form-label">Email</label>
+				<input type="email" class="form-control" id="email" name="email" required>
+			</div>
+			<div class="mb-3">
+				<label for="password" class="form-label">Password</label>
+				<div class="input-group">
+					<input type="password" class="form-control" id="password" name="password" required>
+					<button class="btn btn-outline-secondary" type="button" id="togglePwd">Show</button>
 				</div>
-				<div class="mb-3">
-					<label for="password" class="form-label">Password</label>
-					<div class="input-group">
-						<input type="password" class="form-control" id="password" name="password" required>
-						<button class="btn btn-outline-secondary" type="button" id="togglePwd">Show</button>
-					</div>
-				</div>
+			</div>
 
-				<div class="d-grid gap-2">
-					<button class="btn btn-primary" type="submit">Sign in</button>
-				</div>
-			</form>
+			<div class="d-grid gap-2">
+				<button class="btn btn-primary" type="submit">Sign in</button>
+			</div>
+		</form>
 
-			<hr>
-			<p class="small mb-0">No account? <a href="/admin/signup">Create one</a></p>
-		</div>
+		<hr>
+		<p class="small mb-0 text-center"><a href="/admin/face_login">Face Login</a></p>
 	</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-	document.getElementById('togglePwd').addEventListener('click', function(){
+	document.getElementById('togglePwd').addEventListener('click', function () {
 		const pwd = document.getElementById('password');
-		if (pwd.type === 'password') { pwd.type = 'text'; this.textContent='Hide'; }
-		else { pwd.type = 'password'; this.textContent='Show'; }
+		if (pwd.type === 'password') { pwd.type = 'text'; this.textContent = 'Hide'; }
+		else { pwd.type = 'password'; this.textContent = 'Show'; }
 	});
 </script>
 {% endblock %}

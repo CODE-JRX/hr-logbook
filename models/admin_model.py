@@ -40,6 +40,31 @@ def verify_admin_credentials(email, password):
         return admin
     return None
 
+
+def get_admin_by_id(admin_id):
+    from bson.objectid import ObjectId
+    db = get_db()
+    try:
+        admin = db.admins.find_one({"_id": ObjectId(admin_id)})
+        if admin:
+            admin['id'] = str(admin['_id'])
+        return admin
+    except:
+        return None
+
+def update_admin_password(admin_id, new_password):
+    from bson.objectid import ObjectId
+    db = get_db()
+    ph = generate_password_hash(new_password)
+    try:
+        result = db.admins.update_one(
+            {"_id": ObjectId(admin_id)},
+            {"$set": {"password_hash": ph, "updated_at": datetime.now()}}
+        )
+        return result.modified_count > 0
+    except:
+        return False
+
 def find_best_admin_match(embedding_list, threshold=0.6):
     """Find the closest stored admin face embedding to the given embedding_list."""
     db = get_db()
