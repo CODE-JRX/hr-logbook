@@ -266,6 +266,33 @@ def client_log_report():
     limit = request.args.get('limit', '25')
 
     logs = get_logs(purpose=purpose, department=department, start_date=start_date, end_date=end_date, limit=limit)
+    
+    # Check if this is an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        from flask import render_template_string
+        # Render only the table body rows
+        html = render_template_string('''
+            {% for l in logs %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ l.full_name or '' }}</td>
+              <td>{{ l.gender or '' }}</td>
+              <td>{{ l.age or '' }}</td>
+              <td>{{ l.department or '' }}</td>
+              <td>{{ l.purpose or '' }}</td>
+              <td>{{ l.additional_info or '' }}</td>
+              <td>{{ l.time_in }}</td>
+              <td>{{ l.time_out or '' }}</td>
+            </tr>
+            {% endfor %}
+            {% if not logs %}
+            <tr>
+              <td colspan="9" class="text-center">No records found</td>
+            </tr>
+            {% endif %}
+        ''', logs=logs)
+        return jsonify({'html': html})
+
     departments = get_departments()
     purposes = ["Receive Document/s Requested", "Submit Document/s", "Request Form/s", "Process Appointment", "Inquire", "OTHERS"]
     return render_template('client_log_report.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date, 'limit': limit}, departments=departments, purposes=purposes)
@@ -313,24 +340,11 @@ def csm_report():
                 q_lower = q.lower()
                 csm_forms = [f for f in csm_forms if any(q_lower in str(f.get(field, '')).lower() for field in ['control_no', 'date', 'client_type', 'sex', 'age', 'region_of_residence', 'email', 'service_availed'])]
 
-            # Render only the table rows
-            from flask import render_template_string
-            html = render_template_string('''
-            {% for form in csm_forms %}
-            <tr>
-                <td><strong>{{ form.control_no }}</strong></td>
-                <td>{{ form.date }}</td>
-                <td>{{ form.client_type or '—' }}</td>
-                <td>{{ form.sex or '—' }}</td>
-                <td>{{ form.age or '—' }}</td>
-                <td>{{ form.region_of_residence or '—' }}</td>
-                <td>{{ form.email or '—' }}</td>
-                <td style="font-size: 12px;">{{ form.service_availed or '—' }}</td>
-            </tr>
-            {% endfor %}
-            ''', csm_forms=csm_forms)
+            # Render both partials
+            html = render_template('partials/csm_report_rows.html', csm_forms=csm_forms)
+            print_html = render_template('partials/csm_report_print_forms.html', csm_forms=csm_forms)
 
-            return jsonify({'html': html})
+            return jsonify({'html': html, 'print_html': print_html})
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 

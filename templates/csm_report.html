@@ -21,8 +21,15 @@
     }
 
     /* Hide elements when printing */
-    .no-print { display: block; }
-    @media print { .no-print { display: none !important; } }
+    .no-print {
+        display: block;
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+    }
 
     /* Filter section styling - uses card background */
     .filter-section {
@@ -244,7 +251,8 @@
     }
 
     /* Header and cells: visible borders and compact padding like client_log_report */
-    .results-table th, .results-table td {
+    .results-table th,
+    .results-table td {
         padding: 5px;
         border: 1px solid var(--border-color);
         text-align: center;
@@ -263,7 +271,7 @@
         transition: background-color 0.2s ease;
     }
 
-    .results-table tbody tr:nth-child(even) {testi
+    .results-table tbody tr:nth-child(even) {
         background-color: rgba(0, 0, 0, 0.02);
     }
 
@@ -540,21 +548,40 @@
             font-size: 11px;
             min-width: 1200px;
         }
-        .results-table th, .results-table td {
+
+        .results-table th,
+        .results-table td {
             padding: 6px;
         }
+
         .results-card {
             overflow-x: auto;
         }
-        .filter-form input, .filter-form select {
+
+        .filter-form input,
+        .filter-form select {
             font-size: 14px;
         }
 
         /* Align search + rows-per-page to client_log_report proportions */
-        .row.g-3.align-items-end.no-print { gap: 12px; }
-        .col-md-6 { width: 100%; flex: 0 0 100%; max-width: 100%; }
-        #searchInput { width: 100%; }
-        .form-control, .form-select { font-size: 14px; }
+        .row.g-3.align-items-end.no-print {
+            gap: 12px;
+        }
+
+        .col-md-6 {
+            width: 100%;
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        #searchInput {
+            width: 100%;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 14px;
+        }
     }
 
     /* ===== PRINT STYLES ===== */
@@ -763,90 +790,95 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-filter"></i> Filter CSM Records</h5>
         <div class="d-flex gap-2 no-print" role="group" aria-label="actions">
-            <button class="btn btn-sm btn-outline-success" type="button" onclick="window.print()"><i class="fas fa-print"></i> <span class="d-none d-md-inline">Print</span></button>
-            <a class="btn btn-sm btn-outline-primary" href="/csm-report?export=csv"><i class="fas fa-download"></i> <span class="d-none d-md-inline">Export CSV</span></a>
-            <a class="btn btn-sm btn-outline-secondary" href="/csm-report"><i class="fas fa-times"></i> <span class="d-none d-md-inline">Clear</span></a>
+            <button class="btn btn-sm btn-outline-success" type="button" onclick="window.print()"><i
+                    class="fas fa-print"></i> <span class="d-none d-md-inline">Print</span></button>
+            <a class="btn btn-sm btn-outline-primary" href="/csm-report?export=csv"><i class="fas fa-download"></i>
+                <span class="d-none d-md-inline">Export CSV</span></a>
+            <a class="btn btn-sm btn-outline-secondary" href="/csm-report"><i class="fas fa-times"></i> <span
+                    class="d-none d-md-inline">Clear</span></a>
         </div>
     </div>
 
     <div>
         <div class="filter-section screen-view">
             <form method="get" action="/csm-report" class="filter-form" id="filter-form" data-no-ajax="true">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="start_date"><i class="fas fa-calendar-alt"></i> Start Date:</label>
-                    <input type="date" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="start_date"><i class="fas fa-calendar-alt"></i> Start Date:</label>
+                        <input type="date" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
+                    </div>
+                    <div class="filter-group">
+                        <label for="end_date"><i class="fas fa-calendar-alt"></i> End Date:</label>
+                        <input type="date" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
+                    </div>
+                    <div class="filter-group">
+                        <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
+                        <select id="gender" name="gender">
+                            <option value="">All</option>
+                            <option value="Male" {% if filters.gender=='Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if filters.gender=='Female' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="region"><i class="fas fa-map-marker-alt"></i> Region:</label>
+                        <input type="text" id="region" name="region" placeholder="Enter region"
+                            value="{{ filters.region or '' }}">
+                    </div>
+                    <div class="filter-group">
+                        <label for="age_min"><i class="fas fa-birthday-cake"></i> Age Min:</label>
+                        <input type="number" id="age_min" name="age_min" min="0" value="{{ filters.age_min or '' }}">
+                    </div>
+                    <div class="filter-group">
+                        <label for="age_max"><i class="fas fa-birthday-cake"></i> Age Max:</label>
+                        <input type="number" id="age_max" name="age_max" min="0" value="{{ filters.age_max or '' }}">
+                    </div>
+                    <!-- other filter groups above remain unchanged -->
+                    <div style="flex: 1 1 100%;"></div>
+                    <div class="filter-group" style="min-width:220px; margin-left: auto;">
+                        <label for="service"><i class="fas fa-concierge-bell"></i> Service:</label>
+                        <select id="service" name="service"
+                            style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                            <option value="">All Services</option>
+                            {% for svc in services %}
+                            <option value="{{ svc }}" {% if filters.service==svc %}selected{% endif %}>{{ svc }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!-- Filter button removed: filters now apply on input/select changes -->
                 </div>
-                <div class="filter-group">
-                    <label for="end_date"><i class="fas fa-calendar-alt"></i> End Date:</label>
-                    <input type="date" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
-                </div>
-                <div class="filter-group">
-                    <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
-                    <select id="gender" name="gender">
-                        <option value="">All</option>
-                        <option value="Male" {% if filters.gender=='Male' %}selected{% endif %}>Male</option>
-                        <option value="Female" {% if filters.gender=='Female' %}selected{% endif %}>Female</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="region"><i class="fas fa-map-marker-alt"></i> Region:</label>
-                    <input type="text" id="region" name="region" placeholder="Enter region"
-                        value="{{ filters.region or '' }}">
-                </div>
-                <div class="filter-group">
-                    <label for="age_min"><i class="fas fa-birthday-cake"></i> Age Min:</label>
-                    <input type="number" id="age_min" name="age_min" min="0" value="{{ filters.age_min or '' }}">
-                </div>
-                <div class="filter-group">
-                    <label for="age_max"><i class="fas fa-birthday-cake"></i> Age Max:</label>
-                    <input type="number" id="age_max" name="age_max" min="0" value="{{ filters.age_max or '' }}">
-                </div>
-                <!-- other filter groups above remain unchanged -->
-                <div style="flex: 1 1 100%;"></div>
-                <div class="filter-group" style="min-width:220px; margin-left: auto;">
-                    <label for="service"><i class="fas fa-concierge-bell"></i> Service:</label>
-                    <select id="service" name="service"
-                        style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                        <option value="">All Services</option>
-                        {% for svc in services %}
-                        <option value="{{ svc }}" {% if filters.service==svc %}selected{% endif %}>{{ svc }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Filter button removed: filters now apply on input/select changes -->
-            </div>
             </form>
         </div>
-        </div>
-        <div class="card-body border-bottom">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-6 no-print">
-                    <label for="searchInput" class="form-label"><i class="fas fa-search"></i> Search</label>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by any column">
-                </div>
-                <div class="col-md-6 no-print">
-                    <label for="limit" class="form-label"><i class="fas fa-list"></i> Rows per page</label>
-                    <form method="get" action="/csm-report" style="display: inline-flex; align-items: center; gap: 8px; width: 100%;">
-                        <select id="limit" name="limit" class="form-select" onchange="this.form.submit()">
-                            <option value="25" {% if filters.limit == '25' %}selected{% endif %}>25</option>
-                            <option value="50" {% if filters.limit == '50' %}selected{% endif %}>50</option>
-                            <option value="100" {% if filters.limit == '100' %}selected{% endif %}>100</option>
-                            <option value="all" {% if filters.limit == 'all' %}selected{% endif %}>All</option>
-                        </select>
-                        {% for key, value in filters.items() %}
-                            {% if key != 'limit' and value %}
-                                <input type="hidden" name="{{ key }}" value="{{ value }}">
-                            {% endif %}
-                        {% endfor %}
-                    </form>
-                </div>
+    </div>
+    <div class="card-body border-bottom">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6 no-print">
+                <label for="searchInput" class="form-label"><i class="fas fa-search"></i> Search</label>
+                <input type="text" class="form-control" id="searchInput" placeholder="Search by any column">
+            </div>
+            <div class="col-md-6 no-print">
+                <label for="limit" class="form-label"><i class="fas fa-list"></i> Rows per page</label>
+                <form method="get" action="/csm-report"
+                    style="display: inline-flex; align-items: center; gap: 8px; width: 100%;">
+                    <select id="limit" name="limit" class="form-select" onchange="this.form.submit()">
+                        <option value="25" {% if filters.limit=='25' %}selected{% endif %}>25</option>
+                        <option value="50" {% if filters.limit=='50' %}selected{% endif %}>50</option>
+                        <option value="100" {% if filters.limit=='100' %}selected{% endif %}>100</option>
+                        <option value="all" {% if filters.limit=='all' %}selected{% endif %}>All</option>
+                    </select>
+                    {% for key, value in filters.items() %}
+                    {% if key != 'limit' and value %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                    {% endfor %}
+                </form>
             </div>
         </div>
+    </div>
 
-        <div class="card-body p-0">
+    <div class="card-body p-0">
         <div class="screen-view">
-            {% if csm_forms %}
+
             <div class="results-card">
                 <div class="table-responsive">
                     <table id="csm-report" class="results-table">
@@ -863,536 +895,194 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for form in csm_forms %}
-                            <tr>
-                                <td><strong>{{ form.control_no }}</strong></td>
-                                <td>{{ form.date }}</td>
-                                <td>{{ form.client_type or '—' }}</td>
-                                <td>{{ form.sex or '—' }}</td>
-                                <td>{{ form.age or '—' }}</td>
-                                <td>{{ form.region_of_residence or '—' }}</td>
-                                <td>{{ form.email or '—' }}</td>
-                                <td style="font-size: 12px;">{{ form.service_availed or '—' }}</td>
-                            </tr>
-                            {% endfor %}
+                            {% include 'partials/csm_report_rows.html' %}
                         </tbody>
                     </table>
                 </div>
             </div>
-            {% else %}
-            <div class="results-card" style="text-align: center; color: #999; padding: 40px;">
-                <p>No CSM records found matching the filters.</p>
-            </div>
-            {% endif %}
+
         </div>
     </div>
 </div>
 
 <!-- Print View: Full CSM Forms -->
 <div class="print-forms">
-    {% for form in csm_forms %}
-    <div class="form-page">
-        <div class="container">
-            <div class="control-no">CONTROL NO. {{ form.control_no }}</div>
-
-            <div class="header">
-                <div class="institute-name">ABRA STATE INSTITUTE OF SCIENCES AND TECHNOLOGY</div>
-                <div class="campus">Main Campus, Lagangliang, Abra</div>
-                <div class="form-title">Client Satisfaction Measurement Form</div>
-                <div class="subtitle">HELP US SERVE YOU BETTER!!!</div>
-            </div>
-
-            <div class="intro">
-                This Client Satisfaction Measurement (CSM) tracks the customer experience of government offices.
-                Your feedback on your recently concluded transaction will help this office provide a better service.
-                Personal information shared will be kept confidential and you always have the option to not answer this
-                form.
-            </div>
-
-            <form>
-                <!-- Client Information Section -->
-                <div class="section">
-                    <div class="section-title">Human Resources Management Unit</div>
-
-                    <div class="form-row">
-                        <div class="form-field print-field-label">
-                            DATE: {{ form.date }}
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label class="required">CLIENT TYPE:</label>
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" id="citizen_{{ loop.index }}"
-                                        name="client_type_{{ loop.index }}" value="Citizen" {% if
-                                        form.client_type=='Citizen' %}checked{% endif %}>
-                                    <label for="citizen_{{ loop.index }}" style="margin-bottom: 0;">Citizen</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="business_{{ loop.index }}"
-                                        name="client_type_{{ loop.index }}" value="Business" {% if
-                                        form.client_type=='Business' %}checked{% endif %}>
-                                    <label for="business_{{ loop.index }}" style="margin-bottom: 0;">Business</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="employee_{{ loop.index }}"
-                                        name="client_type_{{ loop.index }}" value="Employee" {% if
-                                        form.client_type=='Employee' %}checked{% endif %}>
-                                    <label for="employee_{{ loop.index }}" style="margin-bottom: 0;">Employee or Another
-                                        Agency</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-field sex-field">
-                            <label class="required">SEX:</label>
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" id="male_{{ loop.index }}" name="sex_{{ loop.index }}"
-                                        value="Male" {% if form.sex and form.sex|lower=='male' %}checked{% endif %}>
-                                    <label for="male_{{ loop.index }}" style="margin-bottom: 0;">Male</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="female_{{ loop.index }}" name="sex_{{ loop.index }}"
-                                        value="Female" {% if form.sex and form.sex|lower=='female' %}checked{% endif %}>
-                                    <label for="female_{{ loop.index }}" style="margin-bottom: 0;">Female</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-field age-field">
-                            AGE: {{ form.age or '' }}
-                        </div>
-
-                        <div class="form-field region-field">
-                            REGION OF RESIDENCE: {{ form.region_of_residence or '' }}
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-field">
-                            Email Address (optional): {{ form.email or '' }}
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label class="required">SERVICE AVAILED:</label>
-                            <div class="checkbox-group">
-                                {% set service_list = form.service_availed.split(', ') if form.service_availed else []
-                                %}
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="service1_{{ loop.index }}"
-                                        name="service_availed_{{ loop.index }}" value="Releasing of Document Requested"
-                                        {% if 'Releasing of Document Requested' in service_list %}checked{% endif %}>
-                                    <label for="service1_{{ loop.index }}">Releasing of Document Requested</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="service2_{{ loop.index }}"
-                                        name="service_availed_{{ loop.index }}" value="Submission of Documents" {%
-                                        if 'Submission of Documents' in service_list %}checked{% endif %}>
-                                    <label for="service2_{{ loop.index }}">Submission of Documents</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="service3_{{ loop.index }}"
-                                        name="service_availed_{{ loop.index }}" value="Request of Forms" {%
-                                        if 'Request of Forms' in service_list %}checked{% endif %}>
-                                    <label for="service3_{{ loop.index }}">Request of Forms</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="service4_{{ loop.index }}"
-                                        name="service_availed_{{ loop.index }}" value="Processing of Appointments" {%
-                                        if 'Processing of Appointments' in service_list %}checked{% endif %}>
-                                    <label for="service4_{{ loop.index }}">Processing of Appointments</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="service5_{{ loop.index }}"
-                                        name="service_availed_{{ loop.index }}" value="Inquiry" {% if 'Inquiry' in
-                                        service_list %}checked{% endif %}>
-                                    <label for="service5_{{ loop.index }}">Inquiry</label>
-                                </div>
-                                <div class="checkbox-option">
-                                    <input type="checkbox" id="service6_{{ loop.index }}"
-                                        name="service_availed_{{ loop.index }}" value="Others" {% if 'Others' in
-                                        service_list or form.other_service %}checked{% endif %}>
-                                    <label for="service6_{{ loop.index }}">OTHERS</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Citizen's Charter Questions -->
-                    <div class="section">
-                        <div class="section-title">Citizen's Charter Questions</div>
-
-                        <div class="instructions">
-                            INSTRUCTIONS: Check mark (✓) your answer to the Citizen's Charter (CC) questions.
-                            The Citizen's Charter is an official document that reflects the services of a government
-                            agency/office
-                            including its requirements, fees, and processing times among others.
-                        </div>
-
-                        <div class="form-field">
-                            <label class="required">CC1. Which of the following best describes your awareness
-                                of a CC?</label>
-                            <div class="radio-group" style="flex-direction: column; gap: 8px;">
-                                <div class="radio-option">
-                                    <input type="radio" id="cc1_1_{{ loop.index }}"
-                                        name="awareness_of_cc_{{ loop.index }}" value="1" {% if form.awareness_of_cc==1
-                                        %}checked{% endif %}>
-                                    <label for="cc1_1_{{ loop.index }}">1. I know what a CC is and I saw this office's
-                                        CC.</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc1_2_{{ loop.index }}"
-                                        name="awareness_of_cc_{{ loop.index }}" value="2" {% if form.awareness_of_cc==2
-                                        %}checked{% endif %}>
-                                    <label for="cc1_2_{{ loop.index }}">2. I know what a CC is but I did NOT see this
-                                        office's CC.</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc1_3_{{ loop.index }}"
-                                        name="awareness_of_cc_{{ loop.index }}" value="3" {% if form.awareness_of_cc==3
-                                        %}checked{% endif %}>
-                                    <label for="cc1_3_{{ loop.index }}">3. I learned of the CC only when I saw this
-                                        office's CC.</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc1_4_{{ loop.index }}"
-                                        name="awareness_of_cc_{{ loop.index }}" value="4" {% if form.awareness_of_cc==4
-                                        %}checked{% endif %}>
-                                    <label for="cc1_4_{{ loop.index }}">4. I do not know what a CC is and I did not see
-                                        one in this office. (Answer 'N/A' on CC2 and CC3)</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-field">
-                            <label class="required">CC2. If aware of CC (answered 1-3 in CC1), would you say
-                                that the CC of this office was ...?</label>
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" id="cc2_1_{{ loop.index }}"
-                                        name="cc_of_this_office_was_{{ loop.index }}" value="1" {% if
-                                        form.cc_of_this_office_was==1 %}checked{% endif %}>
-                                    <label for="cc2_1_{{ loop.index }}">1. easy to see</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc2_2_{{ loop.index }}"
-                                        name="cc_of_this_office_was_{{ loop.index }}" value="2" {% if
-                                        form.cc_of_this_office_was==2 %}checked{% endif %}>
-                                    <label for="cc2_2_{{ loop.index }}">2. somewhat easy to see</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc2_3_{{ loop.index }}"
-                                        name="cc_of_this_office_was_{{ loop.index }}" value="3" {% if
-                                        form.cc_of_this_office_was==3 %}checked{% endif %}>
-                                    <label for="cc2_3_{{ loop.index }}">3. difficult to see</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc2_4_{{ loop.index }}"
-                                        name="cc_of_this_office_was_{{ loop.index }}" value="4" {% if
-                                        form.cc_of_this_office_was==4 %}checked{% endif %}>
-                                    <label for="cc2_4_{{ loop.index }}">4. not visible at all</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc2_5_{{ loop.index }}"
-                                        name="cc_of_this_office_was_{{ loop.index }}" value="5" {% if
-                                        form.cc_of_this_office_was==5 %}checked{% endif %}>
-                                    <label for="cc2_5_{{ loop.index }}">5. N/A</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-field">
-                            <label class="required">CC3. If aware of CC (answered codes 1-3 in CC1), how much
-                                did the CC help you in your transaction?</label>
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" id="cc3_1_{{ loop.index }}" name="cc_help_you_{{ loop.index }}"
-                                        value="1" {% if form.cc_help_you==1 %}checked{% endif %}>
-                                    <label for="cc3_1_{{ loop.index }}">1. helped very much</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc3_2_{{ loop.index }}" name="cc_help_you_{{ loop.index }}"
-                                        value="2" {% if form.cc_help_you==2 %}checked{% endif %}>
-                                    <label for="cc3_2_{{ loop.index }}">2. somewhat helped</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc3_3_{{ loop.index }}" name="cc_help_you_{{ loop.index }}"
-                                        value="3" {% if form.cc_help_you==3 %}checked{% endif %}>
-                                    <label for="cc3_3_{{ loop.index }}">3. did not help</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="cc3_4_{{ loop.index }}" name="cc_help_you_{{ loop.index }}"
-                                        value="4" {% if form.cc_help_you==4 %}checked{% endif %}>
-                                    <label for="cc3_4_{{ loop.index }}">4. N/A</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SQD Questions -->
-                    <div class="section">
-                        <div class="section-title">Service Quality Dimensions (SQD) Questions</div>
-
-                        <div class="instructions">
-                            INSTRUCTIONS: For SQD 0-8, please <strong>PUT A CHECK MARK (✓)</strong> on the column that
-                            best corresponds to your answer.
-                        </div>
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 40%;">Question</th>
-                                    <th class="checkbox-cell">Strongly Disagree</th>
-                                    <th class="checkbox-cell">Disagree</th>
-                                    <th class="checkbox-cell">Neither Agree or Disagree</th>
-                                    <th class="checkbox-cell">Agree</th>
-                                    <th class="checkbox-cell">Strongly Agree</th>
-                                    <th class="checkbox-cell">NOT Applicable</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% set sdq_labels = [
-                                'SQD 0. I am satisfied with the service that I availed.',
-                                'SQD 1. I spent a reasonable amount of time for my transaction.',
-                                'SQD 2. The office followed the transaction\'s requirements and steps based on the
-                                information provided.',
-                                'SQD 3. The steps (including payment) I needed to do for my transaction were easy and
-                                simple.',
-                                'SQD 4. I easily found information about my transaction from the office or its
-                                website.',
-                                'SQD 5. I paid a reasonable amount of fees for my transaction.',
-                                'SQD 6. I feel the office was fair to everyone, or "walang palakasan", during my
-                                transaction.',
-                                'SQD 7. I was treated courteously by the staff, and (if asked for help) the staff was
-                                helpful.',
-                                'SQD 8. I got what I needed from the government office, or (if denied) denial of request
-                                was sufficiently explained to me.'
-                                ] %}
-                                {% set sdq_values = [form.sdq0, form.sdq1, form.sdq2, form.sdq3, form.sdq4, form.sdq5,
-                                form.sdq6, form.sdq7, form.sdq8] %}
-
-                                {% for idx in range(sdq_labels|length) %}
-                                <tr>
-                                    <td class="sqd-question">{{ sdq_labels[idx] }}</td>
-                                    {% for val in range(1, 7) %}
-                                    <td class="checkbox-cell">
-                                        <input type="radio" name="sdq{{ idx }}_{{ loop.index }}" value="{{ val }}" {% if
-                                            sdq_values[idx]==val %}checked{% endif %}>
-                                    </td>
-                                    {% endfor %}
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Suggestions Section -->
-                    <div class="section">
-                        <div class="form-field">
-                            <label for="suggestions_{{ loop.index }}">Suggestions on how we can further improve our
-                                services (optional):</label>
-                            <textarea id="suggestions_{{ loop.index }}"
-                                name="suggestion">{{ form.suggestion or '' }}</textarea>
-                        </div>
-                    </div>
-
-                    <div class="footer-note">
-                        © 2026 HRMO Logbook
-                    </div>
-            </form>
-        </div>
-    </div>
-    {% endfor %}
+    {% include 'partials/csm_report_print_forms.html' %}
 </div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Unified JSON-based live filters for CSM report
-document.addEventListener('DOMContentLoaded', function(){
-    const searchInput = document.getElementById('searchInput');
-    const filterForm = document.getElementById('filter-form');
-    if (!filterForm) return;
+    // Unified JSON-based live filters for CSM report
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const filterForm = document.getElementById('filter-form');
+        if (!filterForm) return;
 
-    let debounceTimer = null;
-    function collectFilters(q){
-        const fd = new FormData(filterForm);
-        const obj = {};
-        for (const [k,v] of fd.entries()){
-            if (v !== null && String(v).trim() !== '') obj[k] = v;
+        let debounceTimer = null;
+        function collectFilters(q) {
+            const fd = new FormData(filterForm);
+            const obj = {};
+            for (const [k, v] of fd.entries()) {
+                if (v !== null && String(v).trim() !== '') obj[k] = v;
+            }
+            if (typeof q !== 'undefined') obj.q = q;
+            return obj;
         }
-        if (typeof q !== 'undefined') obj.q = q;
-        return obj;
-    }
 
-    function updateUrlFromFilters(obj){
-        const parts = [];
-        for (const k in obj){
-            if (obj[k] !== null && obj[k] !== undefined && String(obj[k]).length) parts.push(encodeURIComponent(k)+'='+encodeURIComponent(obj[k]));
+        function updateUrlFromFilters(obj) {
+            const parts = [];
+            for (const k in obj) {
+                if (obj[k] !== null && obj[k] !== undefined && String(obj[k]).length) parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]));
+            }
+            const qs = parts.join('&');
+            const base = window.location.pathname || '/csm-report';
+            const newUrl = qs ? (base + '?' + qs) : base;
+            history.replaceState({}, '', newUrl);
         }
-        const qs = parts.join('&');
-        const base = window.location.pathname || '/csm-report';
-        const newUrl = qs ? (base + '?' + qs) : base;
-        history.replaceState({}, '', newUrl);
-    }
 
-    function applyFilters(q){
-        const payload = collectFilters(q);
-        // send JSON to server and expect JSON { html: '...' }
-        $.ajax({
-            url: '/csm-report',
-            type: 'POST',
-            contentType: 'application/json',
-            dataType: 'json',
-            data: JSON.stringify(payload),
-            headers: {'X-Requested-With': 'XMLHttpRequest'},
-            success: function(data){
-                if (!data) return;
-                const html = data.html || data;
-                try{
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newCard = doc.querySelector('.results-card');
-                    if (newCard){
-                        const old = document.querySelector('.results-card');
-                        if (old) old.replaceWith(newCard);
-                        return;
+        function applyFilters(q) {
+            const payload = collectFilters(q);
+            // send JSON to server and expect JSON { html: '...' }
+            $.ajax({
+                url: '/csm-report',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(payload),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (data) {
+                    if (!data) return;
+
+                    // Update screen view table rows
+                    if (data.html) {
+                        const tbody = document.querySelector('#csm-report tbody');
+                        if (tbody) tbody.innerHTML = data.html;
                     }
-                    const tbody = document.querySelector('#csm-report tbody');
-                    if (tbody){
-                        // server may return only rows
-                        if (html.indexOf('<tr') > -1 && html.indexOf('<tbody') === -1) tbody.innerHTML = html;
-                        else {
-                            const newTbody = doc.querySelector('#csm-report tbody');
-                            if (newTbody) tbody.innerHTML = newTbody.innerHTML;
-                        }
+
+                    // Update print view forms
+                    if (data.print_html) {
+                        const printContainer = document.querySelector('.print-forms');
+                        if (printContainer) printContainer.innerHTML = data.print_html;
                     }
-                }catch(e){ console.error('Failed to apply filters', e); }
-            },
-            error: function(xhr, status, err){ console.warn('Filter request failed', status, err); }
+                },
+                error: function (xhr, status, err) { console.warn('Filter request failed', status, err); }
+            });
+
+            // update URL for bookmarking
+            updateUrlFromFilters(collectFilters(q));
+        }
+
+        function debouncedApply(q) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () { applyFilters(q); }, 300);
+        }
+
+        // wire inputs/selects inside filter form
+        const inputs = filterForm.querySelectorAll('input, select');
+        inputs.forEach(function (el) {
+            const ev = (el.tagName.toLowerCase() === 'select' || el.type === 'date' || el.type === 'number') ? 'change' : 'input';
+            el.addEventListener(ev, function () { debouncedApply(searchInput ? searchInput.value : undefined); });
         });
 
-        // update URL for bookmarking
-        updateUrlFromFilters(collectFilters(q));
-    }
-
-    function debouncedApply(q){
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(function(){ applyFilters(q); }, 300);
-    }
-
-    // wire inputs/selects inside filter form
-    const inputs = filterForm.querySelectorAll('input, select');
-    inputs.forEach(function(el){
-        const ev = (el.tagName.toLowerCase() === 'select' || el.type === 'date' || el.type === 'number') ? 'change' : 'input';
-        el.addEventListener(ev, function(){ debouncedApply(searchInput ? searchInput.value : undefined); });
+        // wire search box
+        if (searchInput) {
+            searchInput.addEventListener('input', function () { debouncedApply(this.value || ''); });
+        }
     });
-
-    // wire search box
-    if (searchInput){
-        searchInput.addEventListener('input', function(){ debouncedApply(this.value || ''); });
-    }
-});
 </script>
 
 <script>
-// Use jQuery AJAX to submit forms on this page without full page reloads.
-// - For GET responses: attempt to replace the `.results-card` area with returned HTML.
-// - For JSON responses: honor `{ "redirect": "/path" }` or `{ "message": "..." }`.
-// Skip forms with `data-no-ajax="true"` if needed.
-(function(){
-    if (typeof window.jQuery === 'undefined') return;
-    var $ = window.jQuery;
+    // Use jQuery AJAX to submit forms on this page without full page reloads.
+    // - For GET responses: attempt to replace the `.results-card` area with returned HTML.
+    // - For JSON responses: honor `{ "redirect": "/path" }` or `{ "message": "..." }`.
+    // Skip forms with `data-no-ajax="true"` if needed.
+    (function () {
+        if (typeof window.jQuery === 'undefined') return;
+        var $ = window.jQuery;
 
-    function replaceResultsCardFromHtml(html){
-        try{
-            var parsed = $('<div>').append($.parseHTML(html));
-            var newCard = parsed.find('.results-card').first();
-            if (newCard.length){
-                $('.results-card').replaceWith(newCard);
-                return true;
-            }
-        }catch(e){ }
-        return false;
-    }
+        function replaceResultsCardFromHtml(html) {
+            try {
+                var parsed = $('<div>').append($.parseHTML(html));
+                var newCard = parsed.find('.results-card').first();
+                if (newCard.length) {
+                    $('.results-card').replaceWith(newCard);
+                    return true;
+                }
+            } catch (e) { }
+            return false;
+        }
 
-    $(function(){
-        $('form').on('submit', function(e){
-            var $form = $(this);
-            if ($form.data('no-ajax')) return true;
-            e.preventDefault();
+        $(function () {
+            $('form').on('submit', function (e) {
+                var $form = $(this);
+                if ($form.data('no-ajax')) return true;
+                e.preventDefault();
 
-            var method = ($form.attr('method') || 'GET').toUpperCase();
-            var url = $form.attr('action') || window.location.href;
-            var isMultipart = ($form.attr('enctype')||'').toLowerCase() === 'multipart/form-data';
+                var method = ($form.attr('method') || 'GET').toUpperCase();
+                var url = $form.attr('action') || window.location.href;
+                var isMultipart = ($form.attr('enctype') || '').toLowerCase() === 'multipart/form-data';
 
-            var ajaxOptions = {url: url, type: method, headers: {'X-Requested-With':'XMLHttpRequest'}};
+                var ajaxOptions = { url: url, type: method, headers: { 'X-Requested-With': 'XMLHttpRequest' } };
 
-            if (method === 'GET' && !isMultipart) {
-                ajaxOptions.data = $form.serialize();
-            } else if (isMultipart) {
-                ajaxOptions.data = new FormData(this);
-                ajaxOptions.processData = false;
-                ajaxOptions.contentType = false;
-            } else {
-                ajaxOptions.data = $form.serialize();
-            }
-
-            $.ajax(ajaxOptions).done(function(resp, textStatus, xhr){
-                var ct = (xhr.getResponseHeader('Content-Type')||'').toLowerCase();
-
-                // JSON response handling
-                if (ct.indexOf('application/json') > -1 || (typeof resp === 'object' && resp !== null)){
-                    var data = (typeof resp === 'string') ? JSON.parse(resp) : resp;
-                    if (data.redirect) { window.location = data.redirect; return; }
-                    if (data.message) { alert(data.message); return; }
+                if (method === 'GET' && !isMultipart) {
+                    ajaxOptions.data = $form.serialize();
+                } else if (isMultipart) {
+                    ajaxOptions.data = new FormData(this);
+                    ajaxOptions.processData = false;
+                    ajaxOptions.contentType = false;
+                } else {
+                    ajaxOptions.data = $form.serialize();
                 }
 
-                // HTML response handling: try to replace .results-card
-                if (typeof resp === 'string'){
-                    if (!replaceResultsCardFromHtml(resp)){
-                        if (resp.indexOf('<html') > -1){
-                            document.open(); document.write(resp); document.close();
+                $.ajax(ajaxOptions).done(function (resp, textStatus, xhr) {
+                    var ct = (xhr.getResponseHeader('Content-Type') || '').toLowerCase();
+
+                    // JSON response handling
+                    if (ct.indexOf('application/json') > -1 || (typeof resp === 'object' && resp !== null)) {
+                        var data = (typeof resp === 'string') ? JSON.parse(resp) : resp;
+                        if (data.redirect) { window.location = data.redirect; return; }
+                        if (data.message) { alert(data.message); return; }
+                    }
+
+                    // HTML response handling: try to replace .results-card
+                    if (typeof resp === 'string') {
+                        if (!replaceResultsCardFromHtml(resp)) {
+                            if (resp.indexOf('<html') > -1) {
+                                document.open(); document.write(resp); document.close();
+                            } else {
+                                location.reload();
+                            }
                         } else {
-                            location.reload();
+                            // Update URL for GET forms so filters are reflected
+                            if (method === 'GET') {
+                                var base = url.split('?')[0];
+                                var serialized = $form.serialize();
+                                var newUrl = serialized ? (base + '?' + serialized) : base;
+                                history.replaceState({}, '', newUrl);
+                            }
                         }
                     } else {
-                        // Update URL for GET forms so filters are reflected
-                        if (method === 'GET'){
-                            var base = url.split('?')[0];
-                            var serialized = $form.serialize();
-                            var newUrl = serialized ? (base + '?' + serialized) : base;
-                            history.replaceState({}, '', newUrl);
-                        }
+                        location.reload();
                     }
-                } else {
-                    location.reload();
-                }
-            }).fail(function(xhr){
-                alert('Request failed: ' + (xhr.status ? xhr.status + ' ' + xhr.statusText : 'Network error'));
+                }).fail(function (xhr) {
+                    alert('Request failed: ' + (xhr.status ? xhr.status + ' ' + xhr.statusText : 'Network error'));
+                });
+
+                return false;
             });
 
-            return false;
+            // Ensure selects that call `this.form.submit()` still trigger AJAX handler
+            // but skip selects inside forms marked data-no-ajax
+            $('select').on('change', function () {
+                var $form = $(this).closest('form');
+                if ($form.length) {
+                    if ($form.data('no-ajax')) return;
+                    $form.trigger('submit');
+                }
+            });
         });
-
-        // Ensure selects that call `this.form.submit()` still trigger AJAX handler
-        // but skip selects inside forms marked data-no-ajax
-        $('select').on('change', function(){
-            var $form = $(this).closest('form');
-            if ($form.length){
-                if ($form.data('no-ajax')) return;
-                $form.trigger('submit');
-            }
-        });
-    });
-})();
+    })();
 </script>
 {% endblock %}
