@@ -2044,8 +2044,19 @@ textarea:disabled {
   .print-forms .form-field.region-field {
     flex: 1 1 auto !important;
   }
-}
 
+  /* Ensure theme colors don't leak into printed output: force neutral text and backgrounds */
+  .print-forms,
+  .print-forms * {
+    color: #000 !important;
+    background: transparent !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+  }
+
+}
 .required::after {
   content: " *";
   color: #d32f2f;

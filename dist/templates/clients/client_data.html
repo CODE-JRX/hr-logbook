@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block title %}Clients — HR Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+  .results-card {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    margin-bottom: 20px;
+  }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .results-table thead {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .results-table th,
+  .results-table td {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+  }
+
+  .results-table tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .results-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Ensure modal appears above navbar */
+  .modal {
+    z-index: 10000 !important;
+  }
+
+  .modal-backdrop {
+    z-index: 9999 !important;
+  }
+
+  /* Small screen adjustments for better table rendering */
+  @media (max-width: 768px) {
+    .results-table {
+      font-size: 11px;
+    }
+    .results-table th, .results-table td {
+      padding: 6px;
+    }
+    .results-card {
+      overflow-x: auto;
+    }
+    .card-header .btn {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+    .card-header .btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    .card-body .form-control, .card-body .form-select {
+      font-size: 14px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><i class="fas fa-users"></i> Client List</h5>
+    <div>
+      <a class="btn btn-primary d-flex align-items-center" href="{{ url_for('client.add') }}">
+        <!-- plus icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24" class="bi bi-plus" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14" />
+        </svg>
+        <span class="ms-2 d-none d-md-inline">Add Client</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Search and Filter Controls -->
+  <div class="card-body border-bottom">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-6">
+        <label for="search" class="form-label"><i class="fas fa-search"></i> Search</label>
+        <input type="text" class="form-control" id="search" value="{{ search }}"
+          placeholder="Search by name or ID">
+      </div>
+      <div class="col-md-6">
+        <label for="limit" class="form-label"><i class="fas fa-list"></i> Rows per page</label>
+        <select class="form-select" id="limit">
+          <option value="25" {% if limit=='25' %}selected{% endif %}>25</option>
+          <option value="50" {% if limit=='50' %}selected{% endif %}>50</option>
+          <option value="100" {% if limit=='100' %}selected{% endif %}>100</option>
+          <option value="all" {% if limit=='all' %}selected{% endif %}>All</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="results-card">
+      <div class="table-responsive">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Client Type</th>
+              <th>Full Name</th>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>Department</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clientTableBody">
+            {% for c in clients %}
+            <tr>
+              <td>{{ c.client_type or '' }}</td>
+              <td>{{ c.full_name }}</td>
+              <td>{{ c.gender or '' }}</td>
+              <td>{{ c.age or '' }}</td>
+              <td>{{ c.department }}</td>
+              <td>
+                <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center"
+                  href="{{ url_for('client.edit', id=c.id) }}" title="Edit">
+                  <i class="fa fa-edit me-1"></i>
+                  <span class="d-none d-md-inline">Edit</span>
+                </a>
+                <button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center" data-id="{{ c.id }}"
+                  data-name="{{ c.full_name }}" onclick="confirmDelete(this)" title="Delete">
+                  <i class="fa fa-trash me-1"></i>
+                  <span class="d-none d-md-inline">Delete</span>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+  var searchTimeout;
+
+  function updateTable() {
+    var search = $('#search').val();
+    var limit = $('#limit').val();
+
+    $.ajax({
+      url: '/clients_ajax',
+      method: 'GET',
+      data: {
+        search: search,
+        limit: limit
+      },
+      success: function(data) {
+        $('#clientTableBody').html(data);
+      },
+      error: function() {
+        console.error('Error updating table');
+      }
+    });
+  }
+
+  // Trigger search on input change with debounce
+  $('#search').on('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(updateTable, 300);
+  });
+
+  // Trigger search on limit change
+  $('#limit').on('change', function() {
+    updateTable();
+  });
+});
+</script>
+{% endblock %}

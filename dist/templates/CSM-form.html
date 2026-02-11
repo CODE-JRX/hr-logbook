@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Satisfaction Measurement Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            position: relative;
+            border-top: 5px solid #2c5aa0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .institute-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 5px;
+        }
+
+        .campus {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d32f2f;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #2c5aa0;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .control-no {
+            position: absolute;
+            top: 5px;
+            right: 30px;
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .intro {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #2c5aa0;
+            margin-bottom: 25px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-field {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+        }
+
+        .radio-option label,
+        .checkbox-option label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        .radio-option input,
+        .checkbox-option input {
+            margin-right: 8px;
+        }
+
+        .instructions {
+            background-color: #f0f7ff;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 14px;
+            border-left: 3px solid #2c5aa0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th {
+            background-color: #2c5aa0;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .sqd-question {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .checkbox-cell {
+            width: 16%;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            transform: scale(1.5);
+            margin-right: 5px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .footer-note {
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            margin-top: 30px;
+            font-style: italic;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn {
+            background-color: #2c5aa0;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background-color: #1e3d6f;
+        }
+
+        .reset-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .reset-btn:hover {
+            background-color: #ddd;
+        }
+
+        .required::after {
+            content: " *";
+            color: #d32f2f;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .control-no {
+                position: static;
+                margin-bottom: 15px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            th,
+            td {
+                padding: 8px 5px;
+                font-size: 13px;
+            }
+
+            .checkbox-cell {
+                width: 20%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="control-no">CONTROL NO. <span id="display_control_no">HR-S26-0001</span></div>
+
+        <div class="header">
+            <div class="institute-name">ABRA STATE INSTITUTE OF SCIENCES AND TECHNOLOGY</div>
+            <div class="campus">Main Campus, Lagangliang, Abra</div>
+            <div class="form-title">Client Satisfaction Measurement Form</div>
+            <div class="subtitle">HELP US SERVE YOU BETTER!!!</div>
+        </div>
+
+        <div class="intro">
+            This Client Satisfaction Measurement (CSM) tracks the customer experience of government offices.
+            Your feedback on your recently concluded transaction will help this office provide a better service.
+            Personal information shared will be kept confidential and you always have the option to not answer this
+            form.
+        </div>
+
+        <form id="csmForm" method="post" action="/CSM-form">
+            <!-- hidden control / agency fields -->
+            <input type="hidden" id="hidden_control_no" name="control_no" value="">
+            <input type="hidden" name="agency_visited" value="Human Resources Management Unit">
+            <!-- Client Information Section -->
+            <div class="section">
+                <div class="section-title">Human Resources Management Unit</div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="date" class="required">DATE:</label>
+                        <input type="text" id="date" name="date" placeholder="MM/DD/YYYY" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="required">CLIENT TYPE:</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="citizen" name="client_type" value="Citizen" required>
+                                <label for="citizen">Citizen</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="business" name="client_type" value="Business">
+                                <label for="business">Business</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="employee" name="client_type" value="Employee">
+                                <label for="employee">Employee or Another Agency</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="required">SEX:</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="male" name="sex" value="Male" required>
+                                <label for="male">Male</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="female" name="sex" value="Female">
+                                <label for="female">Female</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="age" class="required">AGE:</label>
+                        <input type="text" id="age" name="age" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="region" class="required">REGION OF RESIDENCE:</label>
+                        <input type="text" id="region" name="region_of_residence" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="email">Email Address (optional):</label>
+                        <input type="email" id="email" name="email">
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label class="required">SERVICE AVAILED:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="service1" name="service_availed"
+                                value="Releasing of Document Requested">
+                            <label for="service1">Releasing of Document Requested</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="service2" name="service_availed" value="Submission of Documents">
+                            <label for="service2">Submission of Documents</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="service3" name="service_availed" value="Request of Forms">
+                            <label for="service3">Request of Forms</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="service4" name="service_availed"
+                                value="Processing of Appointments">
+                            <label for="service4">Processing of Appointments</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="service5" name="service_availed" value="Inquiry">
+                            <label for="service5">Inquiry</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="service6" name="service_availed" value="Others">
+                            <label for="service6">OTHERS:</label>
+                            <input type="text" id="otherService" name="other_service" placeholder="Please specify"
+                                style="margin-left: 10px; width: 150px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Citizen's Charter Questions -->
+            <div class="section">
+                <div class="section-title">Citizen's Charter Questions</div>
+
+                <div class="instructions">
+                    INSTRUCTIONS: Check mark (✓) your answer to the Citizen's Charter (CC) questions.
+                    The Citizen's Charter is an official document that reflects the services of a government
+                    agency/office
+                    including its requirements, fees, and processing times among others.
+                </div>
+
+                <div class="form-field">
+                    <label class="required">CC1. Which of the following best describes your awareness of a
+                        CC?</label>
+                    <div class="radio-group" style="flex-direction: column; gap: 8px;">
+                        <div class="radio-option">
+                            <input type="radio" id="cc1-1" name="awareness_of_cc" value="1" required checked>
+                            <label for="cc1-1">1. I know what a CC is and I saw this office's CC.</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc1-2" name="awareness_of_cc" value="2">
+                            <label for="cc1-2">2. I know what a CC is but I did NOT see this office's CC.</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc1-3" name="awareness_of_cc" value="3">
+                            <label for="cc1-3">3. I learned of the CC only when I saw this office's CC.</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc1-4" name="awareness_of_cc" value="4">
+                            <label for="cc1-4">4. I do not know what a CC is and I did not see one in this office.
+                                (Answer 'N/A' on CC2 and CC3)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label class="required">CC2. If aware of CC (answered 1-3 in CC1), would you say that the
+                        CC of this office was ...?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="cc2-1" name="cc_of_this_office_was" value="1" required checked>
+                            <label for="cc2-1">1. easy to see</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc2-2" name="cc_of_this_office_was" value="2">
+                            <label for="cc2-2">2. somewhat easy to see</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc2-3" name="cc_of_this_office_was" value="3">
+                            <label for="cc2-3">3. difficult to see</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc2-4" name="cc_of_this_office_was" value="4">
+                            <label for="cc2-4">4. not visible at all</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc2-5" name="cc_of_this_office_was" value="5">
+                            <label for="cc2-5">5. N/A</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label class="required">CC3. If aware of CC (answered codes 1-3 in CC1), how much did the
+                        CC help you in your transaction?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="cc3-1" name="cc_help_you" value="1" required checked>
+                            <label for="cc3-1">1. helped very much</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc3-2" name="cc_help_you" value="2">
+                            <label for="cc3-2">2. somewhat helped</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc3-3" name="cc_help_you" value="3">
+                            <label for="cc3-3">3. did not help</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="cc3-4" name="cc_help_you" value="4">
+                            <label for="cc3-4">4. N/A</label>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- SQD Questions -->
+            <div class="section">
+                <div class="section-title">Service Quality Dimensions (SQD) Questions</div>
+
+                <div class="instructions">
+                    INSTRUCTIONS: For SQD 0-8, please <strong>PUT A CHECK MARK (✓)</strong> on the column that best
+                    corresponds to your answer.
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Question</th>
+                            <th class="checkbox-cell">Strongly Disagree</th>
+                            <th class="checkbox-cell">Disagree</th>
+                            <th class="checkbox-cell">Neither Agree or Disagree</th>
+                            <th class="checkbox-cell">Agree</th>
+                            <th class="checkbox-cell">Strongly Agree</th>
+                            <th class="checkbox-cell">NOT Applicable</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="sqd-question">SQD 0. I am satisfied with the service that I availed.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq0" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq0" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq0" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq0" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq0" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq0" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="sqd-question">SQD 1. I spent a reasonable amount of time for my transaction.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq1" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq1" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq1" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq1" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq1" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq1" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="sqd-question">SQD 2. The office followed the transaction's requirements and steps
+                                based on the information provided.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq2" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq2" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq2" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq2" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq2" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq2" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="sqd-question">SQD 3. The steps (including payment) I needed to do for my
+                                transaction were easy and simple.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq3" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq3" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq3" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq3" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq3" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq3" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="sqd-question">SQD 4. I easily found information about my transaction from the
+                                office or its website.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq4" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq4" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq4" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq4" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq4" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq4" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="sqd-question">SQD 5. I paid a reasonable amount of fees for my transaction.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq5" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq5" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq5" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq5" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq5" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq5" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="sqd-question">SQD 6. I feel the office was fair to everyone, or "walang
+                                palakasan", during my transaction.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq6" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq6" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq6" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq6" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq6" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq6" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="sqd-question">SQD 7. I was treated courteously by the staff, and (if asked for
+                                help) the staff was helpful.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq7" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq7" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq7" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq7" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq7" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq7" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="sqd-question">SQD 8. I got what I needed from the government office, or (if
+                                denied) denial of request was sufficiently explained to me.</td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq8" value="1" required></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq8" value="2"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq8" value="3"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq8" value="4"></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq8" value="5" checked></td>
+                            <td class="checkbox-cell"><input type="radio" name="sdq8" value="6"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Suggestions Section -->
+            <div class="section">
+                <div class="form-field">
+                    <label for="suggestions">Suggestions on how we can further improve our services (optional):</label>
+                    <textarea id="suggestions" name="suggestion"
+                        placeholder="Please provide your suggestions here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Form Buttons -->
+            <div class="form-buttons">
+                <button type="submit" class="submit-btn">Submit Form</button>
+                <button type="reset" class="reset-btn">Reset Form</button>
+            </div>
+
+            <div class="footer-note">
+                © 2026 HRMO Logbook
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Generate and populate control_no on page load
+        async function loadControlNo() {
+            try {
+                const res = await fetch('/generate_control_no');
+                const data = await res.json();
+                if (data.control_no) {
+                    document.getElementById('display_control_no').textContent = data.control_no;
+                    document.getElementById('hidden_control_no').value = data.control_no;
+                }
+            } catch (err) {
+                console.warn('Failed to generate control_no:', err);
+            }
+        }
+        // Generate control_no when page loads
+        document.addEventListener('DOMContentLoaded', loadControlNo);
+
+        // Show success alert if redirected after successful submission
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('submitted') === '1') {
+                alert('Thank you — your response has been submitted successfully.');
+                // remove the query param without reloading
+                params.delete('submitted');
+                const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                window.history.replaceState({}, document.title, newUrl);
+                // Auto close the form after successful submission
+                window.close();
+            }
+        })();
+
+        // Form submission handler
+        document.getElementById('csmForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Check if at least one service is selected
+            const serviceCheckboxes = document.querySelectorAll('input[name="service_availed"]:checked');
+            if (serviceCheckboxes.length === 0) {
+                alert('Please select at least one service availed.');
+                return;
+            }
+
+            // Check all SDQ questions are answered (names: sdq0..sdq8)
+            for (let i = 0; i <= 8; i++) {
+                const sdqQuestion = document.querySelectorAll(`input[name="sdq${i}"]:checked`);
+                if (sdqQuestion.length === 0) {
+                    alert(`Please answer SQD ${i} question.`);
+                    return;
+                }
+            }
+
+            // All validations passed — submit the form to the server
+            this.submit();
+        });
+
+        // Set today's date as default
+        const today = new Date();
+        const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+        document.getElementById('date').value = formattedDate;
+
+        // Show/hide other service text input
+        document.getElementById('service6').addEventListener('change', function () {
+            const otherServiceInput = document.getElementById('otherService');
+            if (this.checked) {
+                otherServiceInput.style.display = 'inline-block';
+                otherServiceInput.required = true;
+            } else {
+                otherServiceInput.style.display = 'none';
+                otherServiceInput.required = false;
+                otherServiceInput.value = '';
+            }
+        });
+
+        // Initially hide the other service input
+        document.getElementById('otherService').style.display = 'none';
+    </script>
+</body>
+
+</html>

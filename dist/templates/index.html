@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}Home — HR Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+  .hero-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.5) 0%, rgba(118, 75, 162, 0.5) 100%),
+    url('{{ url_for("static", filename="resources/background-image.png") }}');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 80px 0;
+    position: relative;
+  }
+
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 1;
+  }
+
+  [data-theme="dark"] .hero-section {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%),
+    url('{{ url_for("static", filename="resources/background-image.png") }}');
+    background-size: cover;
+    background-position: center;
+  }
+
+  [data-theme="dark"] .hero-section::before {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .hero-section .container {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-section h1 {
+    font-weight: 700;
+    margin-bottom: 20px;
+    font-size: 3.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    padding: 15px 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(4px);
+    display: inline-block;
+  }
+
+  .hero-section .lead {
+    font-size: 1.5rem;
+    opacity: 0.95;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
+    padding: 10px 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section h1 {
+      font-size: 2.5rem;
+      padding: 12px 20px;
+    }
+
+    .hero-section .lead {
+      font-size: 1.25rem;
+      padding: 8px 16px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .hero-section h1 {
+      font-size: 2rem;
+      padding: 10px 15px;
+    }
+
+    .hero-section .lead {
+      font-size: 1.1rem;
+      padding: 6px 12px;
+    }
+  }
+
+  .feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+
+  .feature-card .card-body {
+    padding: 30px;
+  }
+
+  .feature-card .card-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #667eea;
+  }
+
+  .feature-card h5 {
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .btn-hero {
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="hero-section text-center">
+  <div class="container">
+    <h1 class="display-4"><i class="fas fa-home"></i> Welcome to HRMO e-Logbook</h1>
+    <p class="lead">Fast client time logging using face recognition — simple, secure, and modern.</p>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+      <a href="/client-log" class="btn btn-light btn-hero"><i class="fas fa-clipboard-list"></i> Open Client Log</a>
+      <a href="/clients" class="btn btn-outline-light btn-hero"><i class="fas fa-users"></i> See Clients</a>
+    </div>
+  </div>
+</header>
+
+<main class="container my-5">
+  <div class="row g-4">
+    <a href="/client-log" style="text-decoration: none; color: inherit;">
+      <div class="col-md-4">
+        <div class="card feature-card h-100">
+          <div class="card-body text-center">
+            <div class="card-icon">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <h5>Client Log</h5>
+            <p class="text-muted">Quickly log time-in/time-out using face detection and review logs.</p>
+            <a href="/client-log" class="btn btn-primary btn-hero  ">Get Started</a>
+          </div>
+        </div>
+      </div>
+    </a>
+
+
+    <div class="col-md-4">
+      <div class="card feature-card h-100">
+        <div class="card-body text-center">
+          <div class="card-icon">
+            <i class="fas fa-user-friends"></i>
+          </div>
+          <h5>Client Records</h5>
+          <p class="text-muted">Manage client profiles and photos with ease.</p>
+          <a href="/clients" class="btn btn-success btn-hero  ">Manage Records</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card feature-card h-100">
+        <div class="card-body text-center">
+          <div class="card-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h5>Admin Dashboard</h5>
+          <p class="text-muted">View analytics and reports. Restricted to administrators.</p>
+          <a href="/admin/dashboard" class="btn btn-warning btn-hero  ">Access Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% endblock %}
