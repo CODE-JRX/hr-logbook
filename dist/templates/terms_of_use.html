@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,19 +12,19 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
         }
-        
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
@@ -32,44 +33,44 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
-        
+
         .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
         }
-        
+
         .logo-section {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-        
+
         .logo-icon {
             font-size: 2.5rem;
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 10px;
         }
-        
+
         h1 {
             font-size: 1.8rem;
             margin-bottom: 5px;
         }
-        
+
         .subtitle {
             opacity: 0.9;
             font-size: 1rem;
         }
-        
+
         .effective-date {
             background: rgba(255, 255, 255, 0.15);
             padding: 8px 15px;
             border-radius: 20px;
             font-weight: 500;
         }
-        
+
         .content-card {
             background: white;
             border-radius: 10px;
@@ -77,7 +78,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             margin-bottom: 25px;
         }
-        
+
         h2 {
             color: #1e3c72;
             margin-bottom: 15px;
@@ -87,31 +88,32 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         h2 i {
             color: #2a5298;
         }
-        
+
         h3 {
             color: #2a5298;
             margin: 20px 0 10px 0;
             font-size: 1.2rem;
         }
-        
-        p, li {
+
+        p,
+        li {
             margin-bottom: 12px;
             color: #444;
         }
-        
+
         ul {
             padding-left: 20px;
             margin-bottom: 15px;
         }
-        
+
         li {
             margin-bottom: 8px;
         }
-        
+
         .highlight-box {
             background-color: #f8f9ff;
             border-left: 4px solid #2a5298;
@@ -119,7 +121,7 @@
             margin: 20px 0;
             border-radius: 0 5px 5px 0;
         }
-        
+
         .acceptance-section {
             background: linear-gradient(to right, #f8f9ff, #fff);
             border: 2px solid #d0d7f0;
@@ -130,31 +132,31 @@
             bottom: 20px;
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
         }
-        
+
         .checkbox-container {
             display: flex;
             align-items: flex-start;
             gap: 10px;
             margin: 20px 0;
         }
-        
+
         .checkbox-container input {
             width: auto;
             margin-top: 5px;
         }
-        
+
         .checkbox-container label {
             font-weight: normal;
             margin-bottom: 0;
         }
-        
+
         .buttons {
             display: flex;
             gap: 15px;
             margin-top: 25px;
             flex-wrap: wrap;
         }
-        
+
         .btn {
             padding: 14px 28px;
             border: none;
@@ -170,46 +172,46 @@
             min-width: 180px;
             text-decoration: none;
         }
-        
+
         .btn-accept {
             background: linear-gradient(to right, #28a745, #20c997);
             color: white;
             flex: 1;
         }
-        
+
         .btn-accept:hover {
             background: linear-gradient(to right, #20c997, #28a745);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
         }
-        
+
         .btn-decline {
             background: #f8f9fa;
             color: #dc3545;
             border: 2px solid #dc3545;
             flex: 1;
         }
-        
+
         .btn-decline:hover {
             background: #dc3545;
             color: white;
         }
-        
+
         .btn-print {
             background: #6c757d;
             color: white;
             flex: 1;
         }
-        
+
         .btn-print:hover {
             background: #5a6268;
             transform: translateY(-2px);
         }
-        
+
         .required {
             color: #e74c3c;
         }
-        
+
         footer {
             text-align: center;
             margin-top: 40px;
@@ -218,7 +220,7 @@
             font-size: 0.9rem;
             border-top: 1px solid #eee;
         }
-        
+
         .contact-info {
             display: flex;
             justify-content: center;
@@ -226,13 +228,13 @@
             margin-top: 15px;
             flex-wrap: wrap;
         }
-        
+
         .contact-item {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
+
         .form-note {
             background-color: #e8f4ff;
             border: 1px solid #c2d9ff;
@@ -243,97 +245,99 @@
             color: #2a5298;
             font-weight: 500;
         }
-        
+
         form {
             margin: 0;
             padding: 0;
         }
-        
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 15px;
             }
-            
+
             .effective-date {
                 align-self: flex-start;
             }
-            
+
             .content-card {
                 padding: 20px;
             }
-            
+
             h1 {
                 font-size: 1.5rem;
             }
-            
+
             .btn {
                 min-width: 100%;
             }
-            
+
             .acceptance-section {
                 position: static;
                 margin-bottom: 20px;
             }
         }
-        
+
         @media print {
-            .acceptance-section, .btn-print {
+
+            .acceptance-section,
+            .btn-print {
                 display: none;
             }
-            
+
             body {
                 font-size: 12pt;
                 background: white;
             }
-            
+
             .content-card {
                 box-shadow: none;
                 border: 1px solid #ddd;
             }
-            
+
             header {
                 background: white !important;
                 color: black !important;
                 border-bottom: 2px solid #333;
             }
-            
+
             h2 {
                 color: black;
             }
         }
-        
+
         /* Flash messages styling */
         .flash-messages {
             margin-bottom: 20px;
         }
-        
+
         .flash-message {
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 10px;
             font-weight: 500;
         }
-        
+
         .flash-success {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        
+
         .flash-error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        
+
         .flash-warning {
             background-color: #fff3cd;
             color: #856404;
             border: 1px solid #ffeaa7;
         }
-        
+
         .purpose-note {
             background-color: #fff8e1;
             border-left: 4px solid #ffb300;
@@ -344,6 +348,7 @@
     </style>
     <link rel="stylesheet" href="static/css/font-awesome.min.css">
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -363,30 +368,35 @@
             </div>
         </div>
     </header>
-    
+
     <div class="container">
         <!-- Flash messages display area -->
         <div class="flash-messages" id="flashMessages">
             <!-- Flash messages will be inserted here by JavaScript -->
         </div>
-        
+
         <div class="form-note">
             <i class="fas fa-exclamation-circle"></i> You must accept these Terms of Use to proceed with registration.
         </div>
-        
+
         <div class="purpose-note">
             <h3><i class="fas fa-info-circle"></i> Important Purpose Notice</h3>
-            <p><strong>This HRMO e-Logbook with Face Recognition System is specifically designed for tracking the time-in and time-out of office clients, visitors, and external stakeholders. This system is NOT intended for employee daily attendance tracking.</strong></p>
+            <p><strong>This HRMO e-Logbook with Face Recognition System is specifically designed for tracking the
+                    time-in and time-out of office clients, visitors, and external stakeholders.</strong></p>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-check-circle"></i> 1. Acceptance of Terms</h2>
-            <p>By registering your biometric data (facial features) and using the HRMO Client e-Logbook with Face Recognition ("the System"), you agree to be bound by these Terms of Use. If you do not agree to these terms, you will not be able to use the biometric client logbook and must contact the HRMO for alternative manual logging procedures.</p>
+            <p>By registering your biometric data (facial features) and using the HRMO Client e-Logbook with Face
+                Recognition ("the System"), you agree to be bound by these Terms of Use. If you do not agree to these
+                terms, you will not be able to use the biometric client logbook and must contact the HRMO for
+                alternative manual logging procedures.</p>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-bullseye"></i> 2. Purpose of the System</h2>
-            <p>The System is implemented by the <strong>ASIST</strong> Human Resource Management Office (HRMO) for the specific purpose of:</p>
+            <p>The System is implemented by the <strong>ASIST</strong> Human Resource Management Office (HRMO) for the
+                specific purpose of:</p>
             <ul>
                 <li>Automating and securing client/visitor time-in and time-out logging at ASIST offices</li>
                 <li>Enhancing the accuracy and efficiency of client attendance records</li>
@@ -396,16 +406,19 @@
                 <li>Improving service delivery through efficient client flow management</li>
             </ul>
             <div class="purpose-note">
-                <p><strong>Note:</strong> This system is exclusively for tracking office clients, visitors, and external stakeholders. Employee attendance tracking is handled through separate systems.</p>
+                <p><strong>Note:</strong> This system is exclusively for tracking office clients, visitors, and external
+                    stakeholders. Employee attendance tracking is handled through separate systems.</p>
             </div>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-database"></i> 3. Data Collection, Use, and Storage</h2>
-            
+
             <h3>3.1. Type of Data Collected</h3>
-            <p>The System will capture and process your biometric data, specifically a digital template (a mathematical representation) of your facial features. It does not store actual photographs or video footage for logging purposes.</p>
-            
+            <p>The System will capture and process your biometric data, specifically a digital template (a mathematical
+                representation) of your facial features. It does not store actual photographs or video footage for
+                logging purposes.</p>
+
             <h3>3.2. How Data is Used</h3>
             <p>Your facial template will be used solely for:</p>
             <ul>
@@ -414,55 +427,72 @@
                 <li>Maintaining security records of office visits</li>
                 <li>Improving service delivery through visit pattern analysis (aggregated data only)</li>
             </ul>
-            
+
             <h3>3.3. Data Storage & Security</h3>
             <ul>
                 <li>Biometric templates are encrypted and stored on a secure server controlled by the ASIST HRMO.</li>
-                <li>Client visit data is retained for a maximum period of 2 years, after which biometric templates are permanently deleted.</li>
-                <li>Data is not shared with, sold to, or accessed by any third parties without your explicit consent, except as required by law or for legitimate institutional purposes.</li>
-                <li>We implement reasonable technical and organizational measures to protect your biometric data from unauthorized access, disclosure, or loss.</li>
+                <li>Client visit data is retained for a maximum period of 2 years, after which biometric templates are
+                    permanently deleted.</li>
+                <li>Data is not shared with, sold to, or accessed by any third parties without your explicit consent,
+                    except as required by law or for legitimate institutional purposes.</li>
+                <li>We implement reasonable technical and organizational measures to protect your biometric data from
+                    unauthorized access, disclosure, or loss.</li>
             </ul>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-user-shield"></i> 4. User Consent and Rights</h2>
-            
+
             <h3>4.1. Voluntary Consent</h3>
-            <p>Your provision of biometric data for client logbook purposes is voluntary. However, refusal to provide such data will necessitate the use of an alternative, non-biometric method of client logging as determined by the HRMO.</p>
-            
+            <p>Your provision of biometric data for client logbook purposes is voluntary. However, refusal to provide
+                such data will necessitate the use of an alternative, non-biometric method of client logging as
+                determined by the HRMO.</p>
+
             <h3>4.2. Right to Information</h3>
-            <p>You have the right to be informed about how your biometric data is handled and to access your visit records upon request.</p>
-            
+            <p>You have the right to be informed about how your biometric data is handled and to access your visit
+                records upon request.</p>
+
             <h3>4.3. Data Deletion</h3>
-            <p>You may request deletion of your biometric data at any time by submitting a written request to the HRMO. Upon such request, or after 2 years of inactivity, your biometric template will be permanently deleted from the active System, unless retention is required by applicable law or institutional policy.</p>
-            
+            <p>You may request deletion of your biometric data at any time by submitting a written request to the HRMO.
+                Upon such request, or after 2 years of inactivity, your biometric template will be permanently deleted
+                from the active System, unless retention is required by applicable law or institutional policy.</p>
+
             <h3>4.4. Client-Specific Rights</h3>
             <p>As a client/visitor using this system, you have the right to:</p>
             <ul>
                 <li>Know what data is being collected about your office visits</li>
                 <li>Request correction of inaccurate visit records</li>
                 <li>Obtain a record of your office visits upon proper identification</li>
-                <li>Withdraw your consent for biometric data collection (alternative manual logging will be provided)</li>
+                <li>Withdraw your consent for biometric data collection (alternative manual logging will be provided)
+                </li>
             </ul>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-tasks"></i> 5. Client Responsibilities</h2>
             <ul>
-                <li>You must use the System personally for your own time-in and time-out logging. Any attempt to log attendance for another person (e.g., using a photograph, mask, or proxy) is strictly prohibited.</li>
-                <li>You are responsible for positioning yourself correctly in front of the recognition device to ensure accurate reading during office visits.</li>
-                <li>You must immediately report any issues with the System (e.g., failure to recognize, hardware problems) to the HRMO or front desk personnel.</li>
+                <li>You must use the System personally for your own time-in and time-out logging. Any attempt to log
+                    attendance for another person (e.g., using a photograph, mask, or proxy) is strictly prohibited.
+                </li>
+                <li>You are responsible for positioning yourself correctly in front of the recognition device to ensure
+                    accurate reading during office visits.</li>
+                <li>You must immediately report any issues with the System (e.g., failure to recognize, hardware
+                    problems) to the HRMO or front desk personnel.</li>
                 <li>You must not attempt to tamper with, hack, or disrupt the System hardware or software.</li>
                 <li>You must use the system only for legitimate office visits to ASIST premises.</li>
-                <li>You should ensure that your facial features are clearly visible to the camera (removing hats, sunglasses, or other obstructions during registration and use).</li>
+                <li>You should ensure that your facial features are clearly visible to the camera (removing hats,
+                    sunglasses, or other obstructions during registration and use).</li>
             </ul>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-shield-alt"></i> 6. Privacy and Data Protection</h2>
-            <p>The HRMO complies with relevant data privacy laws including the Data Privacy Act of 2012 (Republic Act No. 10173). Our general Privacy Policy, which outlines your broader data rights, is available at <a href="privacy-policy" target="_blank">ASIST Privacy Policy</a>. Specific to biometric data, we adhere to stricter guidelines as outlined herein.</p>
+            <p>The HRMO complies with relevant data privacy laws including the Data Privacy Act of 2012 (Republic Act
+                No. 10173). Our general Privacy Policy, which outlines your broader data rights, is available at <a
+                    href="privacy-policy" target="_blank">ASIST Privacy Policy</a>. Specific to biometric data, we
+                adhere to stricter guidelines as outlined herein.</p>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-ban"></i> 7. Prohibited Conduct</h2>
             <p>The following are strictly prohibited:</p>
@@ -470,12 +500,13 @@
                 <li>Registering another person's face or an object as your own.</li>
                 <li>Circumventing or attempting to circumvent the face recognition process.</li>
                 <li>Any action that compromises the security or integrity of the System.</li>
-                <li>Using the System for any purpose other than legitimate client time-in and time-out logging at ASIST offices.</li>
+                <li>Using the System for any purpose other than legitimate client time-in and time-out logging at ASIST
+                    offices.</li>
                 <li>Attempting to access other clients' visit records or system data.</li>
                 <li>Using the system to falsify visit records or office attendance.</li>
             </ul>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-exclamation-triangle"></i> 8. Consequences of Violation</h2>
             <p>Violation of these Terms of Use may result in:</p>
@@ -487,35 +518,48 @@
                 <li>Potential legal liability for damages caused to the system or institution</li>
             </ul>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-balance-scale"></i> 9. Limitation of Liability</h2>
-            <p>ASIST and the HRMO will not be liable for any incidental, indirect, or consequential damages arising from the use or inability to use the System, including but not limited to technical failures, recognition errors, or delays in logging, except where such liability is mandated by law. The institution's liability shall be limited to cases of gross negligence or willful misconduct.</p>
+            <p>ASIST and the HRMO will not be liable for any incidental, indirect, or consequential damages arising from
+                the use or inability to use the System, including but not limited to technical failures, recognition
+                errors, or delays in logging, except where such liability is mandated by law. The institution's
+                liability shall be limited to cases of gross negligence or willful misconduct.</p>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-edit"></i> 10. Changes to Terms</h2>
-            <p>The HRMO reserves the right to modify these Terms of Use at any time. Changes will be communicated to registered clients via the ASIST website (<a href='http://www.asist.edu.ph' target='_blank'>www.asist.edu.ph</a>) with reasonable notice. Continued use of the System after changes constitute acceptance of the new terms.</p>
+            <p>The HRMO reserves the right to modify these Terms of Use at any time. Changes will be communicated to
+                registered clients via the ASIST website (<a href='http://www.asist.edu.ph'
+                    target='_blank'>www.asist.edu.ph</a>) with reasonable notice. Continued use of the System after
+                changes constitute acceptance of the new terms.</p>
         </div>
-        
+
         <div class="highlight-box">
             <h3><i class="fas fa-file-contract"></i> Acknowledgment of Receipt and Consent</h3>
-            <p><strong>I, the undersigned client/visitor, have read, understood, and agree to the Terms of Use for the HRMO Client e-Logbook with Face Recognition System.</strong></p>
-            <p><strong>I voluntarily consent to the collection, use, and storage of my biometric data (facial template) for the sole purpose of time-in and time-out logging during my visits to ASIST offices as described above.</strong></p>
-            <p><strong>I understand my rights and responsibilities under these terms as a client/visitor of ASIST.</strong></p>
+            <p><strong>I, the undersigned client/visitor, have read, understood, and agree to the Terms of Use for the
+                    HRMO Client e-Logbook with Face Recognition System.</strong></p>
+            <p><strong>I voluntarily consent to the collection, use, and storage of my biometric data (facial template)
+                    for the sole purpose of time-in and time-out logging during my visits to ASIST offices as described
+                    above.</strong></p>
+            <p><strong>I understand my rights and responsibilities under these terms as a client/visitor of
+                    ASIST.</strong></p>
         </div>
-        
+
         <!-- Acceptance Section with Form -->
         <div class="content-card acceptance-section">
             <form method="POST" action="" id="termsForm">
                 <div class="checkbox-container">
                     <input type="checkbox" id="accept_terms" name="accept_terms" required>
                     <label for="accept_terms">
-                        <strong>I have read and agree to the Terms of Use and <a href="privacy-policy" target="_blank">Privacy Policy</a></strong>. I understand that by accepting, I consent to the collection and use of my biometric data as described in these documents for client/visitor logging purposes at ASIST offices.
+                        <strong>I have read and agree to the Terms of Use and <a href="privacy-policy"
+                                target="_blank">Privacy Policy</a></strong>. I understand that by accepting, I consent
+                        to the collection and use of my biometric data as described in these documents for
+                        client/visitor logging purposes at ASIST offices.
                         <span class="required">*</span>
                     </label>
                 </div>
-                
+
                 <div class="buttons">
                     <button type="submit" class="btn btn-accept" name="action" value="accept">
                         <i class="fas fa-check-circle"></i> Accept & Continue
@@ -529,11 +573,11 @@
                 </div>
             </form>
         </div>
-        
+
         <div class="content-card">
             <h2><i class="fas fa-info-circle"></i> Contact Information</h2>
             <p>For questions, concerns, or requests regarding your biometric data and these Terms, please contact:</p>
-            
+
             <div class="contact-info">
                 <div class="contact-item">
                     <i class="fas fa-building"></i>
@@ -545,7 +589,7 @@
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-phone"></i>
-                    <span><strong>Phone:</strong> (063) 123-4567 local 101</span>
+                    <span><strong>Phone:</strong> ###-###-####</span>
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-globe"></i>
@@ -553,76 +597,78 @@
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-user-tie"></i>
-                    <span><strong>Data Protection Officer:</strong> dpo@asist.edu.ph</span>
+                    <span><strong>Data Protection Officer:</strong> ---@asist.edu.ph</span>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <footer>
         <div class="container">
-            <p>&copy; <span id="currentYear"></span> Abra State Institute of Sciences and Technology (ASIST). All rights reserved.</p>
-            <p>This document is intended for clients and visitors of ASIST. All biometric data is protected under the Data Privacy Act of 2012.</p>
+            <p>&copy; <span id="currentYear"></span> Abra State Institute of Sciences and Technology (ASIST). All rights
+                reserved.</p>
+            <p>This document is intended for clients and visitors of ASIST. All biometric data is protected under the
+                Data Privacy Act of 2012.</p>
         </div>
     </footer>
-    
+
     <script>
         // Set current date and year
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
-            const formattedDate = now.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+            const formattedDate = now.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
-            
+
             document.getElementById('currentDate').textContent = formattedDate;
             document.getElementById('currentYear').textContent = now.getFullYear();
-            
+
             // Decline button functionality
-            document.getElementById('declineBtn').addEventListener('click', function() {
+            document.getElementById('declineBtn').addEventListener('click', function () {
                 if (confirm('Are you sure you want to decline the Terms of Use? You will not be able to proceed with the biometric registration and will need to use alternative manual logging procedures.')) {
                     // In a real implementation, you might want to redirect to a different page
                     // or show a message about alternative procedures
                     alert('You have declined the Terms of Use. Please proceed to the manual logbook at the front desk for alternative logging procedures.');
-                    
+
                     // Optionally redirect to a different page
                     // window.location.href = '/decline-alternative';
                 }
             });
-            
+
             // Form submission handling
-            document.getElementById('termsForm').addEventListener('submit', function(e) {
+            document.getElementById('termsForm').addEventListener('submit', function (e) {
                 const checkbox = document.getElementById('accept_terms');
                 if (!checkbox.checked) {
                     e.preventDefault();
                     alert('You must check the box to accept the Terms of Use before proceeding with biometric registration.');
                     return false;
                 }
-                
+
                 // Show loading state
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
                 submitBtn.disabled = true;
-                
+
                 // In a real implementation, the form would submit to the server
                 // For demo purposes, we'll simulate a successful submission
-                setTimeout(function() {
+                setTimeout(function () {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 }, 1500);
             });
-            
+
             // Check for URL parameters that might indicate flash messages
             const urlParams = new URLSearchParams(window.location.search);
             const message = urlParams.get('message');
             const messageType = urlParams.get('type');
-            
+
             if (message) {
                 showFlashMessage(message, messageType || 'info');
             }
-            
+
             // Function to display flash messages
             function showFlashMessage(text, type) {
                 const flashContainer = document.getElementById('flashMessages');
@@ -630,7 +676,7 @@
                 messageDiv.className = `flash-message flash-${type}`;
                 messageDiv.innerHTML = `<i class="fas fa-${getIconForType(type)}"></i> ${text}`;
                 flashContainer.appendChild(messageDiv);
-                
+
                 // Auto-remove after 5 seconds
                 setTimeout(() => {
                     messageDiv.style.opacity = '0';
@@ -642,9 +688,9 @@
                     }, 500);
                 }, 5000);
             }
-            
+
             function getIconForType(type) {
-                switch(type) {
+                switch (type) {
                     case 'success': return 'check-circle';
                     case 'error': return 'exclamation-circle';
                     case 'warning': return 'exclamation-triangle';
@@ -654,4 +700,5 @@
         });
     </script>
 </body>
+
 </html>

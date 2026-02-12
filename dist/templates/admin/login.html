@@ -39,5 +39,13 @@
 		if (pwd.type === 'password') { pwd.type = 'text'; this.textContent = 'Hide'; }
 		else { pwd.type = 'password'; this.textContent = 'Show'; }
 	});
+
+	// Show error modal if error parameter is present
+	{% if error == 'invalid_credentials' %}
+	document.addEventListener('DOMContentLoaded', function () {
+		const errorModal = new bootstrap.Modal(document.getElementById('loginErrorModal'));
+		errorModal.show();
+	});
+	{% endif %}
 </script>
 {% endblock %}

@@ -387,7 +387,7 @@
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0"><i class="fas fa-file-alt"></i> Client Log Report</h5>
     <div class="d-flex gap-2 no-print" role="group" aria-label="actions">
-      <button class="btn btn-sm btn-outline-success" type="button" onclick="window.print()"><i class="fas fa-print"></i>
+      <button class="btn btn-sm btn-outline-success" type="button" onclick="window.open(window.location.href + (window.location.search ? '&' : '?') + 'print=1', '_blank')"><i class="fas fa-print"></i>
         <span class="d-none d-md-inline">Print</span></button>
       <button class="btn btn-sm btn-outline-primary" type="button" id="exportCsvBtn"><i class="fas fa-download"></i>
         <span class="d-none d-md-inline">Export CSV</span></button>

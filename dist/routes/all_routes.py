@@ -134,22 +134,27 @@ def edit(id):
             gender=request.form.get("gender"),
             age=(int(request.form.get("age")) if request.form.get("age") not in (None, '') else None)
         )
-        return redirect(url_for("client.client_data"))
+        return redirect(url_for("client.edit", id=id, success=1))
 
     client = get_client_by_id(id)
-    return render_template("clients/edit.html", client=client)
+    success = request.args.get('success') == '1'
+    return render_template("clients/edit.html", client=client, success=success)
 
 
 @client_bp.route("/delete/<id>")
 @admin_required
 def delete(id):
     delete_client(id)
-    return redirect(url_for("client.client_data"))
+    return redirect(url_for("client.client_data", success=1))
 
 
 @client_bp.route('/client-log')
 def client_log():
     return render_template('client_log.html')
+
+@client_bp.route('/client-log-help')
+def client_log_help():
+    return render_template('client_log_help.html')
 
 
 
@@ -264,9 +269,10 @@ def client_log_report():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     limit = request.args.get('limit', '25')
+    print_mode = request.args.get('print') == '1'
 
     logs = get_logs(purpose=purpose, department=department, start_date=start_date, end_date=end_date, limit=limit)
-    
+
     # Check if this is an AJAX request
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         from flask import render_template_string
@@ -292,6 +298,10 @@ def client_log_report():
             {% endif %}
         ''', logs=logs)
         return jsonify({'html': html})
+
+    # If print mode, render the print template
+    if print_mode:
+        return render_template('client_log_report_print.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date, 'limit': limit})
 
     departments = get_departments()
     purposes = ["Receive Document/s Requested", "Submit Document/s", "Request Form/s", "Process Appointment", "Inquire", "OTHERS"]
@@ -567,12 +577,13 @@ def admin_login():
             flash('Signed in successfully')
             return redirect(url_for('client.admin_dashboard'))
         else:
-            flash('Invalid credentials')
-            return redirect(url_for('client.admin_login', type='password'))
+            # Redirect with error parameter for password login
+            return redirect(url_for('client.admin_login', type='password', error='invalid_credentials'))
 
     # If login type is password, show the regular login form
     if request.args.get('type') == 'password':
-        return render_template('admin/login.html')
+        error = request.args.get('error')
+        return render_template('admin/login.html', error=error)
     
     # Default to face login
     return render_template('admin/face_login.html')
@@ -618,7 +629,6 @@ def admin_face_login():
 def admin_logout():
     session.pop('admin_id', None)
     session.pop('admin_email', None)
-    flash('Signed out')
     return render_template('admin/logout.html')
 
 @client_bp.route('/admin/profile')

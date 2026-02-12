@@ -44,7 +44,8 @@
 
 /* HIGH SPECIFICITY: Only when absolutely necessary */
 .card .btn-safe:hover {
-  background: var(--accent-color) !important; /* Use !important only for user interaction states */
+  background: var(--accent-color) !important;
+  /* Use !important only for user interaction states */
 }
 
 /* =================================================================
@@ -69,7 +70,7 @@
     gap: var(--spacing-md);
   }
 
-  .grid-safe > * {
+  .grid-safe>* {
     flex: 1 1 250px;
   }
 }
@@ -107,13 +108,17 @@
 /* FALLBACK: Define fallback values before using variables */
 .btn-fallback {
   /* Fallback color for browsers without CSS variable support */
-  background: #667eea; /* var(--primary-color) */
+  background: #667eea;
+  /* var(--primary-color) */
   background: var(--primary-color);
   color: white;
-  color: var(--text-color, #333); /* Fallback inline */
-  padding: 0.5rem; /* var(--spacing-sm) */
+  color: var(--text-color, #333);
+  /* Fallback inline */
+  padding: 0.5rem;
+  /* var(--spacing-sm) */
   padding: var(--spacing-sm);
-  border-radius: 4px; /* var(--border-radius) */
+  border-radius: 4px;
+  /* var(--border-radius) */
   border-radius: var(--border-radius);
 }
 
@@ -146,7 +151,8 @@
 }
 
 /* SCOPED CLASSES: Prefix to avoid conflicts */
-.ds-card { /* ds = design system */
+.ds-card {
+  /* ds = design system */
   background: var(--card-bg);
   border-radius: var(--border-radius);
 }
@@ -230,21 +236,89 @@
 }
 
 /* PHASE 1: Utility Classes (add these as alternatives to existing styles) */
-.btn-primary-new { background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); padding: var(--spacing-sm) var(--spacing-lg); font-weight: var(--font-weight-semibold); transition: all var(--animation-normal); cursor: pointer; }
-.btn-primary-new:hover { background-color: var(--secondary-color); transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn-primary-new {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--animation-normal);
+  cursor: pointer;
+}
 
-.btn-secondary-new { background-color: var(--secondary-color); color: white; border: none; border-radius: var(--border-radius); padding: var(--spacing-sm) var(--spacing-lg); font-weight: var(--font-weight-semibold); transition: all var(--animation-normal); cursor: pointer; }
-.btn-secondary-new:hover { background-color: var(--primary-color); transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn-primary-new:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
 
-.form-input-new { width: 100%; padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--border-color); border-radius: var(--border-radius); font-size: var(--font-size-body); font-family: var(--font-family); transition: border-color var(--animation-fast); }
-.form-input-new:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25); }
+.btn-secondary-new {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--animation-normal);
+  cursor: pointer;
+}
 
-.card-new { background: var(--card-bg); border-radius: var(--border-radius-lg); box-shadow: var(--shadow); overflow: hidden; transition: transform var(--animation-normal), box-shadow var(--animation-normal); }
-.card-new:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+.btn-secondary-new:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
 
-.text-h1-new { font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); line-height: 1.2; margin-bottom: var(--spacing-md); }
-.text-h2-new { font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); line-height: 1.3; margin-bottom: var(--spacing-md); }
-.text-body-new { font-size: var(--font-size-body); font-weight: var(--font-weight-normal); line-height: 1.6; color: var(--text-color); }
+.form-input-new {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-body);
+  font-family: var(--font-family);
+  transition: border-color var(--animation-fast);
+}
+
+.form-input-new:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+.card-new {
+  background: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform var(--animation-normal), box-shadow var(--animation-normal);
+}
+
+.card-new:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.text-h1-new {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+}
+
+.text-h2-new {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+  margin-bottom: var(--spacing-md);
+}
+
+.text-body-new {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.6;
+  color: var(--text-color);
+}
 
 /* =================================================================
    PHASE 2: SELECTIVE UPDATES - Global Typography & Form Elements
@@ -253,24 +327,85 @@
    ================================================================= */
 
 /* PHASE 2: Global Typography Updates (apply to standardize text hierarchy) */
-h1, .h1 { font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); line-height: 1.2; margin-bottom: var(--spacing-md); }
-h2, .h2 { font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); line-height: 1.3; margin-bottom: var(--spacing-md); }
-h3, .h3 { font-size: var(--font-size-h3); font-weight: var(--font-weight-semibold); line-height: 1.4; margin-bottom: var(--spacing-sm); }
-h4, .h4 { font-size: var(--font-size-h4); font-weight: var(--font-weight-semibold); line-height: 1.4; margin-bottom: var(--spacing-sm); }
-h5, .h5 { font-size: var(--font-size-h5); font-weight: var(--font-weight-medium); line-height: 1.5; margin-bottom: var(--spacing-xs); }
-h6, .h6 { font-size: var(--font-size-h6); font-weight: var(--font-weight-medium); line-height: 1.5; margin-bottom: var(--spacing-xs); }
+h1,
+.h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+}
 
-body { font-family: var(--font-family); font-size: var(--font-size-body); font-weight: var(--font-weight-normal); line-height: 1.6; color: var(--text-color); }
+h2,
+.h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+  margin-bottom: var(--spacing-md);
+}
+
+h3,
+.h3 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-sm);
+}
+
+h4,
+.h4 {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-sm);
+}
+
+h5,
+.h5 {
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-xs);
+}
+
+h6,
+.h6 {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-xs);
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.6;
+  color: var(--text-color);
+}
 
 /* PHASE 2: Form Element Updates (gradually standardize form controls) */
-input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="tel"], input[type="url"], textarea, select {
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
   font-family: var(--font-family);
   font-size: var(--font-size-body);
   border-radius: var(--border-radius);
   transition: border-color var(--animation-fast), box-shadow var(--animation-fast);
 }
 
-input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="number"]:focus, input[type="tel"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+textarea:focus,
+select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
   outline: none;
@@ -283,25 +418,72 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
    ================================================================= */
 
 /* PHASE 3: Button Component Updates (replace Bootstrap buttons gradually) */
-.btn-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
-.btn-primary:hover { background-color: var(--secondary-color) !important; border-color: var(--secondary-color) !important; }
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
 
-.btn-secondary { background-color: var(--secondary-color) !important; border-color: var(--secondary-color) !important; color: white !important; }
-.btn-secondary:hover { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
+.btn-primary:hover {
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+}
 
-.btn-success { background-color: var(--success-color) !important; border-color: var(--success-color) !important; }
-.btn-warning { background-color: var(--warning-color) !important; border-color: var(--warning-color) !important; }
-.btn-danger { background-color: var(--danger-color) !important; border-color: var(--danger-color) !important; }
+.btn-secondary {
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  color: white !important;
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-success {
+  background-color: var(--success-color) !important;
+  border-color: var(--success-color) !important;
+}
+
+.btn-warning {
+  background-color: var(--warning-color) !important;
+  border-color: var(--warning-color) !important;
+}
+
+.btn-danger {
+  background-color: var(--danger-color) !important;
+  border-color: var(--danger-color) !important;
+}
 
 /* PHASE 3: Card Component Updates (standardize card styling) */
-.card { border-radius: var(--border-radius-lg) !important; box-shadow: var(--shadow) !important; }
-.card:hover { box-shadow: var(--shadow-lg) !important; }
+.card {
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg) !important;
+}
 
 /* PHASE 3: CSM Form Specific Updates (refactor CSM-form.html styles) */
-.form-page .container { border-radius: var(--border-radius-lg) !important; box-shadow: var(--shadow) !important; }
-.institute-name { font-size: var(--font-size-h3) !important; color: var(--primary-color) !important; }
-.form-title { font-size: var(--font-size-h2) !important; color: var(--danger-color) !important; }
-.section-title { font-size: var(--font-size-h4) !important; color: var(--primary-color) !important; }
+.form-page .container {
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.institute-name {
+  font-size: var(--font-size-h3) !important;
+  color: var(--primary-color) !important;
+}
+
+.form-title {
+  font-size: var(--font-size-h2) !important;
+  color: var(--danger-color) !important;
+}
+
+.section-title {
+  font-size: var(--font-size-h4) !important;
+  color: var(--primary-color) !important;
+}
 
 /* Utility Classes and Components */
 
@@ -725,6 +907,10 @@ nav {
   left: 0;
   right: 0;
   bottom: 0;
+  background-image: url('../resources/nav-bg-light.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.2;
   z-index: -1;
 }
 
@@ -1247,7 +1433,7 @@ nav {
   gap: var(--spacing-md);
 }
 
-.grid-cols-2 > * {
+.grid-cols-2>* {
   flex: 1 1 calc(50% - var(--spacing-md));
   min-width: 250px;
 }
@@ -1258,7 +1444,7 @@ nav {
   gap: var(--spacing-md);
 }
 
-.grid-cols-3 > * {
+.grid-cols-3>* {
   flex: 1 1 calc(33.333% - var(--spacing-md));
   min-width: 200px;
 }
@@ -1269,7 +1455,7 @@ nav {
   gap: var(--spacing-md);
 }
 
-.grid-cols-4 > * {
+.grid-cols-4>* {
   flex: 1 1 calc(25% - var(--spacing-md));
   min-width: 150px;
 }
@@ -1338,6 +1524,7 @@ nav {
 
 /* Responsive Breakpoints */
 @media (max-width: 575.98px) {
+
   .container-sm,
   .container-md,
   .container-lg,
@@ -1346,9 +1533,9 @@ nav {
     padding: 0 var(--spacing-sm);
   }
 
-  .grid-cols-2 > *,
-  .grid-cols-3 > *,
-  .grid-cols-4 > * {
+  .grid-cols-2>*,
+  .grid-cols-3>*,
+  .grid-cols-4>* {
     flex: 1 1 100%;
     min-width: 0;
   }
@@ -1363,15 +1550,16 @@ nav {
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-  .grid-cols-3 > *,
-  .grid-cols-4 > * {
+
+  .grid-cols-3>*,
+  .grid-cols-4>* {
     flex: 1 1 calc(50% - var(--spacing-md));
     min-width: 200px;
   }
 }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-  .grid-cols-4 > * {
+  .grid-cols-4>* {
     flex: 1 1 calc(50% - var(--spacing-md));
     min-width: 200px;
   }
@@ -2057,6 +2245,7 @@ textarea:disabled {
   }
 
 }
+
 .required::after {
   content: " *";
   color: #d32f2f;
@@ -2117,33 +2306,33 @@ textarea:disabled {
 
 /* Highlight elements not using design system fonts */
 .debug-mode [style*="font-family"]:not([style*="var(--font-family"] {
-  outline: 2px solid #ffd93d !important;
-  outline-offset: 2px !important;
-}
+    outline: 2px solid #ffd93d !important;
+    outline-offset: 2px !important;
+  }
 
-/* Highlight elements not using design system spacing */
-.debug-mode [style*="margin"]:not([style*="var(--spacing"],
-.debug-mode [style*="padding"]:not([style*="var(--spacing"] {
-  outline: 2px solid #6bcf7f !important;
-  outline-offset: 2px !important;
-}
+  /* Highlight elements not using design system spacing */
+  .debug-mode [style*="margin"]:not([style*="var(--spacing"],
+    .debug-mode [style*="padding"]:not([style*="var(--spacing"] {
+        outline: 2px solid #6bcf7f !important;
+        outline-offset: 2px !important;
+      }
 
-/* Highlight buttons not using design system */
-.debug-mode button:not(.btn-primary-new):not(.btn-secondary-new):not(.btn-primary):not(.btn-secondary) {
-  outline: 3px solid #4ecdc4 !important;
-  outline-offset: 3px !important;
-}
+      /* Highlight buttons not using design system */
+      .debug-mode button:not(.btn-primary-new):not(.btn-secondary-new):not(.btn-primary):not(.btn-secondary) {
+        outline: 3px solid #4ecdc4 !important;
+        outline-offset: 3px !important;
+      }
 
-/* Highlight forms not using design system */
-.debug-mode input:not(.form-input-new):not(.form-control),
-.debug-mode select:not(.form-select),
-.debug-mode textarea:not(.form-control) {
-  outline: 3px solid #45b7d1 !important;
-  outline-offset: 3px !important;
-}
+      /* Highlight forms not using design system */
+      .debug-mode input:not(.form-input-new):not(.form-control),
+      .debug-mode select:not(.form-select),
+      .debug-mode textarea:not(.form-control) {
+        outline: 3px solid #45b7d1 !important;
+        outline-offset: 3px !important;
+      }
 
-/* Highlight cards not using design system */
-.debug-mode .card:not(.card-new) {
-  outline: 3px solid #f9ca24 !important;
-  outline-offset: 3px !important;
-}
+      /* Highlight cards not using design system */
+      .debug-mode .card:not(.card-new) {
+        outline: 3px solid #f9ca24 !important;
+        outline-offset: 3px !important;
+      }

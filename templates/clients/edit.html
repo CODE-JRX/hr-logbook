@@ -37,11 +37,10 @@
                         <label class="form-label"><i class="fas fa-venus-mars"></i> Gender</label>
                         <select class="form-select" name="gender">
                             <option value="" {% if not client.gender %}selected{% endif %}>Select</option>
-                            <option value="Male" {% if client.gender=='Male' %}selected{% endif %}>Male</option>
-                            <option value="Female" {% if client.gender=='Female' %}selected{% endif %}>Female</option>
-                            <option value="Other" {% if client.gender=='Other' %}selected{% endif %}>Other</option>
-                            <option value="Prefer not to say" {% if client.gender=='Prefer not to say' %}selected{%
-                                endif %}>Prefer not to say</option>
+                            <option value="MALE" {% if client.gender=='MALE' %}selected{% endif %}>Male</option>
+                            <option value="FEMALE" {% if client.gender=='FEMALE' %}selected{% endif %}>Female</option>
+                            <option value="OTHER" {% if client.gender=='OTHER' %}selected{% endif %}>Other</option>
+                            <option value="PREFER_NOT_TO_SAY" {% if client.gender=='PREFER_NOT_TO_SAY' %}selected{% endif %}>Prefer not to say</option>
                         </select>
                     </div>
                     <div class="mb-3">

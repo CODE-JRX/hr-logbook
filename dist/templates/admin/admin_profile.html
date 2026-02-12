@@ -95,7 +95,7 @@
                     <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                 </div>
                 <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary">Update Password</button>
+                    <button type="submit" class="btn btn-outline-primary">Update Password</button>
                     <a href="{{ url_for('client.admin_dashboard') }}" class="btn btn-outline-secondary">Back to
                         Dashboard</a>
                 </div>
@@ -103,4 +103,40 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+{% if 'password' in message.lower() %}
+{% if 'successfully' in message.lower() %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+        var modalLabel = document.getElementById('passwordModalLabel');
+        var modalMessage = document.getElementById('passwordModalMessage');
+        modalMessage.textContent = {{ message | tojson }};
+        modalLabel.innerHTML = '<i class="fas fa-check-circle me-2 text-success"></i>Password Updated Successfully';
+        modalLabel.className = 'modal-title text-success';
+        modal.show();
+    });
+</script>
+{% else %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+        var modalLabel = document.getElementById('passwordModalLabel');
+        var modalMessage = document.getElementById('passwordModalMessage');
+        modalMessage.textContent = {{ message | tojson }};
+        modalLabel.innerHTML = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>Password Update Failed';
+        modalLabel.className = 'modal-title text-danger';
+        modal.show();
+    });
+</script>
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endwith %}
 {% endblock %}
