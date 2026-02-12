@@ -815,14 +815,19 @@
                         <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
                         <select id="gender" name="gender">
                             <option value="">All</option>
-                            <option value="Male" {% if filters.gender=='MALE' %}selected{% endif %}>MALE</option>
-                            <option value="Female" {% if filters.gender=='FEMALE' %}selected{% endif %}>FEMALE</option>
+                            {% for gen in genders %}
+                            <option value="{{ gen }}" {% if filters.gender==gen %}selected{% endif %}>{{ gen }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="filter-group">
                         <label for="region"><i class="fas fa-map-marker-alt"></i> Region:</label>
-                        <input type="text" id="region" name="region" placeholder="Enter region"
-                            value="{{ filters.region or '' }}">
+                        <select id="region" name="region">
+                            <option value="">All Regions</option>
+                            {% for reg in regions %}
+                            <option value="{{ reg }}" {% if filters.region==reg %}selected{% endif %}>{{ reg }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="filter-group">
                         <label for="age_min"><i class="fas fa-birthday-cake"></i> Age Min:</label>

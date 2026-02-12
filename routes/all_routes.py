@@ -479,7 +479,21 @@ def csm_report():
                 services_set.add(svc.strip())
     services_list = sorted(list(services_set))
 
-    return render_template('csm_report.html', csm_forms=csm_forms, filters=filters, services=services_list)
+    # Get list of unique regions for dropdown
+    regions_set = set()
+    for form in all_forms:
+        if form.get('region_of_residence'):
+            regions_set.add(form['region_of_residence'])
+    regions_list = sorted(list(regions_set))
+
+    # Get list of unique genders for dropdown
+    genders_set = set()
+    for form in all_forms:
+        if form.get('sex'):
+            genders_set.add(form['sex'])
+    genders_list = sorted(list(genders_set))
+
+    return render_template('csm_report.html', csm_forms=csm_forms, filters=filters, services=services_list, regions=regions_list, genders=genders_list)
 
 
 @client_bp.route('/admin/dashboard')
