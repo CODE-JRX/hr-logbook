@@ -197,7 +197,7 @@
               </div>
 
               <div class="mt-3 text-center">
-                <button id="camera-action" type="button" class="btn btn-primary me-2"><i class="fas fa-play"></i> Start
+                <button id="camera-action" type="button" class="btn btn-outline-primary me-2"><i class="fas fa-play"></i> Start
                   Camera</button>
                 <button id="file-toggle" type="button" class="btn btn-outline-secondary"><i class="fas fa-upload"></i>
                   Use file</button>
@@ -222,10 +222,10 @@
               </div>
 
               <div class="mt-3">
-                <button id="saveBtn" type="submit" class="btn btn-primary" disabled><i class="fas fa-save"></i>
+                <button id="saveBtn" type="submit" class="btn btn-outline-primary" disabled><i class="fas fa-save"></i>
                   Save</button>
-                <a href="{{ url_for('client.client_data') }}" class="btn btn-outline-secondary ms-2"><i
-                    class="fas fa-times"></i> Cancel</a>
+                <button id="cancelBtn" type="button" class="btn btn-outline-secondary ms-2"><i
+                    class="fas fa-times"></i> Cancel</button>
               </div>
             </div>
           </div>
@@ -251,6 +251,7 @@
   const fileArea = document.getElementById('fileArea');
   const fileInput = document.getElementById('fileInput');
   const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
   const messageOverlay = document.getElementById('message-overlay');
   let stream = null;
   let cameraState = 'stopped'; // 'stopped' | 'started' | 'captured'
@@ -445,6 +446,33 @@
   document.getElementById('addClientForm').addEventListener('submit', (e) => {
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving...';
+  });
+
+  // Cancel button: clear all fields, reset camera, clear image
+  cancelBtn.addEventListener('click', () => {
+    // Clear form fields
+    document.getElementById('addClientForm').reset();
+    // Clear hidden photo data
+    photoInput.value = '';
+    // Reset camera state
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    video.srcObject = null;
+    video.style.display = 'none';
+    placeholder.style.display = 'block';
+    actionBtn.textContent = 'Start Camera';
+    cameraState = 'stopped';
+    faceVerified = false;
+    // Clear preview box
+    previewBox.innerHTML = '<div style="text-align:center; width:100%;"> <span class="text-muted">No image captured | Preview</span></div>';
+    // Hide message overlay
+    hideMessage();
+    // Reset file input
+    if (fileInput) fileInput.value = '';
+    fileArea.style.display = 'none';
+    actionBtn.disabled = false;
+    fileToggle.textContent = 'Use file';
+    // Re-validate form
+    validateForm();
   });
 </script>
 {% endblock %}
