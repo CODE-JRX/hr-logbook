@@ -264,9 +264,10 @@ def client_log_report():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     limit = request.args.get('limit', '25')
+    print_mode = request.args.get('print') == '1'
 
     logs = get_logs(purpose=purpose, department=department, start_date=start_date, end_date=end_date, limit=limit)
-    
+
     # Check if this is an AJAX request
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         from flask import render_template_string
@@ -292,6 +293,10 @@ def client_log_report():
             {% endif %}
         ''', logs=logs)
         return jsonify({'html': html})
+
+    # If print mode, render the print template
+    if print_mode:
+        return render_template('client_log_report_print.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date, 'limit': limit})
 
     departments = get_departments()
     purposes = ["Receive Document/s Requested", "Submit Document/s", "Request Form/s", "Process Appointment", "Inquire", "OTHERS"]
