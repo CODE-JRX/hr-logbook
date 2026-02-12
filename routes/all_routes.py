@@ -151,6 +151,10 @@ def delete(id):
 def client_log():
     return render_template('client_log.html')
 
+@client_bp.route('/client-log-help')
+def client_log_help():
+    return render_template('client_log_help.html')
+
 
 
 @client_bp.route('/CSM-form', methods=['GET', 'POST'])

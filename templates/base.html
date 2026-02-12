@@ -18,6 +18,13 @@
   <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}"
     as="style">
   <link rel="preload" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" as="style">
+  <script>
+    // Prevent flash of light theme by setting theme immediately
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
   {% block head_extra %}{% endblock %}
 </head>
 
