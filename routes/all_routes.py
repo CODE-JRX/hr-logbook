@@ -165,7 +165,16 @@ def csm_form():
         try:
             # Basic fields
             control_no = request.form.get('control_no')
-            date_val = request.form.get('date')  # expected YYYY-MM-DD
+            date_val = request.form.get('date')  # received as MM/DD/YYYY, convert to YYYY-MM-DD
+            if date_val:
+                try:
+                    # Parse MM/DD/YYYY and convert to YYYY-MM-DD
+                    from datetime import datetime
+                    parsed_date = datetime.strptime(date_val, '%m/%d/%Y')
+                    date_val = parsed_date.strftime('%Y-%m-%d')
+                except ValueError:
+                    flash('Invalid date format. Please use MM/DD/YYYY.')
+                    return redirect(url_for('client.csm_form'))
             agency_visited = request.form.get('agency_visited')
             client_type = request.form.get('client_type')
             sex = request.form.get('sex')
