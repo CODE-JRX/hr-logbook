@@ -56,14 +56,37 @@
       height: clamp(32px, 8%, 56px);
       box-sizing: border-box;
       border-radius: 4px;
-      border-color: rgba(154,166,188,0.28);
+      border-color: rgba(154, 166, 188, 0.28);
       border-style: solid;
     }
 
-    #face-guide .top-left { top: 0; left: 0; border-right: none; border-bottom: none; }
-    #face-guide .top-right { top: 0; right: 0; border-left: none; border-bottom: none; }
-    #face-guide .bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; }
-    #face-guide .bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; }
+    #face-guide .top-left {
+      top: 0;
+      left: 0;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    #face-guide .top-right {
+      top: 0;
+      right: 0;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    #face-guide .bottom-right {
+      bottom: 0;
+      right: 0;
+      border-left: none;
+      border-top: none;
+    }
+
+    #face-guide .bottom-left {
+      bottom: 0;
+      left: 0;
+      border-right: none;
+      border-top: none;
+    }
 
     #previewBox {
       padding: .5rem;
@@ -119,7 +142,7 @@
           <label for="client_type" class="form-label"><i class="fas fa-tags"></i> Client Type <span
               class="text-danger">*</span></label>
           <select class="form-select" name="client_type" id="client_type" required>
-            <option value="">-- Select --</option>
+            <option value="">Select</option>
             <option value="EMPLOYEE">EMPLOYEE</option>
             <option value="STUDENT">STUDENT</option>
             <option value="APPLICANT">APPLICANT</option>
@@ -132,7 +155,7 @@
           <label for="gender" class="form-label"><i class="fas fa-venus-mars"></i> Gender <span
               class="text-danger">*</span></label>
           <select class="form-select" name="gender" id="gender" required>
-            <option value="">-- Select --</option>
+            <option value="">Select</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             <option value="Other">Other</option>

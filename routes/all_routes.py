@@ -567,12 +567,13 @@ def admin_login():
             flash('Signed in successfully')
             return redirect(url_for('client.admin_dashboard'))
         else:
-            flash('Invalid credentials')
-            return redirect(url_for('client.admin_login', type='password'))
+            # Redirect with error parameter for password login
+            return redirect(url_for('client.admin_login', type='password', error='invalid_credentials'))
 
     # If login type is password, show the regular login form
     if request.args.get('type') == 'password':
-        return render_template('admin/login.html')
+        error = request.args.get('error')
+        return render_template('admin/login.html', error=error)
     
     # Default to face login
     return render_template('admin/face_login.html')
@@ -618,7 +619,6 @@ def admin_face_login():
 def admin_logout():
     session.pop('admin_id', None)
     session.pop('admin_email', None)
-    flash('Signed out')
     return render_template('admin/logout.html')
 
 @client_bp.route('/admin/profile')

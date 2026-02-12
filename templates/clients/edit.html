@@ -23,7 +23,7 @@
                     <div class="mb-3">
                         <label class="form-label"><i class="fas fa-tags"></i> Client Type</label>
                         <select class="form-select" name="client_type">
-                            <option value="" {% if not client.client_type %}selected{% endif %}>-- Select --</option>
+                            <option value="" {% if not client.client_type %}selected{% endif %}>Select</option>
                             <option value="EMPLOYEE" {% if client.client_type=='EMPLOYEE' %}selected{% endif %}>EMPLOYEE
                             </option>
                             <option value="STUDENT" {% if client.client_type=='STUDENT' %}selected{% endif %}>STUDENT
@@ -38,7 +38,7 @@
                     <div class="mb-3">
                         <label class="form-label"><i class="fas fa-venus-mars"></i> Gender</label>
                         <select class="form-select" name="gender">
-                            <option value="" {% if not client.gender %}selected{% endif %}>-- Select --</option>
+                            <option value="" {% if not client.gender %}selected{% endif %}>Select</option>
                             <option value="Male" {% if client.gender=='Male' %}selected{% endif %}>Male</option>
                             <option value="Female" {% if client.gender=='Female' %}selected{% endif %}>Female</option>
                             <option value="Other" {% if client.gender=='Other' %}selected{% endif %}>Other</option>
