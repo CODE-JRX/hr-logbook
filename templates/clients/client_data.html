@@ -185,6 +185,15 @@ $(document).ready(function() {
   $('#limit').on('change', function() {
     updateTable();
   });
+
+  // Check if success=1 is in the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('success') === '1') {
+    // Show the success modal
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    document.getElementById('successMessage').textContent = 'Client record deleted successfully!';
+    successModal.show();
+  }
 });
 </script>
 {% endblock %}

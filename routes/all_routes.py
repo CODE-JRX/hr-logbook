@@ -134,17 +134,18 @@ def edit(id):
             gender=request.form.get("gender"),
             age=(int(request.form.get("age")) if request.form.get("age") not in (None, '') else None)
         )
-        return redirect(url_for("client.client_data"))
+        return redirect(url_for("client.edit", id=id, success=1))
 
     client = get_client_by_id(id)
-    return render_template("clients/edit.html", client=client)
+    success = request.args.get('success') == '1'
+    return render_template("clients/edit.html", client=client, success=success)
 
 
 @client_bp.route("/delete/<id>")
 @admin_required
 def delete(id):
     delete_client(id)
-    return redirect(url_for("client.client_data"))
+    return redirect(url_for("client.client_data", success=1))
 
 
 @client_bp.route('/client-log')
