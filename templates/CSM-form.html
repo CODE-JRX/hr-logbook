@@ -692,7 +692,7 @@
 
         // Set today's date as default
         const today = new Date();
-        const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+        const formattedDate = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}/${today.getFullYear()}`;
         document.getElementById('date').value = formattedDate;
 
         // Show/hide other service text input

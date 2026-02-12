@@ -95,7 +95,7 @@
           placeholder="Search by name or ID">
       </div>
       <div class="col-md-6">
-        <label for="limit" class="form-label"><i class="fas fa-list"></i> Rows per page</label>
+        <label for="limit" class="form-label"><i class="fas fa-list"></i>  Rows Displayed</label>
         <select class="form-select" id="limit">
           <option value="25" {% if limit=='25' %}selected{% endif %}>25</option>
           <option value="50" {% if limit=='50' %}selected{% endif %}>50</option>
@@ -112,12 +112,12 @@
         <table class="results-table">
           <thead>
             <tr>
-              <th>Client Type</th>
-              <th>Full Name</th>
-              <th>Gender</th>
-              <th>Age</th>
-              <th>Department</th>
-              <th>Actions</th>
+              <th>CLIENT TYPE</th>
+              <th>FULL NAME</th>
+              <th>GENDER</th>
+              <th>AGE</th>
+              <th>DEPARTMENT</th>
+              <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody id="clientTableBody">

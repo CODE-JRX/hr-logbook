@@ -7,11 +7,11 @@ def add_time_in(client_id, purpose=None, additional_info=None):
     # Ensure time is stored as Date object for queries
     now = datetime.now() # MongoDB native Date
     db.logs.insert_one({
-        "client_id": client_id,
+        "client_id": client_id.upper() if isinstance(client_id, str) else client_id,
         "time_in": now,
         "time_out": None,
-        "purpose": purpose,
-        "additional_info": additional_info or ""
+        "purpose": purpose.upper() if isinstance(purpose, str) else purpose,
+        "additional_info": (additional_info or "").upper() if isinstance(additional_info, str) else (additional_info or "")
     })
 
 
