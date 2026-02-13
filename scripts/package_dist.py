@@ -22,6 +22,7 @@ INCLUDE_FILES = [
     "requirements.txt",
     "README_DEPLOY.md",
     ".env.example",
+    "run_run.vbs",
 ]
 
 INCLUDE_DIRS = [

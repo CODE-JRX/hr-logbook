@@ -815,14 +815,19 @@
                         <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
                         <select id="gender" name="gender">
                             <option value="">All</option>
-                            <option value="Male" {% if filters.gender=='Male' %}selected{% endif %}>Male</option>
-                            <option value="Female" {% if filters.gender=='Female' %}selected{% endif %}>Female</option>
+                            {% for gen in genders %}
+                            <option value="{{ gen }}" {% if filters.gender==gen %}selected{% endif %}>{{ gen }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="filter-group">
                         <label for="region"><i class="fas fa-map-marker-alt"></i> Region:</label>
-                        <input type="text" id="region" name="region" placeholder="Enter region"
-                            value="{{ filters.region or '' }}">
+                        <select id="region" name="region">
+                            <option value="">All Regions</option>
+                            {% for reg in regions %}
+                            <option value="{{ reg }}" {% if filters.region==reg %}selected{% endif %}>{{ reg }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="filter-group">
                         <label for="age_min"><i class="fas fa-birthday-cake"></i> Age Min:</label>
@@ -857,7 +862,7 @@
                 <input type="text" class="form-control" id="searchInput" placeholder="Search by any column">
             </div>
             <div class="col-md-6 no-print">
-                <label for="limit" class="form-label"><i class="fas fa-list"></i> Rows per page</label>
+                <label for="limit" class="form-label"><i class="fas fa-list"></i>  Rows Displayed</label>
                 <form method="get" action="/csm-report"
                     style="display: inline-flex; align-items: center; gap: 8px; width: 100%;">
                     <select id="limit" name="limit" class="form-select" onchange="this.form.submit()">
@@ -884,14 +889,14 @@
                     <table id="csm-report" class="results-table">
                         <thead>
                             <tr>
-                                <th>Control #</th>
-                                <th>Date</th>
-                                <th>Client Type</th>
-                                <th>Gender</th>
-                                <th>Age</th>
-                                <th>Region</th>
-                                <th>Email</th>
-                                <th>Services</th>
+                                <th>CONTROL #</th>
+                                <th>DATE</th>
+                                <th>CLIENT TYPE</th>
+                                <th>GENDER</th>
+                                <th>AGE</th>
+                                <th>REGION</th>
+                                <th>EMAIL</th>
+                                <th>SERVICES</th>
                             </tr>
                         </thead>
                         <tbody>

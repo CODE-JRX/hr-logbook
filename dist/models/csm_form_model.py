@@ -15,19 +15,19 @@ def insert_csm_form(
     # We'll just insert a document with these fields.
     
     doc = {
-        "control_no": control_no,
+        "control_no": control_no.upper() if isinstance(control_no, str) else control_no,
         "date": date_val,
-        "agency_visited": agency_visited,
-        "client_type": client_type,
-        "sex": sex,
+        "agency_visited": agency_visited.upper() if isinstance(agency_visited, str) else agency_visited,
+        "client_type": client_type.upper() if isinstance(client_type, str) else client_type,
+        "sex": sex.upper() if isinstance(sex, str) else sex,
         "age": age,
-        "region_of_residence": region_of_residence,
-        "email": email,
-        "service_availed": service_availed,
-        "awareness_of_cc": awareness_of_cc,
-        "cc_of_this_office_was": cc_of_this_office_was,
-        "cc_help_you": cc_help_you,
-        "suggestion": suggestion,
+        "region_of_residence": region_of_residence.upper() if isinstance(region_of_residence, str) else region_of_residence,
+        "email": email.upper() if isinstance(email, str) else email,
+        "service_availed": service_availed.upper() if isinstance(service_availed, str) else service_availed,
+        "awareness_of_cc": awareness_of_cc.upper() if isinstance(awareness_of_cc, str) else awareness_of_cc,
+        "cc_of_this_office_was": cc_of_this_office_was.upper() if isinstance(cc_of_this_office_was, str) else cc_of_this_office_was,
+        "cc_help_you": cc_help_you.upper() if isinstance(cc_help_you, str) else cc_help_you,
+        "suggestion": suggestion.upper() if isinstance(suggestion, str) else suggestion,
         "created_at": datetime.now()
     }
 

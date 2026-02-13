@@ -16,7 +16,7 @@ def add_face_embedding(client_id, embedding_list):
     # I should store it as an array to respect the schema.
     
     db.face_embeddings.insert_one({
-        "client_id": client_id, # Schema calls it client_id
+        "client_id": client_id.upper() if isinstance(client_id, str) else client_id, # Schema calls it client_id
         "embedding_json": embedding_list # Store as list directly per schema
     })
 

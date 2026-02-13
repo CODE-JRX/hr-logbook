@@ -11,9 +11,9 @@ def add_admin(first_name, last_name, email, password, embedding_list=None):
     db = get_db()
     ph = generate_password_hash(password)
     doc = {
-        "first_name": first_name,
-        "last_name": last_name,
-        "email": email,
+        "first_name": first_name.upper() if isinstance(first_name, str) else first_name,
+        "last_name": last_name.upper() if isinstance(last_name, str) else last_name,
+        "email": email.upper() if isinstance(email, str) else email,
         "password_hash": ph,
         "created_at": datetime.now()
     }

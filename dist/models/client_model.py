@@ -40,12 +40,12 @@ def add_client(client_id, full_name, department=None, gender=None, age=None, cli
     """Insert a new client into the clients collection."""
     db = get_db()
     doc = {
-        "client_id": client_id,
-        "full_name": full_name,
-        "department": department,
-        "gender": gender,
+        "client_id": client_id.upper() if isinstance(client_id, str) else client_id,
+        "full_name": full_name.upper() if isinstance(full_name, str) else full_name,
+        "department": department.upper() if isinstance(department, str) else department,
+        "gender": gender.upper() if isinstance(gender, str) else gender,
         "age": age,
-        "client_type": client_type
+        "client_type": client_type.upper() if isinstance(client_type, str) else client_type
     }
     db.clients.insert_one(doc)
 
@@ -55,17 +55,17 @@ def update_client(id, client_id=None, full_name=None, department=None, gender=No
     db = get_db()
     fields = {}
     if client_id is not None:
-        fields["client_id"] = client_id
+        fields["client_id"] = client_id.upper() if isinstance(client_id, str) else client_id
     if full_name is not None:
-        fields["full_name"] = full_name
+        fields["full_name"] = full_name.upper() if isinstance(full_name, str) else full_name
     if department is not None:
-        fields["department"] = department
+        fields["department"] = department.upper() if isinstance(department, str) else department
     if gender is not None:
-        fields["gender"] = gender
+        fields["gender"] = gender.upper() if isinstance(gender, str) else gender
     if age is not None:
         fields["age"] = age
     if client_type is not None:
-        fields["client_type"] = client_type
+        fields["client_type"] = client_type.upper() if isinstance(client_type, str) else client_type
 
     if not fields:
         return
