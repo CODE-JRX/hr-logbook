@@ -26,7 +26,8 @@ def get_admin_by_email(email):
     db = get_db()
     # Normalize result to simpler dict if needed, or return None
     # We convert _id to str if we want consistency, but internal use mainly needs dict
-    admin = db.admins.find_one({"email": email})
+    email_upper = email.upper() if isinstance(email, str) else email
+    admin = db.admins.find_one({"email": email_upper})
     if admin:
         # Convert ObjectId to string for session/compatibility
         admin['id'] = str(admin['_id'])

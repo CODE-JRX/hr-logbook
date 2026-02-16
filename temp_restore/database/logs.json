@@ -1,0 +1,540 @@
+[
+  {
+    "_id": {
+      "$oid": "6982d2a29da99d5a6f4959a8"
+    },
+    "client_id": "TEST_FAIL_LOG",
+    "time_in": {
+      "$date": "2026-02-04T13:01:22.418Z"
+    },
+    "time_out": {
+      "$date": "2026-02-04T13:02:35.507Z"
+    },
+    "purpose": "PURPOSE",
+    "additional_info": ""
+  },
+  {
+    "_id": {
+      "$oid": "6982d2e0fbe293fd87740294"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-04T13:02:24.758Z"
+    },
+    "time_out": {
+      "$date": "2026-02-04T13:02:36.722Z"
+    },
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED",
+    "additional_info": "SDFGH"
+  },
+  {
+    "_id": {
+      "$oid": "69840119ff52426995de4b44"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T10:31:53.827Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T10:59:38.054Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "1QWSDFG"
+  },
+  {
+    "_id": {
+      "$oid": "698403c9ff52426995de4b45"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T10:43:21.817Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T10:59:37.024Z"
+    },
+    "purpose": "REQUEST FORM/S",
+    "additional_info": "QWEFG"
+  },
+  {
+    "_id": {
+      "$oid": "698407531f952ca691e8908b"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T10:58:27.870Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T10:59:36.145Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S, PROCESS APPOINTMENT",
+    "additional_info": "QWDFG"
+  },
+  {
+    "_id": {
+      "$oid": "698407751f952ca691e8908c"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T10:59:01.812Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T10:59:34.827Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S, PROCESS APPOINTMENT",
+    "additional_info": "QWDFG"
+  },
+  {
+    "_id": {
+      "$oid": "6984085aa6669204621d2a35"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T11:02:50.395Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:22.329Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S, PROCESS APPOINTMENT, INQUIRE",
+    "additional_info": "QWDFGH"
+  },
+  {
+    "_id": {
+      "$oid": "6984087fa6669204621d2a36"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T11:03:27.827Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:21.364Z"
+    },
+    "purpose": "REQUEST FORM/S",
+    "additional_info": "QWDFGHN"
+  },
+  {
+    "_id": {
+      "$oid": "69840a639d7838cd40612dc2"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T11:11:31.671Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:20.497Z"
+    },
+    "purpose": "INQUIRE",
+    "additional_info": "ASDFG"
+  },
+  {
+    "_id": {
+      "$oid": "69840c82e85fd4f38b0924ed"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T11:20:34.964Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:19.199Z"
+    },
+    "purpose": "PROCESS APPOINTMENT",
+    "additional_info": "DAD"
+  },
+  {
+    "_id": {
+      "$oid": "69840c89e85fd4f38b0924ee"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T11:20:41.596Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:17.148Z"
+    },
+    "purpose": "PROCESS APPOINTMENT",
+    "additional_info": "DASDA"
+  },
+  {
+    "_id": {
+      "$oid": "69840c92e85fd4f38b0924ef"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T11:20:50.213Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:16.197Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "DASDAD"
+  },
+  {
+    "_id": {
+      "$oid": "69840caae85fd4f38b0924f0"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T11:21:14.078Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:14.890Z"
+    },
+    "purpose": "PROCESS APPOINTMENT",
+    "additional_info": "DASDA"
+  },
+  {
+    "_id": {
+      "$oid": "69841b56449b88dbbc72ec32"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T12:23:50.462Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:12.847Z"
+    },
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED, SUBMIT DOCUMENT/S, REQUEST FORM/S, PROCESS APPOINTMENT",
+    "additional_info": "NA"
+  },
+  {
+    "_id": {
+      "$oid": "69841c0a449b88dbbc72ec33"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T12:26:50.638Z"
+    },
+    "time_out": {
+      "$date": "2026-02-05T14:41:10.469Z"
+    },
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED, INQUIRE",
+    "additional_info": "SADASD"
+  },
+  {
+    "_id": {
+      "$oid": "69843d6c196dea08e4f730c5"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-05T14:49:16.633Z"
+    },
+    "time_out": null,
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED, SUBMIT DOCUMENT/S, REQUEST FORM/S",
+    "additional_info": "WQEWQEQE"
+  },
+  {
+    "_id": {
+      "$oid": "6984400f196dea08e4f730cb"
+    },
+    "client_id": "3",
+    "time_in": {
+      "$date": "2026-02-05T15:00:31.436Z"
+    },
+    "time_out": null,
+    "purpose": "PROCESS APPOINTMENT, INQUIRE",
+    "additional_info": "XASDA"
+  },
+  {
+    "_id": {
+      "$oid": "69856f7d069cec8e55168d52"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-06T12:35:09.849Z"
+    },
+    "time_out": null,
+    "purpose": "REQUEST FORM/S",
+    "additional_info": "SADASD"
+  },
+  {
+    "_id": {
+      "$oid": "698571e7b4084e67d565df57"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-06T12:45:27.170Z"
+    },
+    "time_out": {
+      "$date": "2026-02-06T12:53:15.510Z"
+    },
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED, REQUEST FORM/S",
+    "additional_info": "DASDA"
+  },
+  {
+    "_id": {
+      "$oid": "698581e214bc277eff586228"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-06T13:53:38.226Z"
+    },
+    "time_out": null,
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED",
+    "additional_info": "DASD"
+  },
+  {
+    "_id": {
+      "$oid": "698587de94424d680955cfdf"
+    },
+    "client_id": "8",
+    "time_in": {
+      "$date": "2026-02-06T14:19:10.986Z"
+    },
+    "time_out": null,
+    "purpose": "OTHERS",
+    "additional_info": "REPORT TO WORK"
+  },
+  {
+    "_id": {
+      "$oid": "6985889b94424d680955cfe2"
+    },
+    "client_id": "9",
+    "time_in": {
+      "$date": "2026-02-06T14:22:19.019Z"
+    },
+    "time_out": null,
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "DTR FOR THE MONTH OF JANUARY 2026"
+  },
+  {
+    "_id": {
+      "$oid": "698589dc94424d680955cfe6"
+    },
+    "client_id": "10",
+    "time_in": {
+      "$date": "2026-02-06T14:27:40.382Z"
+    },
+    "time_out": {
+      "$date": "2026-02-06T14:27:53.278Z"
+    },
+    "purpose": "INQUIRE",
+    "additional_info": "LEAVE CREDITS"
+  },
+  {
+    "_id": {
+      "$oid": "698a877b9889e5a929e7f072"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-10T09:18:51.587Z"
+    },
+    "time_out": {
+      "$date": "2026-02-10T11:02:20.715Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "QWDFGH"
+  },
+  {
+    "_id": {
+      "$oid": "698a9fe859b58b932774dc56"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-10T11:03:04.363Z"
+    },
+    "time_out": {
+      "$date": "2026-02-10T11:08:42.927Z"
+    },
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED",
+    "additional_info": "SDFG"
+  },
+  {
+    "_id": {
+      "$oid": "698aa13759b58b932774dc57"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-10T11:08:39.323Z"
+    },
+    "time_out": {
+      "$date": "2026-02-10T11:08:41.585Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "DJKASDJA"
+  },
+  {
+    "_id": {
+      "$oid": "698ac96dc58bd752c3be9013"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-10T14:00:13.931Z"
+    },
+    "time_out": {
+      "$date": "2026-02-10T15:44:26.987Z"
+    },
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED",
+    "additional_info": "QWEFGH"
+  },
+  {
+    "_id": {
+      "$oid": "698ae1d77bb627cd3df0f689"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-10T15:44:23.111Z"
+    },
+    "time_out": {
+      "$date": "2026-02-10T15:44:25.753Z"
+    },
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED",
+    "additional_info": "DFGHN"
+  },
+  {
+    "_id": {
+      "$oid": "698b13c7ab372720faf6e0af"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-10T19:17:27.084Z"
+    },
+    "time_out": {
+      "$date": "2026-02-10T19:17:31.573Z"
+    },
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED, OTHERS",
+    "additional_info": "QWERFGHJKL"
+  },
+  {
+    "_id": {
+      "$oid": "698b1cc9ac0a4c71918a304d"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-10T19:55:53.952Z"
+    },
+    "time_out": {
+      "$date": "2026-02-10T20:20:11.080Z"
+    },
+    "purpose": "REQUEST FORM/S",
+    "additional_info": "ZXCVB"
+  },
+  {
+    "_id": {
+      "$oid": "698c12acf4f412ccce6fe31a"
+    },
+    "client_id": "698C11C8F4F412CCCE6FE317",
+    "time_in": {
+      "$date": "2026-02-11T13:25:00.597Z"
+    },
+    "time_out": {
+      "$date": "2026-02-11T13:29:30.797Z"
+    },
+    "purpose": "REQUEST FORM/S",
+    "additional_info": "QWERGH"
+  },
+  {
+    "_id": {
+      "$oid": "698c13b75a440a3f6b28cf71"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-11T13:29:27.641Z"
+    },
+    "time_out": {
+      "$date": "2026-02-11T13:29:29.690Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "SDF"
+  },
+  {
+    "_id": {
+      "$oid": "698c1996a579cf5b73ade8ed"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-11T13:54:30.564Z"
+    },
+    "time_out": null,
+    "purpose": "RECEIVE DOCUMENT/S REQUESTED",
+    "additional_info": "SDFGH"
+  },
+  {
+    "_id": {
+      "$oid": "698c2238b4f6ee32ff5756c1"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-11T14:31:20.949Z"
+    },
+    "time_out": null,
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "ASDFGH"
+  },
+  {
+    "_id": {
+      "$oid": "698c2a4dbf544adbeee33ec6"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-11T15:05:49.115Z"
+    },
+    "time_out": null,
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "QDFGH"
+  },
+  {
+    "_id": {
+      "$oid": "698c625ebff87c5a07c7c3d6"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-11T19:05:02.620Z"
+    },
+    "time_out": null,
+    "purpose": "REQUEST FORM/S",
+    "additional_info": "ADSFG"
+  },
+  {
+    "_id": {
+      "$oid": "698db1d230d90e9a566cb84e"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-12T18:56:18.527Z"
+    },
+    "time_out": {
+      "$date": "2026-02-12T20:26:34.236Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "WAQEQW"
+  },
+  {
+    "_id": {
+      "$oid": "698ea90110483554b7398f47"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-13T12:30:57.219Z"
+    },
+    "time_out": {
+      "$date": "2026-02-13T12:31:21.880Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "DTR-JAN"
+  },
+  {
+    "_id": {
+      "$oid": "698ea91510483554b7398f48"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-13T12:31:17.331Z"
+    },
+    "time_out": {
+      "$date": "2026-02-13T12:31:20.932Z"
+    },
+    "purpose": "SUBMIT DOCUMENT/S",
+    "additional_info": "DTR"
+  },
+  {
+    "_id": {
+      "$oid": "699269b45d059cb15f174b59"
+    },
+    "client_id": "1",
+    "time_in": {
+      "$date": "2026-02-16T08:49:56.043Z"
+    },
+    "time_out": null,
+    "purpose": "REQUEST FORM/S",
+    "additional_info": "LEAVE FORM"
+  }
+]

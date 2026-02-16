@@ -1,0 +1,112 @@
+[
+  {
+    "_id": {
+      "$oid": "6982d1acdec7868701cd74bc"
+    },
+    "client_id": "1",
+    "full_name": "JERIC G. BOLEZA",
+    "department": "IT",
+    "gender": "MALE",
+    "age": 31,
+    "client_type": "OTHER"
+  },
+  {
+    "_id": {
+      "$oid": "69843f3c196dea08e4f730c7"
+    },
+    "client_id": "2",
+    "full_name": "GARCIA",
+    "department": "BSIT",
+    "gender": "MALE",
+    "age": 20,
+    "client_type": "STUDENT"
+  },
+  {
+    "_id": {
+      "$oid": "69843fc0196dea08e4f730c9"
+    },
+    "client_id": "3",
+    "full_name": "ELIZA LIE CORPUZ",
+    "department": "IT ",
+    "gender": "OTHER",
+    "age": 67,
+    "client_type": "STUDENT"
+  },
+  {
+    "_id": {
+      "$oid": "698440bb196dea08e4f730cc"
+    },
+    "client_id": "4",
+    "full_name": "LYRICA JEN TIMBREZA",
+    "department": "IT ",
+    "gender": "PREFER NOT TO SAY",
+    "age": 45,
+    "client_type": "STUDENT"
+  },
+  {
+    "_id": {
+      "$oid": "69844103196dea08e4f730ce"
+    },
+    "client_id": "5",
+    "full_name": "REINELLE TRONGCO",
+    "department": "CMCS",
+    "gender": "FEMALE",
+    "age": 19,
+    "client_type": "STUDENT"
+  },
+  {
+    "_id": {
+      "$oid": "6984413d196dea08e4f730d0"
+    },
+    "client_id": "6",
+    "full_name": "ZHYREN SARMIENTO ",
+    "department": "IT",
+    "gender": "FEMALE",
+    "age": 18,
+    "client_type": "STUDENT"
+  },
+  {
+    "_id": {
+      "$oid": "6984414d196dea08e4f730d2"
+    },
+    "client_id": "7",
+    "full_name": "LADYBIE TACIS",
+    "department": "IT",
+    "gender": "FEMALE",
+    "age": 20,
+    "client_type": "STUDENT"
+  },
+  {
+    "_id": {
+      "$oid": "698587a094424d680955cfdd"
+    },
+    "client_id": "8",
+    "full_name": "RAMELDA B. BEGNALEN",
+    "department": "HUMAN RESOURCE MANAGEMENT UNIT",
+    "gender": "FEMALE",
+    "age": 58,
+    "client_type": "EMPLOYEE"
+  },
+  {
+    "_id": {
+      "$oid": "6985885c94424d680955cfe0"
+    },
+    "client_id": "9",
+    "full_name": "MILDRED B. GANNAPAO",
+    "department": "HUMAN RESOURCE MANAGEMENT UNIT",
+    "gender": "FEMALE",
+    "age": 45,
+    "client_type": "EMPLOYEE"
+  },
+  {
+    "_id": {
+      "$oid": "6985898994424d680955cfe4"
+    },
+    "client_id": "10",
+    "full_name": "ELIZABETH JOAN TALLEDO",
+    "department": "HUMAN RESOURCE MANAGEMENT UNIT",
+    "gender": "FEMALE",
+    "age": 50,
+    "client_type": "EMPLOYEE"
+  }
+]

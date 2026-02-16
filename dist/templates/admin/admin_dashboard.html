@@ -14,7 +14,31 @@
   <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h5>
-      <div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-sm btn-outline-success d-flex align-items-center" href="/admin/backup/download">
+          <i class="fas fa-download me-2"></i>
+          <span class="d-none d-md-inline">Backup Data</span>
+        </a>
+
+        <form action="/admin/backup/restore" method="POST" enctype="multipart/form-data" id="restoreForm">
+          <input type="file" name="backup_file" id="backupFile" style="display: none;" accept=".zip"
+            onchange="confirmRestore()">
+          <button type="button" class="btn btn-sm btn-outline-warning d-flex align-items-center"
+            onclick="document.getElementById('backupFile').click()">
+            <i class="fas fa-upload me-2"></i>
+            <span class="d-none d-md-inline">Restore Data</span>
+          </button>
+        </form>
+
+        <script>
+          function confirmRestore() {
+            if (confirm('WARNING: Restoring will REPLACE all current data with the backup data. This cannot be undone. Are you sure?')) {
+              document.getElementById('restoreForm').submit();
+            } else {
+              document.getElementById('backupFile').value = ''; // clear selection
+            }
+          }
+        </script>
         <a class="btn btn-sm btn-outline-primary d-flex align-items-center" href="/admin/signup">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
             viewBox="0 0 24 24" class="bi bi-plus" aria-hidden="true">

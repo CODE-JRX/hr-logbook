@@ -4,7 +4,7 @@ from functools import wraps
 from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials, get_admin_by_id, update_admin_password
 from models.client_model import *
 from models.client_model import search_clients
-from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding
+from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding, improve_client_embedding
 from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
 from models.csm_form_model import insert_csm_form, get_csm_forms_filtered
@@ -863,6 +863,34 @@ def log_action():
             # Convert list of purposes to comma-separated string
             purpose_str = ', '.join(purposes) if purposes else None
             add_time_in(client_id, purpose_str, additional_info)
+
+            # Handle Face Embedding Update (Adaptive Learning)
+            photo_data = data.get('photo_data')
+            if photo_data:
+                try:
+                    # Extract base64
+                    m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
+                    if m:
+                        img_b64 = m.group(2)
+                    else:
+                        img_b64 = photo_data.split(',', 1)[1] if ',' in photo_data else photo_data
+                    
+                    image_bytes = base64.b64decode(img_b64)
+                    
+                    # Load and encode
+                    img = face_recognition.load_image_file(io.BytesIO(image_bytes))
+                    encodings = face_recognition.face_encodings(img)
+                    
+                    if encodings:
+                        new_embedding = list(encodings[0])
+                        # Attempt to improve the embedding
+                        # We use a loose match_threshold (0.6) to ensure it's at least SOMEWHAT close to the user 
+                        # before we consider adding/merging it.
+                        result = improve_client_embedding(client_id, new_embedding)
+                        print(f"Embedding update for {client_id}: {result}")
+                except Exception as e:
+                    print(f"Failed to update embedding for {client_id}: {e}")
+
         else:
             # Do not update purpose on time_out; purpose should come from the original time_in
             add_time_out(client_id)

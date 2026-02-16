@@ -1,0 +1,362 @@
+[
+  {
+    "_id": {
+      "$oid": "6982d45094d97e5a66f102c7"
+    },
+    "control_no": "HR-S26-001",
+    "date": "2/4/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "CITIZEN",
+    "sex": "MALE",
+    "age": 1,
+    "region_of_residence": "CAR",
+    "email": "ADMIN@ADMIN.COM",
+    "service_availed": "SUBMISSION OF DOCUMENTS, INQUIRY",
+    "awareness_of_cc": 4,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "SUGGESTIONS ON HOW WE CAN FURTHER IMPROVE OUR SERVICES (OPTIONAL):",
+    "created_at": {
+      "$date": "2026-02-04T13:08:32.684Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "6982d4d294d97e5a66f102c8"
+    },
+    "control_no": "HR-S26-002",
+    "date": "2/4/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "CITIZEN",
+    "sex": "FEMALE",
+    "age": 1,
+    "region_of_residence": "CAR",
+    "email": "JETRIXBOLEZA@GMAIL.COM",
+    "service_availed": "REQUEST OF FORMS",
+    "awareness_of_cc": 4,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "SUGGESTIONS ON HOW WE CAN FURTHER IMPROVE OUR SERVICES (OPTIONAL):",
+    "created_at": {
+      "$date": "2026-02-04T13:10:42.608Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "6982ddb1f7c8a9f23fd7cd35"
+    },
+    "control_no": "HR-S26-003",
+    "date": "2/4/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "EMPLOYEE",
+    "sex": "MALE",
+    "age": 111,
+    "region_of_residence": "CAR",
+    "email": "JETRIXBOLEZA@GMAIL.COM",
+    "service_availed": "SUBMISSION OF DOCUMENTS",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "R IMPROVE OUR SERVICES (OPTIONAL):",
+    "created_at": {
+      "$date": "2026-02-04T13:48:33.693Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "69856fb8069cec8e55168d53"
+    },
+    "control_no": "HR-S26-004",
+    "date": "2/6/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "CITIZEN",
+    "sex": "FEMALE",
+    "age": 111,
+    "region_of_residence": "CAR",
+    "email": "ADMIN@ADMIN.COM",
+    "service_availed": "SUBMISSION OF DOCUMENTS, REQUEST OF FORMS",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "THER IMPROVE OUR SERVICES (OPTIONAL):",
+    "created_at": {
+      "$date": "2026-02-06T12:36:08.588Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "698588e994424d680955cfe3"
+    },
+    "control_no": "HR-S26-005",
+    "date": "2/6/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "EMPLOYEE",
+    "sex": "FEMALE",
+    "age": 45,
+    "region_of_residence": "CAR",
+    "email": "MILDRED_726@YAHOO.COM",
+    "service_availed": "REQUEST OF FORMS",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "",
+    "created_at": {
+      "$date": "2026-02-06T14:23:37.218Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "69859e60f6ad6a4494ac4d71"
+    },
+    "control_no": "HR-S26-006",
+    "date": "2/6/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "CITIZEN",
+    "sex": "MALE",
+    "age": 12,
+    "region_of_residence": "CAR",
+    "email": "DASDA@GMAIL.COM",
+    "service_availed": "SUBMISSION OF DOCUMENTS",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "",
+    "created_at": {
+      "$date": "2026-02-06T15:55:12.749Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "69859e9af6ad6a4494ac4d72"
+    },
+    "control_no": "HR-S26-007",
+    "date": "2/6/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "BUSINESS",
+    "sex": "FEMALE",
+    "age": 43,
+    "region_of_residence": "CAR",
+    "email": "JETRIXBOLEZA@GMAIL.COM",
+    "service_availed": "DHAHDHA",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "",
+    "created_at": {
+      "$date": "2026-02-06T15:56:10.665Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "69859f29f6ad6a4494ac4d73"
+    },
+    "control_no": "HR-S26-008",
+    "date": "2/6/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "EMPLOYEE",
+    "sex": "MALE",
+    "age": 45,
+    "region_of_residence": "CAR",
+    "email": "HRADMIN@HRLOGBOOK.EDU",
+    "service_availed": "PROCESSING OF APPOINTMENTS",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "",
+    "created_at": {
+      "$date": "2026-02-06T15:58:33.099Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "6985a0b4f6ad6a4494ac4d75"
+    },
+    "control_no": "HR-S26-009",
+    "date": "2/6/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "EMPLOYEE",
+    "sex": "MALE",
+    "age": 65,
+    "region_of_residence": "R3",
+    "email": "",
+    "service_availed": "SUBMISSION OF DOCUMENTS",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "",
+    "created_at": {
+      "$date": "2026-02-06T16:05:08.245Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "698db6928e2384231e46a002"
+    },
+    "control_no": "HR-S26-010",
+    "date": "02/12/2026",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "BUSINESS",
+    "sex": "MALE",
+    "age": 21,
+    "region_of_residence": "CAR",
+    "email": "",
+    "service_availed": "SUBMISSION OF DOCUMENTS, DTR",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "FURTHER IMPROVE OUR SERVICES (OPTIONAL):",
+    "created_at": {
+      "$date": "2026-02-12T19:16:34.375Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "698dc048cab8fb8b3b6d893b"
+    },
+    "control_no": "HR-S26-011",
+    "date": "2026-02-12",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "BUSINESS",
+    "sex": "FEMALE",
+    "age": 12,
+    "region_of_residence": "CAR",
+    "email": "",
+    "service_availed": "SUBMISSION OF DOCUMENTS",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "",
+    "created_at": {
+      "$date": "2026-02-12T19:58:00.994Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  },
+  {
+    "_id": {
+      "$oid": "698dc090cab8fb8b3b6d893c"
+    },
+    "control_no": "HR-S26-012",
+    "date": "2026-02-12",
+    "agency_visited": "HUMAN RESOURCES MANAGEMENT UNIT",
+    "client_type": "EMPLOYEE",
+    "sex": "FEMALE",
+    "age": 30,
+    "region_of_residence": "CAR",
+    "email": "JERICBOLEZA@GMAIL.COM",
+    "service_availed": "PROCESSING OF APPOINTMENTS",
+    "awareness_of_cc": 1,
+    "cc_of_this_office_was": 1,
+    "cc_help_you": 1,
+    "suggestion": "",
+    "created_at": {
+      "$date": "2026-02-12T19:59:12.418Z"
+    },
+    "sdq0": 5,
+    "sdq1": 5,
+    "sdq2": 5,
+    "sdq3": 5,
+    "sdq4": 5,
+    "sdq5": 5,
+    "sdq6": 5,
+    "sdq7": 5,
+    "sdq8": 5
+  }
+]

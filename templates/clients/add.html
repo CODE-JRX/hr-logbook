@@ -117,6 +117,10 @@
     .message-overlay.error {
       background-color: rgba(220, 53, 69, 1);
     }
+
+    .message-overlay.normal {
+      background-color: rgba(13, 110, 253, 0.9);
+    }
   </style>
   {% endblock %}
   <div class="card-header d-flex justify-content-between align-items-center">
@@ -178,7 +182,8 @@
           <label class="form-label"><i class="fas fa-camera"></i> Photo <span class="text-danger">*</span></label>
           <div class="row g-2">
             <div class="col-md-6">
-              <div class="mx-auto shadow-sm rounded media-frame" id="cameraCanvas" style="cursor: pointer;" title="Click to start camera">
+              <div class="mx-auto shadow-sm rounded media-frame" id="cameraCanvas" style="cursor: pointer;"
+                title="Click to start camera">
                 <video id="video" autoplay playsinline style="display:none; border-radius:6px;"></video>
 
                 <!-- face position guide (subtle broken square corners) -->
@@ -197,7 +202,8 @@
               </div>
 
               <div class="mt-3 text-center">
-                <button id="camera-action" type="button" class="btn btn-outline-primary me-2"><i class="fas fa-play"></i> Start
+                <button id="camera-action" type="button" class="btn btn-outline-primary me-2"><i
+                    class="fas fa-play"></i> Start
                   Camera</button>
                 <button id="file-toggle" type="button" class="btn btn-outline-secondary"><i class="fas fa-upload"></i>
                   Use file</button>
@@ -224,8 +230,8 @@
               <div class="mt-3">
                 <button id="saveBtn" type="submit" class="btn btn-outline-primary" disabled><i class="fas fa-save"></i>
                   Save</button>
-                <button id="cancelBtn" type="button" class="btn btn-outline-secondary ms-2"><i
-                    class="fas fa-times"></i> Cancel</button>
+                <button id="cancelBtn" type="button" class="btn btn-outline-secondary ms-2"><i class="fas fa-times"></i>
+                  Cancel</button>
               </div>
             </div>
           </div>
@@ -334,9 +340,13 @@
         ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
         // display in preview box (single canonical preview)
-        const placeholder = previewBox.querySelector('div[style*="text-align:center"]');
-        if (placeholder) placeholder.remove();
-        const img = document.createElement('img'); img.src = dataUrl; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover'; previewBox.appendChild(img);
+        // Clear previous preview safely (remove all children except overlay)
+        // But simplest way to ensure clean state including overlay is:
+        previewBox.innerHTML = '';
+        previewBox.appendChild(messageOverlay);
+
+        const img = document.createElement('img'); img.src = dataUrl; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
+        previewBox.insertBefore(img, messageOverlay);
         video.style.display = 'none';
         actionBtn.textContent = 'Stop Camera';
         cameraState = 'captured';
@@ -365,6 +375,7 @@
         actionBtn.textContent = 'Start Camera';
         cameraState = 'stopped';
         previewBox.innerHTML = '<div style="text-align:center; width:100%;"> <span class="text-muted">No image captured</span></div>';
+        previewBox.appendChild(messageOverlay);
         hideMessage(); // Hide any existing message
         validateForm();
         return;
@@ -399,31 +410,54 @@
     }
   });
 
-  fileInput && fileInput.addEventListener('change', async (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    if (f.size > 5 * 1024 * 1024) { alert('File too large (max 5MB)'); return; }
-    const reader = new FileReader();
-    reader.onload = async function (ev) {
-      const data = ev.target.result;
-      photoInput.value = data;
-      const placeholder = previewBox.querySelector('div[style*="text-align:center"]');
-      if (placeholder) placeholder.remove();
-      const img = document.createElement('img'); img.src = data; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover'; previewBox.appendChild(img);
+  // Allow re-selecting the same file
+  if (fileInput) {
+    fileInput.addEventListener('click', function () {
+      this.value = '';
+    });
 
-      // Verify face
-      const verificationResult = await verifyFace(data);
-      if (verificationResult.ok) {
-        faceVerified = true;
-        showMessage('Face verified successfully!', 'success');
-      } else {
-        faceVerified = false;
-        showMessage(verificationResult.message, 'error');
-      }
-      validateForm();
-    };
-    reader.readAsDataURL(f);
-  });
+    fileInput.addEventListener('change', async (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      if (f.size > 5 * 1024 * 1024) { alert('File too large (max 5MB)'); return; }
+
+      // Reset state immediately
+      faceVerified = false;
+      photoInput.value = '';
+      validateForm(); // Disable save button
+      hideMessage();
+
+      const reader = new FileReader();
+      reader.onload = async function (ev) {
+        const data = ev.target.result;
+        photoInput.value = data;
+
+        // Clear previous preview
+        previewBox.innerHTML = '';
+        previewBox.appendChild(messageOverlay);
+
+        const img = document.createElement('img');
+        img.src = data;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        previewBox.insertBefore(img, messageOverlay);
+
+        // Verify face
+        showMessage('Verifying face...', 'normal');
+        const verificationResult = await verifyFace(data);
+        if (verificationResult.ok) {
+          faceVerified = true;
+          showMessage('Face verified successfully!', 'success');
+        } else {
+          faceVerified = false;
+          showMessage(verificationResult.message, 'error');
+        }
+        validateForm();
+      };
+      reader.readAsDataURL(f);
+    });
+  }
 
   // Function to verify face using the server endpoint
   async function verifyFace(photoData) {
@@ -478,6 +512,7 @@
     faceVerified = false;
     // Clear preview box
     previewBox.innerHTML = '<div style="text-align:center; width:100%;"> <span class="text-muted">No image captured | Preview</span></div>';
+    previewBox.appendChild(messageOverlay);
     // Hide message overlay
     hideMessage();
     // Reset file input
