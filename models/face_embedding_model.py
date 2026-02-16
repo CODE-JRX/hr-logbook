@@ -6,19 +6,20 @@ import numpy as np
 def add_face_embedding(client_id, embedding_list):
     """Insert a face embedding (list of floats) as JSON into face_embeddings."""
     db = get_db()
-    # embedding_list is already a list of floats
-    # In MongoDB we can store attributes directly, avoiding the JSON string if we want,
-    # but to minimize friction with existing logic (if any relies on structure),
-    # we will store it. However, Mongo supports array natively.
-    # The Schema script says: embedding_json: { bsonType: "array", items: { bsonType: "double" } }
-    # So we should store it as an ARRAY, not a JSON string.
-    # But wait, existing code passed `json.dumps`. The schema says `embedding_json` is an array.
-    # I should store it as an array to respect the schema.
     
     db.face_embeddings.insert_one({
         "client_id": client_id.upper() if isinstance(client_id, str) else client_id, # Schema calls it client_id
         "embedding_json": embedding_list # Store as list directly per schema
     })
+
+def update_face_embedding(client_id, embedding_list):
+    """Update or insert a face embedding."""
+    db = get_db()
+    db.face_embeddings.update_one(
+        {"client_id": client_id.upper() if isinstance(client_id, str) else client_id},
+        {"$set": {"embedding_json": embedding_list}},
+        upsert=True
+    )
 
 
 def get_embedding_by_client_id(client_id):

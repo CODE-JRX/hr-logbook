@@ -178,7 +178,7 @@
           <label class="form-label"><i class="fas fa-camera"></i> Photo <span class="text-danger">*</span></label>
           <div class="row g-2">
             <div class="col-md-6">
-              <div class="mx-auto shadow-sm rounded media-frame">
+              <div class="mx-auto shadow-sm rounded media-frame" id="cameraCanvas" style="cursor: pointer;" title="Click to start camera">
                 <video id="video" autoplay playsinline style="display:none; border-radius:6px;"></video>
 
                 <!-- face position guide (subtle broken square corners) -->
@@ -253,6 +253,7 @@
   const saveBtn = document.getElementById('saveBtn');
   const cancelBtn = document.getElementById('cancelBtn');
   const messageOverlay = document.getElementById('message-overlay');
+  const cameraCanvas = document.getElementById('cameraCanvas');
   let stream = null;
   let cameraState = 'stopped'; // 'stopped' | 'started' | 'captured'
   let faceVerified = false; // Track if face has been verified
@@ -281,7 +282,8 @@
     }
   }
 
-  actionBtn.addEventListener('click', async () => {
+  // Combined camera action function
+  async function cameraAction() {
     try {
       if (cameraState === 'stopped') {
         stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
@@ -370,7 +372,19 @@
     } catch (err) {
       alert('Camera error: ' + err.message);
     }
-  });
+  }
+
+  // Button click handler
+  actionBtn.addEventListener('click', cameraAction);
+
+  // Make the entire camera canvas clickable
+  if (cameraCanvas) {
+    cameraCanvas.addEventListener('click', (e) => {
+      // Prevent triggering if clicking on the button itself to avoid double execution
+      if (e.target === actionBtn) return;
+      cameraAction();
+    });
+  }
 
   // File upload fallback
   fileToggle.addEventListener('click', () => {

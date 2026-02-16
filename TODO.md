@@ -1,10 +1,22 @@
-# TODO: Ensure all string data stored in database is uppercase
+# TODO - Add Camera Button Functionality to add.html
 
-## Tasks
-- [x] Modify `add_client` in `models/client_model.py` to convert string parameters to uppercase
-- [x] Modify `update_client` in `models/client_model.py` to convert string values in fields to uppercase
-- [x] Modify `add_admin` in `models/admin_model.py` to convert first_name, last_name, email to uppercase
-- [x] Modify `insert_csm_form` in `models/csm_form_model.py` to convert all string fields to uppercase
-- [x] Modify `add_time_in` in `models/log_model.py` to convert client_id, purpose, additional_info to uppercase
-- [x] Modify `add_face_embedding` in `models/face_embedding_model.py` to convert client_id to uppercase
-- [x] Test the changes by running the application and verifying data in database
+## Plan:
+1. [ ] HTML Structure Changes:
+   - [ ] Move `#camera-action` button inside `.media-frame` container
+   - [ ] Add `scan-line` div for scan animation effect
+   - [ ] Add `preview` img element for displaying captured image
+   - [ ] Add `camera-error` div for error messages
+   - [ ] Add `title` attribute to the button
+
+2. [ ] CSS Changes:
+   - [ ] Add positioning styles for button inside media-frame
+   - [ ] Add scan-line animation keyframes and styles
+
+3. [ ] JavaScript Changes:
+   - [ ] Add sound functions (playSuccessSound, playErrorSound)
+   - [ ] Update button click handler to use cameraAction function
+   - [ ] Add click handler for the entire media-frame
+   - [ ] Add scan-line animation logic when capturing
+   - [ ] Update to show preview img instead of creating img element dynamically
+
+4. [ ] Test the implementation
