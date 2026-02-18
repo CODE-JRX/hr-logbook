@@ -1,0 +1,75 @@
+--- Backup Diagnostics ---
+Successfully connected to DB.
+Table: admins
+  Rows: 4
+  Sample row types:
+    id: <class 'int'>
+    first_name: <class 'str'>
+    last_name: <class 'str'>
+    email: <class 'str'>
+    password_hash: <class 'str'>
+    face_embedding: <class 'str'>
+    created_at: <class 'datetime.datetime'>
+    updated_at: <class 'datetime.datetime'>
+  Successfully serialized.
+Table: clients
+  Rows: 10
+  Sample row types:
+    id: <class 'int'>
+    client_id: <class 'str'>
+    full_name: <class 'str'>
+    department: <class 'str'>
+    gender: <class 'str'>
+    age: <class 'int'>
+    client_type: <class 'str'>
+  Successfully serialized.
+Table: csm_form
+  Rows: 2
+  Sample row types:
+    id: <class 'int'>
+    control_no: <class 'str'>
+    date: <class 'datetime.date'>
+    agency_visited: <class 'str'>
+    client_type: <class 'str'>
+    sex: <class 'str'>
+    age: <class 'int'>
+    region_of_residence: <class 'str'>
+    email: <class 'str'>
+    service_availed: <class 'str'>
+    awareness_of_cc: <class 'int'>
+    cc_of_this_office_was: <class 'int'>
+    cc_help_you: <class 'int'>
+    sdq0: <class 'int'>
+    sdq1: <class 'int'>
+    sdq2: <class 'int'>
+    sdq3: <class 'int'>
+    sdq4: <class 'int'>
+    sdq5: <class 'int'>
+    sdq6: <class 'int'>
+    sdq7: <class 'int'>
+    sdq8: <class 'int'>
+    suggestion: <class 'str'>
+    created_at: <class 'datetime.datetime'>
+  Successfully serialized.
+Table: face_embeddings
+  Rows: 22
+  Sample row types:
+    id: <class 'int'>
+    client_id: <class 'str'>
+    embedding_json: <class 'str'>
+    updated_at: <class 'datetime.datetime'>
+  Successfully serialized.
+Table: logs
+  Rows: 81
+  Sample row types:
+    id: <class 'int'>
+    client_id: <class 'str'>
+    time_in: <class 'datetime.datetime'>
+    time_out: <class 'datetime.datetime'>
+    purpose: <class 'str'>
+    additional_info: <class 'str'>
+  Successfully serialized.
+Added 185 files from Clients
+Added 2 files from Admins
+Backup zip created in memory.
+Zip size: 8290219 bytes

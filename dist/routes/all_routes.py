@@ -18,7 +18,6 @@ import io
 import face_recognition
 import numpy as np
 from datetime import datetime
-from bson.objectid import ObjectId
 
 client_bp = Blueprint("client", __name__)
 
@@ -140,7 +139,7 @@ def edit(id):
         if photo_data:
             try:
                 # Need to use the ACTUAL client_id string (e.g. "HR-S26-001") for file name and embedding
-                # The 'id' param is the MongoDB ObjectId string.
+                # Actual client_id string (e.g. "HR-S26-001")
                 # We can fetch the client to get the string ID.
                 # Although we just updated it, so we can use the form data or fetch fresh.
                 # Form data might have it as hidden field 'client_id' IF we trusted it, 
@@ -623,7 +622,11 @@ def admin_signup():
                 embedding = list(encodings[0])
                 # Update admin with embedding
                 db = get_db()
-                db.admins.update_one({"_id": ObjectId(admin_id)}, {"$set": {"face_embedding": embedding}})
+                cursor = db.cursor()
+                cursor.execute("UPDATE admins SET face_embedding = %s WHERE id = %s", (json.dumps(embedding), admin_id))
+                db.commit()
+                cursor.close()
+                db.close()
             else:
                 # No face found; optional: remove file or keep for debug
                 flash("No face detected in the uploaded photo; embedding not saved.")
@@ -686,11 +689,17 @@ def admin_face_login():
         if admin_id:
             # Get admin details
             db = get_db()
-            admin = db.admins.find_one({"_id": ObjectId(admin_id)})
+            cursor = db.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM admins WHERE id = %s", (admin_id,))
+            admin = cursor.fetchone()
             if admin:
-                session['admin_id'] = admin_id
+                session['admin_id'] = str(admin['id'])
                 session['admin_email'] = admin.get('email')
+                cursor.close()
+                db.close()
                 return jsonify({'ok': True}), 200
+            cursor.close()
+            db.close()
         return jsonify({'ok': False, 'error': 'Face not recognized'}), 200
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
@@ -747,6 +756,7 @@ def identify():
     # Expects form field 'photo_data' (data URL)
     photo_data = request.form.get('photo_data')
     if not photo_data:
+        print("Identify Debug: No photo_data provided")
         return jsonify({'ok': False, 'error': 'No photo_data provided'}), 400
 
     try:
@@ -763,6 +773,9 @@ def identify():
         from PIL import Image
         img = face_recognition.load_image_file(io.BytesIO(image_bytes))
         encodings = face_recognition.face_encodings(img)
+        
+        print(f"Identify Debug: Found {len(encodings)} face(encodings)")
+
         if not encodings:
             return jsonify({'ok': False, 'error': 'No face detected'}), 200
 
@@ -770,10 +783,13 @@ def identify():
         client_id, distance = find_best_match(encoding)
         if client_id:
             cli = get_client_by_client_id(client_id)
+            print(f"Identify Debug: Best match: {client_id} ({cli.get('full_name') if cli else 'Unknown'}) with distance {distance}")
             return jsonify({'ok': True, 'client_id': client_id, 'full_name': cli.get('full_name') if cli else None, 'gender': cli.get('gender') if cli else None, 'age': cli.get('age') if cli else None, 'distance': distance}), 200
         else:
+            print("Identify Debug: No matching client found below threshold")
             return jsonify({'ok': False, 'error': 'No matching client found'}), 200
     except Exception as e:
+        print(f"Identify Debug Error: {e}")
         return jsonify({'ok': False, 'error': str(e)}), 500
 
 

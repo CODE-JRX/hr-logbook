@@ -2,11 +2,18 @@ import os
 import zipfile
 import io
 import json
-from datetime import datetime
-from flask import Blueprint, send_file, flash, redirect, url_for, current_app, session
-from bson import json_util
+from datetime import datetime, date
+from flask import Blueprint, send_file, flash, redirect, url_for, current_app, session, request
 from db import get_db
 from functools import wraps
+import mysql.connector
+
+# Custom JSON encoder to handle datetime and date
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        return super(DateTimeEncoder, self).default(obj)
 
 # Define local admin_required to avoid circular/complex imports with all_routes
 def admin_required(f):
@@ -20,24 +27,26 @@ def admin_required(f):
 
 backup_bp = Blueprint('backup', __name__)
 
+TABLES = ['admins', 'clients', 'csm_form', 'face_embeddings', 'logs']
+
 @backup_bp.route('/admin/backup/download')
 @admin_required
 def download_backup():
     try:
         db = get_db()
+        cursor = db.cursor(dictionary=True)
         
         # Create in-memory zip file
         memory_file = io.BytesIO()
         with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
             
-            # 1. Dump MongoDB Collections
-            collections = db.list_collection_names()
-            for col_name in collections:
-                # Fetch all documents
-                data = list(db[col_name].find())
-                # Serialize to JSON using bson.json_util (handles ObjectIds, Dates, etc.)
-                json_data = json_util.dumps(data, indent=2)
-                zf.writestr(f"database/{col_name}.json", json_data)
+            # 1. Dump MySQL Tables
+            for table in TABLES:
+                cursor.execute(f"SELECT * FROM {table}")
+                data = cursor.fetchall()
+                # Serialize to JSON
+                json_data = json.dumps(data, indent=2, cls=DateTimeEncoder)
+                zf.writestr(f"database/{table}.json", json_data)
                 
             # 2. Add Clients images
             clients_dir = os.path.join(os.getcwd(), 'Clients')
@@ -45,7 +54,6 @@ def download_backup():
                 for root, dirs, files in os.walk(clients_dir):
                     for file in files:
                         file_path = os.path.join(root, file)
-                        # Archive name: images/Clients/filename.jpg
                         arcname = os.path.join('images/Clients', os.path.relpath(file_path, clients_dir))
                         zf.write(file_path, arcname)
                         
@@ -55,10 +63,11 @@ def download_backup():
                 for root, dirs, files in os.walk(admins_dir):
                     for file in files:
                         file_path = os.path.join(root, file)
-                        # Archive name: images/Admins/filename.jpg
                         arcname = os.path.join('images/Admins', os.path.relpath(file_path, admins_dir))
                         zf.write(file_path, arcname)
 
+        cursor.close()
+        db.close()
         memory_file.seek(0)
         
         filename = f"backup_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.zip"
@@ -78,7 +87,6 @@ def download_backup():
 @backup_bp.route('/admin/backup/restore', methods=['POST'])
 @admin_required
 def restore_backup():
-    from flask import request
     import shutil
     
     if 'backup_file' not in request.files:
@@ -93,6 +101,7 @@ def restore_backup():
     if file and file.filename.endswith('.zip'):
         try:
             db = get_db()
+            cursor = db.cursor()
             
             # Save upload temporarily
             temp_dir = os.path.join(os.getcwd(), 'temp_restore')
@@ -109,49 +118,70 @@ def restore_backup():
             # Restore Database
             db_dir = os.path.join(temp_dir, 'database')
             if os.path.exists(db_dir):
-                for json_file in os.listdir(db_dir):
-                    if json_file.endswith('.json'):
-                        col_name = json_file.replace('.json', '')
-                        file_path = os.path.join(db_dir, json_file)
-                        
+                # We should restore in an order that respects foreign keys
+                # clients -> face_embeddings/logs
+                # admins/csm_form (independent)
+                
+                # Preferred order
+                RESTORE_ORDER = ['admins', 'clients', 'csm_form', 'face_embeddings', 'logs']
+                
+                # Disable FK checks temporarily for easier restore
+                cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+                
+                for table in RESTORE_ORDER:
+                    json_file = f"{table}.json"
+                    file_path = os.path.join(db_dir, json_file)
+                    
+                    if os.path.exists(file_path):
                         with open(file_path, 'r') as f:
-                            data = json_util.loads(f.read())
-                            
-                        # Drop and Re-insert
-                        db[col_name].drop()
+                            data = json.loads(f.read())
+                        
+                        # Clear table
+                        cursor.execute(f"TRUNCATE TABLE {table}")
+                        
                         if data:
-                            db[col_name].insert_many(data)
+                            # Insert rows
+                            columns = data[0].keys()
+                            query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))})"
+                            
+                            rows_to_insert = []
+                            for row in data:
+                                # JSON doesn't distinguish between None and missing, 
+                                # but our dump has all keys.
+                                values = []
+                                for col in columns:
+                                    val = row.get(col)
+                                    # Convert ISO strings back to datetime if necessary?
+                                    # mysql-connector usually handles ISO strings for DATETIME if format is correct,
+                                    # but let's see. 
+                                    values.append(val)
+                                rows_to_insert.append(tuple(values))
+                                
+                            cursor.executemany(query, rows_to_insert)
+                
+                cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+                db.commit()
 
-            # Restore Images
-            # Clients
-            clients_src = os.path.join(temp_dir, 'images', 'Clients')
-            clients_dst = os.path.join(os.getcwd(), 'Clients')
-            if os.path.exists(clients_src):
-                if not os.path.exists(clients_dst):
-                    os.makedirs(clients_dst)
-                for file_name in os.listdir(clients_src):
-                     src_file = os.path.join(clients_src, file_name)
-                     dst_file = os.path.join(clients_dst, file_name)
-                     shutil.copy2(src_file, dst_file)
-
-            # Admins
-            admins_src = os.path.join(temp_dir, 'images', 'Admins')
-            admins_dst = os.path.join(os.getcwd(), 'Admins')
-            if os.path.exists(admins_src):
-                if not os.path.exists(admins_dst):
-                    os.makedirs(admins_dst)
-                for file_name in os.listdir(admins_src):
-                     src_file = os.path.join(admins_src, file_name)
-                     dst_file = os.path.join(admins_dst, file_name)
-                     shutil.copy2(src_file, dst_file)
+            # Restore Images (Admins/Clients)
+            for folder in ['Clients', 'Admins']:
+                src_folder = os.path.join(temp_dir, 'images', folder)
+                dst_folder = os.path.join(os.getcwd(), folder)
+                if os.path.exists(src_folder):
+                    os.makedirs(dst_folder, exist_ok=True)
+                    for file_name in os.listdir(src_folder):
+                        shutil.copy2(os.path.join(src_folder, file_name), os.path.join(dst_folder, file_name))
 
             # Cleanup
             shutil.rmtree(temp_dir)
+            cursor.close()
+            db.close()
             
             flash('System restored successfully')
             
         except Exception as e:
             flash(f"Restore failed: {str(e)}")
+            if 'db' in locals():
+                db.rollback()
             
     else:
         flash('Invalid file format. Please upload a ZIP file.')

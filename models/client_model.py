@@ -1,201 +1,205 @@
 from db import get_db
-from bson.objectid import ObjectId
 import os
+import mysql.connector
 
 def get_all_clients():
-    """Return all rows from the clients collection."""
     db = get_db()
-    # Sort by _id desc (approx like id desc)
-    cursor = db.clients.find().sort("_id", -1)
-    clients = []
-    for doc in cursor:
-        doc['id'] = str(doc['_id'])
-        clients.append(doc)
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM clients ORDER BY id DESC")
+    clients = cursor.fetchall()
+    
+    for client in clients:
+        client['id'] = str(client['id'])
+    
+    cursor.close()
+    db.close()
     return clients
 
-
 def get_client_by_id(id):
-    """Return a single client by the MongoDB _id string."""
     db = get_db()
-    try:
-        oid = ObjectId(id)
-    except:
-        return None
-    client = db.clients.find_one({"_id": oid})
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM clients WHERE id = %s", (id,))
+    client = cursor.fetchone()
+    
     if client:
-        client['id'] = str(client['_id'])
+        client['id'] = str(client['id'])
+    
+    cursor.close()
+    db.close()
     return client
-
 
 def get_client_by_client_id(client_id):
-    """Return a single client by the `client_id` field."""
     db = get_db()
-    client = db.clients.find_one({"client_id": client_id})
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM clients WHERE client_id = %s", (client_id,))
+    client = cursor.fetchone()
+    
     if client:
-        client['id'] = str(client['_id'])
+        client['id'] = str(client['id'])
+    
+    cursor.close()
+    db.close()
     return client
 
-
 def add_client(client_id, full_name, department=None, gender=None, age=None, client_type=None):
-    """Insert a new client into the clients collection."""
     db = get_db()
-    doc = {
-        "client_id": client_id.upper() if isinstance(client_id, str) else client_id,
-        "full_name": full_name.upper() if isinstance(full_name, str) else full_name,
-        "department": department.upper() if isinstance(department, str) else department,
-        "gender": gender.upper() if isinstance(gender, str) else gender,
-        "age": age,
-        "client_type": client_type.upper() if isinstance(client_type, str) else client_type
-    }
-    db.clients.insert_one(doc)
-
+    cursor = db.cursor()
+    query = """INSERT INTO clients (client_id, full_name, department, gender, age, client_type)
+               VALUES (%s, %s, %s, %s, %s, %s)"""
+    values = (
+        client_id.upper() if isinstance(client_id, str) else client_id,
+        full_name.upper() if isinstance(full_name, str) else full_name,
+        department.upper() if isinstance(department, str) else department,
+        gender.upper() if isinstance(gender, str) else gender,
+        age,
+        client_type.upper() if isinstance(client_type, str) else client_type
+    )
+    cursor.execute(query, values)
+    db.commit()
+    cursor.close()
+    db.close()
 
 def update_client(id, client_id=None, full_name=None, department=None, gender=None, age=None, client_type=None):
-    """Update fields for a client."""
     db = get_db()
-    fields = {}
+    cursor = db.cursor()
+    
+    updates = []
+    values = []
+    
     if client_id is not None:
-        fields["client_id"] = client_id.upper() if isinstance(client_id, str) else client_id
+        updates.append("client_id = %s")
+        values.append(client_id.upper() if isinstance(client_id, str) else client_id)
     if full_name is not None:
-        fields["full_name"] = full_name.upper() if isinstance(full_name, str) else full_name
+        updates.append("full_name = %s")
+        values.append(full_name.upper() if isinstance(full_name, str) else full_name)
     if department is not None:
-        fields["department"] = department.upper() if isinstance(department, str) else department
+        updates.append("department = %s")
+        values.append(department.upper() if isinstance(department, str) else department)
     if gender is not None:
-        fields["gender"] = gender.upper() if isinstance(gender, str) else gender
+        updates.append("gender = %s")
+        values.append(gender.upper() if isinstance(gender, str) else gender)
     if age is not None:
-        fields["age"] = age
+        updates.append("age = %s")
+        values.append(age)
     if client_type is not None:
-        fields["client_type"] = client_type.upper() if isinstance(client_type, str) else client_type
+        updates.append("client_type = %s")
+        values.append(client_type.upper() if isinstance(client_type, str) else client_type)
 
-    if not fields:
+    if not updates:
+        cursor.close()
+        db.close()
         return
 
-    try:
-        oid = ObjectId(id)
-        db.clients.update_one({"_id": oid}, {"$set": fields})
-    except:
-        pass
-
+    query = f"UPDATE clients SET {', '.join(updates)} WHERE id = %s"
+    values.append(id)
+    
+    cursor.execute(query, values)
+    db.commit()
+    cursor.close()
+    db.close()
 
 def delete_client(id):
-    """Delete a client and related data."""
     db = get_db()
-    try:
-        oid = ObjectId(id)
-        # Get client_id first
-        cli = db.clients.find_one({"_id": oid})
-        if cli:
-            client_id = cli.get('client_id')
+    cursor = db.cursor(dictionary=True)
+    
+    # Get client_id first for related deletion
+    cursor.execute("SELECT client_id FROM clients WHERE id = %s", (id,))
+    cli = cursor.fetchone()
+    if cli:
+        client_id = cli['client_id']
+        
+        # Foreign keys will handle logs and face_embeddings if ON DELETE CASCADE is set
+        # But for completeness:
+        cursor.execute("DELETE FROM clients WHERE id = %s", (id,))
+        
+        # Delete image file
+        try:
+            clients_dir = os.path.join(os.getcwd(), 'Clients')
+            file_path = os.path.join(clients_dir, f"{client_id}.jpg")
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception:
+            pass
             
-            # 1. Delete face embeddings
-            db.face_embeddings.delete_many({"client_id": client_id})
-            
-            # 2. Delete logs
-            db.logs.delete_many({"client_id": client_id})
-
-            # 3. Delete image file
-            try:
-                clients_dir = os.path.join(os.getcwd(), 'Clients')
-                file_path = os.path.join(clients_dir, f"{client_id}.jpg")
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            except Exception:
-                pass
-            
-            # 4. Delete client
-            db.clients.delete_one({"_id": oid})
-    except:
-        pass
-
+    db.commit()
+    cursor.close()
+    db.close()
 
 def get_departments():
-    """Return a list of distinct departments."""
     db = get_db()
-    # distinct returns a list of values
-    deps = db.clients.distinct("department")
-    # Filter out None and sort
-    return sorted([d for d in deps if d])
-
+    cursor = db.cursor()
+    cursor.execute("SELECT DISTINCT department FROM clients WHERE department IS NOT NULL")
+    deps = [row[0] for row in cursor.fetchall()]
+    cursor.close()
+    db.close()
+    return sorted(deps)
 
 def get_client_count():
     db = get_db()
-    return db.clients.count_documents({})
-
+    cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) FROM clients")
+    count = cursor.fetchone()[0]
+    cursor.close()
+    db.close()
+    return count
 
 def get_next_client_id():
-    """Generate the next client_id."""
-    # This might be slow if many docs, but safe enough for now. 
-    # Better to find max using regex or numeric check if mixed.
-    # Assuming client_id are numeric strings.
     db = get_db()
-    # Fetch all client_ids to find max (heavy, but flexible) or sort by client_id desc if purely numeric string format is guaranteed?
-    # String sorting "10" < "2", so better to cast. 
-    # Let's fetch just client_id strings.
-    cursor = db.clients.find({}, {"client_id": 1})
+    cursor = db.cursor()
+    cursor.execute("SELECT client_id FROM clients")
     max_id = 0
-    for doc in cursor:
-        cid = doc.get("client_id")
+    for (cid,) in cursor:
         try:
             val = int(cid)
             if val > max_id:
                 max_id = val
         except:
             pass
+    cursor.close()
+    db.close()
     return str(max_id + 1)
 
-
 def search_clients(query, limit=10):
-    """Search clients by client_id or full_name."""
     db = get_db()
-    # Regex search (case insensitive)
-    rgx = {"$regex": query, "$options": "i"}
-    criteria = {
-        "$or": [
-            {"client_id": rgx},
-            {"full_name": rgx}
-        ]
-    }
-    cursor = db.clients.find(criteria).sort("full_name", 1).limit(limit)
-    rows = []
-    for doc in cursor:
-        # map for frontend compatibility
-        rows.append({
-            "id": str(doc["_id"]),
-            "client_id": doc.get("client_id"),
-            "full_name": doc.get("full_name"),
-            "department": doc.get("department"),
-            "client_type": doc.get("client_type")
-        })
+    cursor = db.cursor(dictionary=True)
+    search_val = f"%{query}%"
+    sql = """SELECT id, client_id, full_name, department, client_type 
+             FROM clients 
+             WHERE client_id LIKE %s OR full_name LIKE %s 
+             ORDER BY full_name ASC LIMIT %s"""
+    cursor.execute(sql, (search_val, search_val, limit))
+    rows = cursor.fetchall()
+    
+    for row in rows:
+        row['id'] = str(row['id'])
+        
+    cursor.close()
+    db.close()
     return rows
 
-
 def get_clients_filtered(search=None, limit=None):
-    """Return clients filtered by search query and limited by number."""
     db = get_db()
-    criteria = {}
-    if search:
-        rgx = {"$regex": search, "$options": "i"}
-        criteria = {
-            "$or": [
-                {"full_name": rgx},
-                {"client_id": rgx}
-            ]
-        }
+    cursor = db.cursor(dictionary=True)
     
-    cursor = db.clients.find(criteria).sort("_id", -1)
+    sql = "SELECT *, client_id as employee_id FROM clients"
+    params = []
+    if search:
+        sql += " WHERE full_name LIKE %s OR client_id LIKE %s"
+        search_val = f"%{search}%"
+        params.extend([search_val, search_val])
+    
+    sql += " ORDER BY id DESC"
     
     if limit and limit != 'all':
-        try:
-            cursor = cursor.limit(int(limit))
-        except:
-            pass
-            
-    data = []
-    for doc in cursor:
-        doc['id'] = str(doc['_id'])
-        # doc['client_id'] is already correct, no alias needed if we update callers
-        # but let's redundant alias if templates still use employee_id
-        doc['employee_id'] = doc.get('client_id') 
-        data.append(doc)
+        sql += " LIMIT %s"
+        params.append(int(limit))
+    
+    cursor.execute(sql, params)
+    data = cursor.fetchall()
+    
+    for doc in data:
+        doc['id'] = str(doc['id'])
+        
+    cursor.close()
+    db.close()
     return data
-
