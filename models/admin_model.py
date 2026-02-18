@@ -5,18 +5,20 @@ import numpy as np
 import json
 import mysql.connector
 
-def add_admin(first_name, last_name, email, password, embedding_list=None):
+def add_admin(first_name, last_name, email, password, embedding_list=None, pin=None):
     db = get_db()
     cursor = db.cursor()
     ph = generate_password_hash(password)
+    pin_hash = generate_password_hash(pin) if pin else None
     
-    query = """INSERT INTO admins (first_name, last_name, email, password_hash, face_embedding, created_at)
-               VALUES (%s, %s, %s, %s, %s, %s)"""
+    query = """INSERT INTO admins (first_name, last_name, email, password_hash, pin_hash, face_embedding, created_at)
+               VALUES (%s, %s, %s, %s, %s, %s, %s)"""
     values = (
         first_name.upper() if isinstance(first_name, str) else first_name,
         last_name.upper() if isinstance(last_name, str) else last_name,
         email.upper() if isinstance(email, str) else email,
         ph,
+        pin_hash,
         json.dumps(embedding_list) if embedding_list else None,
         datetime.now()
     )
@@ -61,6 +63,17 @@ def verify_admin_credentials(email, password):
     if check_password_hash(admin.get('password_hash', ''), password):
         return admin
     return None
+
+def verify_admin_pin(admin, pin):
+    if not admin or not pin:
+        return False
+    # If no pin hash exists, fail secure or allow? Assuming fail secure for 2FA.
+    # But for backward compatibility, if pin_hash is null, we might need a policy.
+    # For now, if pin_hash is set, check it.
+    stored_pin_hash = admin.get('pin_hash')
+    if not stored_pin_hash:
+        return False # PIN is mandatory for face login now
+    return check_password_hash(stored_pin_hash, pin)
 
 def get_admin_by_id(admin_id):
     db = get_db()
@@ -108,15 +121,32 @@ def find_best_admin_match(embedding_list, threshold=0.6):
     best_distance = None
     
     for r in cursor:
-        stored_emb = r.get('face_embedding')
-        if stored_emb:
-            if isinstance(stored_emb, (bytes, bytearray)):
-                emb = np.array(json.loads(stored_emb.decode('utf-8')))
-            elif isinstance(stored_emb, str):
-                emb = np.array(json.loads(stored_emb))
-            else:
-                emb = np.array(stored_emb)
+        stored_json = r.get('face_embedding')
+        if not stored_json:
+            continue
             
+        if isinstance(stored_json, (bytes, bytearray)):
+            stored_data = json.loads(stored_json.decode('utf-8'))
+        elif isinstance(stored_json, str):
+            stored_data = json.loads(stored_json)
+        else:
+            stored_data = stored_json
+            
+        # Handle both old (single list) and new (list of lists) formats
+        # New format: [[...], [...], [...]]
+        # Old format: [...]
+        
+        candidates = []
+        if isinstance(stored_data, list) and len(stored_data) > 0:
+            if isinstance(stored_data[0], list):
+                # Request returns list of lists
+                candidates = [np.array(e) for e in stored_data]
+            else:
+                # Legacy single embedding
+                candidates = [np.array(stored_data)]
+        
+        # Check against all candidates for this admin
+        for emb in candidates:
             dist = np.linalg.norm(emb - target)
             if best_distance is None or dist < best_distance:
                 best_distance = float(dist)

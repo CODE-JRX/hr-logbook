@@ -315,9 +315,34 @@
 		<p id="error" style="display:none;" class="text-danger mt-2"></p>
 	</div>
 </div>
+<!-- PIN Modal -->
+<div class="modal fade" id="pinModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+	<div class="modal-dialog modal-dialog-centered modal-sm">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Enter Admin PIN</h5>
+			</div>
+			<div class="modal-body">
+				<div class="form-group text-center">
+					<label for="pinInput" class="mb-2">Please enter your 4-digit PIN</label>
+					<input type="password" id="pinInput" class="form-control text-center text-primary fw-bold"
+						maxlength="4" pattern="[0-9]*" inputmode="numeric"
+						style="letter-spacing: 4px; font-size: 24px;">
+					<div id="pinError" class="text-danger small mt-2" style="display:none;"></div>
+				</div>
+			</div>
+			<div class="modal-footer justify-content-center">
+				<button type="button" class="btn btn-primary w-100" onclick="submitPin()">Verify</button>
+				<button type="button" class="btn btn-secondary w-100 mt-2" onclick="cancelPin()">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 	const video = document.getElementById('video');
 	const canvas = document.getElementById('canvas');
@@ -329,6 +354,10 @@
 	const loginStatus = document.getElementById('login-status');
 	const errorP = document.getElementById('error');
 	const cameraError = document.getElementById('camera-error');
+
+	// PIN Modal
+	const pinModalEl = document.getElementById('pinModal');
+	let pinModal;
 
 	function setError(msg) {
 		const m = String(msg || '');
@@ -437,17 +466,27 @@
 			fd.append('photo_data', dataUrl);
 			try {
 				const res = await fetch('/admin/face_login', { method: 'POST', body: fd });
+
+				// Check if redirect (old behavior) or JSON (new behavior)
 				if (res.redirected) {
-					// Successful login, redirect to dashboard
 					window.location.href = res.url;
 					return;
 				}
+
 				const body = await res.json();
 				if (body.ok) {
-					// Should not reach here if login successful, but handle just in case
-					window.location.href = '/admin/dashboard';
+					if (body.status === 'pin_required') {
+						// Show PIN modal
+						if (!pinModal) pinModal = new bootstrap.Modal(pinModalEl);
+						document.getElementById('pinInput').value = '';
+						document.getElementById('pinError').style.display = 'none';
+						pinModal.show();
+					} else {
+						// Fallback for direct login (if 2FA disabled server-side)
+						window.location.href = '/admin/dashboard';
+					}
 				} else {
-					setError(body.error || 'Face not recognized. Please ensure you have registered your face during signup.');
+					setError(body.error || 'Face not recognized.');
 				}
 			} catch (err) {
 				setError('Face login failed: ' + err.message);
@@ -472,6 +511,41 @@
 		}
 	}
 
+	async function submitPin() {
+		const pin = document.getElementById('pinInput').value;
+		const pinError = document.getElementById('pinError');
+
+		if (!pin || pin.length !== 4) {
+			pinError.textContent = 'Please enter a 4-digit PIN';
+			pinError.style.display = 'block';
+			return;
+		}
+
+		const fd = new FormData();
+		fd.append('pin', pin);
+
+		try {
+			const res = await fetch('/admin/verify_pin', { method: 'POST', body: fd });
+			const body = await res.json();
+
+			if (body.ok && body.redirect) {
+				window.location.href = body.redirect;
+			} else {
+				pinError.textContent = body.error || 'Invalid PIN';
+				pinError.style.display = 'block';
+			}
+		} catch (err) {
+			pinError.textContent = 'Verification failed: ' + err.message;
+			pinError.style.display = 'block';
+		}
+	}
+
+	function cancelPin() {
+		if (pinModal) pinModal.hide();
+		// Reset camera flow
+		cameraAction();
+	}
+
 	// Combined camera button handler
 	actionBtn.addEventListener('click', cameraAction);
 
@@ -481,6 +555,13 @@
 			// Prevent triggering if clicking on the button itself to avoid double execution
 			if (e.target === actionBtn) return;
 			cameraAction();
+		});
+	}
+
+	// Auto-focus PIN input when modal opens
+	if (pinModalEl) {
+		pinModalEl.addEventListener('shown.bs.modal', () => {
+			document.getElementById('pinInput').focus();
 		});
 	}
 </script>

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, get_flashed_messages
 from db import get_db
 from functools import wraps
-from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials, get_admin_by_id, update_admin_password
+from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials, get_admin_by_id, update_admin_password, verify_admin_pin
 from models.client_model import *
 from models.client_model import search_clients
 from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding, improve_client_embedding
@@ -73,37 +73,74 @@ def add():
         add_client(client_id, full_name, department, gender, age_val, client_type)
 
         # handle captured photo (data URL)
-        photo_data = request.form.get("photo_data")
-        if photo_data and client_id:
+        # handle captured photos (3 angles)
+        photo_center = request.form.get("photo_data_center")
+        photo_left = request.form.get("photo_data_left")
+        photo_right = request.form.get("photo_data_right")
+        
+        # fallback to single photo if new fields not present (e.g. old form submit or direct API use)
+        if not photo_center:
+            photo_center = request.form.get("photo_data")
+
+        processed_count = 0
+
+        # Helper to process an image: save optional file, add embedding
+        def process_face_image(p_data, cid, save_as_main=False):
+            if not p_data: return False
             try:
                 # extract base64 payload
-                m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
+                m = re.match(r"data:(image/\w+);base64,(.*)", p_data)
                 if m:
                     img_b64 = m.group(2)
                 else:
-                    # fallback if data URL prefix missing
-                    img_b64 = photo_data.split(",", 1)[1] if "," in photo_data else photo_data
+                    img_b64 = p_data.split(",", 1)[1] if "," in p_data else p_data
 
                 image_bytes = base64.b64decode(img_b64)
 
-                clients_dir = os.path.join(os.getcwd(), "Clients")
-                os.makedirs(clients_dir, exist_ok=True)
-                file_path = os.path.join(clients_dir, f"{client_id}.jpg")
-                with open(file_path, "wb") as f:
-                    f.write(image_bytes)
+                # Save file if it's the main (center) image
+                file_path = None
+                if save_as_main:
+                    clients_dir = os.path.join(os.getcwd(), "Clients")
+                    os.makedirs(clients_dir, exist_ok=True)
+                    file_path = os.path.join(clients_dir, f"{cid}.jpg")
+                    with open(file_path, "wb") as f:
+                        f.write(image_bytes)
+                else:
+                    # For side images, we might not save them permanently to disk unless needed for debug.
+                    # But face_recognition needs a file or loaded image file object.
+                    # We can use BytesIO.
+                    pass
 
                 # compute face encoding
-                img = face_recognition.load_image_file(file_path)
+                # Load from bytes
+                img = face_recognition.load_image_file(io.BytesIO(image_bytes))
                 encodings = face_recognition.face_encodings(img)
                 if encodings:
                     embedding = list(encodings[0])
-                    add_face_embedding(client_id, embedding)
+                    add_face_embedding(cid, embedding)
+                    return True
                 else:
-                    # no face found; optional: remove file or keep for debug
-                    flash("No face detected in the uploaded photo; embedding not saved.")
+                    print(f"Warning: No face detected in one of the captured angles for {cid}")
+                    return False
             except Exception as e:
-                # don't block adding client if embedding fails
-                flash(f"Failed to process photo: {e}")
+                print(f"Error processing face image for {cid}: {e}")
+                return False
+
+        if client_id:
+            # Process Center (Main)
+            if process_face_image(photo_center, client_id, save_as_main=True):
+                processed_count += 1
+            
+            # Process Left
+            if process_face_image(photo_left, client_id):
+                processed_count += 1
+                
+            # Process Right
+            if process_face_image(photo_right, client_id):
+                processed_count += 1
+
+            if processed_count == 0:
+                 flash("Warning: No faces were successfully detected and saved. You may need to update the photo later.")
 
         # If an admin performed the registration, keep the admin workflow.
         if session.get('admin_id'):
@@ -580,61 +617,93 @@ def admin_signup():
         confirm = request.form.get('confirm_password') or request.form.get('confirm')
         photo_data = request.form.get('photo_data')
 
-        if not (first_name and last_name and email and password and photo_data):
-            flash('All fields are required, including photo')
-            return redirect(url_for('client.admin_signup'))
+        # Validate key fields
+        if not (first_name and last_name and email and password and confirm):
+             flash('All fields are required')
+             return redirect(url_for('client.admin_signup'))
 
         if password != confirm:
             flash('Passwords do not match')
             return redirect(url_for('client.admin_signup'))
+            
+        pin = request.form.get('pin')
+        if not pin or not re.match(r"^\d{4}$", pin):
+             flash("PIN must be exactly 4 digits")
+             return redirect(url_for('client.admin_signup'))
 
         if get_admin_by_email(email):
             flash('An account with that email already exists')
             return redirect(url_for('client.admin_signup'))
 
-        # Process photo and compute embedding
-        embedding = None
-        try:
-            # Extract base64 payload
-            m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
-            if m:
-                img_b64 = m.group(2)
-            else:
-                # fallback if data URL prefix missing
-                img_b64 = photo_data.split(",", 1)[1] if "," in photo_data else photo_data
+        # Process photos to get embeddings
+        embeddings = []
+        
+        # Photos
+        photo_center = request.form.get("photo_data_center")
+        photo_left = request.form.get("photo_data_left")
+        photo_right = request.form.get("photo_data_right")
+        
+        def get_embedding(p_data):
+            if not p_data: return None
+            try:
+                m = re.match(r"data:(image/\w+);base64,(.*)", p_data)
+                if m:
+                    img_b64 = m.group(2)
+                else:
+                    img_b64 = p_data.split(",", 1)[1] if "," in p_data else p_data
+                image_bytes = base64.b64decode(img_b64)
+                img = face_recognition.load_image_file(io.BytesIO(image_bytes))
+                encs = face_recognition.face_encodings(img)
+                if encs:
+                    return list(encs[0])
+            except Exception as e:
+                print(f"Error processing admin photo: {e}")
+            return None
 
-            image_bytes = base64.b64decode(img_b64)
+        # Collect valid embeddings
+        for p in [photo_center, photo_left, photo_right]:
+            emb = get_embedding(p)
+            if emb:
+                embeddings.append(emb)
+        
+        # Fallback to single photo if new fields missing
+        if not embeddings:
+             p_single = request.form.get("photo_data")
+             emb = get_embedding(p_single)
+             if emb:
+                 embeddings.append(emb)
 
-            # Create admin first to get ID for file name
-            admin_id = add_admin(first_name, last_name, email, password)
+        if not embeddings:
+            flash("No face detected in any photo. Please try again.")
+            return redirect(url_for('client.admin_signup'))
+            
+        new_id = add_admin(first_name, last_name, email, password, embeddings, pin)
 
-            # Save image file
-            admins_dir = os.path.join(os.getcwd(), "Admins")
-            os.makedirs(admins_dir, exist_ok=True)
-            file_path = os.path.join(admins_dir, f"{admin_id}.jpg")
-            with open(file_path, "wb") as f:
-                f.write(image_bytes)
+        if new_id:
+             # Save center image as profile pic
+            if photo_center or request.form.get("photo_data"):
+                try:
+                    p_to_save = photo_center or request.form.get("photo_data")
+                    m = re.match(r"data:(image/\w+);base64,(.*)", p_to_save)
+                    if m:
+                        img_b64 = m.group(2)
+                    else:
+                        img_b64 = p_to_save.split(",", 1)[1] if "," in p_to_save else p_to_save
+                    image_bytes = base64.b64decode(img_b64)
+                    
+                    admins_dir = os.path.join(os.getcwd(), "Admins")
+                    os.makedirs(admins_dir, exist_ok=True)
+                    file_path = os.path.join(admins_dir, f"{new_id}.jpg")
+                    with open(file_path, "wb") as f:
+                        f.write(image_bytes)
+                except Exception as e:
+                    print(f"Failed to save admin profile image: {e}")
 
-            # Compute face encoding
-            img = face_recognition.load_image_file(file_path)
-            encodings = face_recognition.face_encodings(img)
-            if encodings:
-                embedding = list(encodings[0])
-                # Update admin with embedding
-                db = get_db()
-                cursor = db.cursor()
-                cursor.execute("UPDATE admins SET face_embedding = %s WHERE id = %s", (json.dumps(embedding), admin_id))
-                db.commit()
-                cursor.close()
-                db.close()
-            else:
-                # No face found; optional: remove file or keep for debug
-                flash("No face detected in the uploaded photo; embedding not saved.")
-        except Exception as e:
-            flash(f"Failed to process photo: {e}")
-
-        flash('Account created. Please sign in.')
-        return redirect(url_for('client.admin_login'))
+            flash('Account created. Please sign in.')
+            return redirect(url_for('client.admin_login'))
+        else:
+             flash("Failed to create account")
+             return redirect(url_for('client.admin_signup'))
 
     return render_template('admin/admin_signup.html')
 
@@ -687,22 +756,40 @@ def admin_face_login():
         encoding = list(encodings[0])
         admin_id, distance = find_best_admin_match(encoding)
         if admin_id:
-            # Get admin details
-            db = get_db()
-            cursor = db.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM admins WHERE id = %s", (admin_id,))
-            admin = cursor.fetchone()
-            if admin:
-                session['admin_id'] = str(admin['id'])
-                session['admin_email'] = admin.get('email')
-                cursor.close()
-                db.close()
-                return jsonify({'ok': True}), 200
-            cursor.close()
-            db.close()
+            # 2FA: Store temp ID and ask for PIN
+            session['2fa_pending_admin_id'] = admin_id
+            return jsonify({'ok': True, 'status': 'pin_required'}), 200
+            
         return jsonify({'ok': False, 'error': 'Face not recognized'}), 200
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
+
+@client_bp.route('/admin/verify_pin', methods=['POST'])
+def admin_verify_pin():
+    try:
+        pending_id = session.get('2fa_pending_admin_id')
+        if not pending_id:
+            return jsonify({'ok': False, 'error': 'Session expired or invalid flow'}), 400
+            
+        pin = request.form.get('pin')
+        if not pin:
+            return jsonify({'ok': False, 'error': 'PIN required'}), 400
+            
+        admin = get_admin_by_id(pending_id)
+        if not admin:
+            return jsonify({'ok': False, 'error': 'Admin user not found'}), 400
+
+        if verify_admin_pin(admin, pin):
+            # 2FA Success
+            session.pop('2fa_pending_admin_id', None)
+            session['admin_id'] = str(admin['id'])
+            session['admin_email'] = admin.get('email')
+            return jsonify({'ok': True, 'redirect': url_for('client.admin_dashboard')})
+        else:
+            return jsonify({'ok': False, 'error': 'Invalid PIN'}), 200
+    except Exception as e:
+        print(f"Admin Verify PIN Error: {e}")
+        return jsonify({'ok': False, 'error': f"Server Error: {str(e)}"}), 500
 
 
 @client_bp.route('/admin/logout')
