@@ -82,7 +82,9 @@
           <a href="{{ url_for('client.client_log_report') }}" class="text-decoration-none">
             <div class="card shadow-sm p-3">
               <h6><i class="fas fa-chart-bar"></i> Purpose Counts</h6>
-              <canvas id="chartPurpose" height="200"></canvas>
+              <div style="min-height: 300px; position: relative;">
+                <canvas id="chartPurpose"></canvas>
+              </div>
             </div>
           </a>
         </div>
@@ -114,10 +116,55 @@
 
 
   function buildBarChart(ctx, labels, data) {
+    // Elegant colors for purposes
+    const colors = [
+      '#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0',
+      '#6610f2', '#fd7e14', '#20c997', '#e83e8c', '#6f42c1'
+    ];
+
+    // Expand colors if there are more labels than colors
+    const backgroundColors = labels.map((_, i) => colors[i % colors.length]);
+
     return new Chart(ctx, {
       type: 'bar',
-      data: { labels, datasets: [{ label: 'Count', data, backgroundColor: '#198754' }] },
-      options: { responsive: true }
+      data: {
+        labels,
+        datasets: [{
+          label: 'Times Requested',
+          data,
+          backgroundColor: backgroundColors,
+          borderRadius: 4,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const value = context.parsed.x;
+                const percentage = ((value / total) * 100).toFixed(1);
+                return ` Count: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: { display: false },
+            ticks: { precision: 0 }
+          },
+          y: {
+            grid: { display: false }
+          }
+        }
+      }
     });
   }
 

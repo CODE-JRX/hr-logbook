@@ -92,8 +92,8 @@ def get_logs_by_day(days=14):
     cursor = db.cursor(dictionary=True)
     start_date = datetime.now() - timedelta(days=days)
     
-    sql = """SELECT DATE_FORMAT(time_in, '%%Y-%%M-%%d') as day_key, 
-                    DATE_FORMAT(time_in, '%%d') as day, 
+    sql = """SELECT DATE_FORMAT(time_in, '%Y-%m-%d') as day_key, 
+                    DATE_FORMAT(time_in, '%m/%d') as day, 
                     COUNT(*) as cnt 
              FROM logs 
              WHERE time_in >= %s 
@@ -128,17 +128,30 @@ def get_purpose_counts():
     db = get_db()
     cursor = db.cursor(dictionary=True)
     
-    sql = """SELECT IFNULL(purpose, 'Unspecified') as purpose, COUNT(*) as cnt 
-             FROM logs 
-             GROUP BY purpose 
-             ORDER BY cnt DESC"""
-             
+    # Select all purposes (ignoring NULL/empty)
+    sql = "SELECT purpose FROM logs WHERE purpose IS NOT NULL AND purpose != ''"
     cursor.execute(sql)
     rows = cursor.fetchall()
     
+    counts = {}
+    for row in rows:
+        purpose_str = row['purpose']
+        if purpose_str:
+            # Multi-purpose is comma-separated (e.g., "INQUIRE, PROCESS APPOINTMENT")
+            purposes = [p.strip() for p in purpose_str.split(',')]
+            for p in purposes:
+                if p:
+                    counts[p] = counts.get(p, 0) + 1
+    
+    # Sort by count descending
+    sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+    
+    # Reformat to match expect chart data: [{'purpose': 'P1', 'cnt': 10}, ...]
+    rows_reformatted = [{'purpose': p, 'cnt': c} for p, c in sorted_counts]
+    
     cursor.close()
     db.close()
-    return rows
+    return rows_reformatted
 
 def get_total_logs():
     db = get_db()
