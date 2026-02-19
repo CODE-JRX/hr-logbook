@@ -454,6 +454,23 @@ select:focus {
   border-color: var(--danger-color) !important;
 }
 
+.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  background-color: transparent !important;
+  transition: all var(--animation-normal) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: var(--shadow) !important;
+  transform: translateY(-1px);
+}
+
 /* PHASE 3: Card Component Updates (standardize card styling) */
 .card {
   border-radius: var(--border-radius-lg) !important;
@@ -2298,41 +2315,41 @@ textarea:disabled {
 }
 
 /* Highlight elements not using design system colors */
-.debug-mode [style*="background-color"]:not([style*="var(--"]]),
+.debug-mode [style*="background-color"]:not([style*="var(--"]),
 .debug-mode [style*="color"]:not([style*="var(--"]) {
   outline: 2px solid #ff6b6b !important;
   outline-offset: 2px !important;
 }
 
 /* Highlight elements not using design system fonts */
-.debug-mode [style*="font-family"]:not([style*="var(--font-family"] {
-    outline: 2px solid #ffd93d !important;
-    outline-offset: 2px !important;
-  }
+.debug-mode [style*="font-family"]:not([style*="var(--font-family)"]) {
+  outline: 2px solid #ffd93d !important;
+  outline-offset: 2px !important;
+}
 
-  /* Highlight elements not using design system spacing */
-  .debug-mode [style*="margin"]:not([style*="var(--spacing"],
-    .debug-mode [style*="padding"]:not([style*="var(--spacing"] {
-        outline: 2px solid #6bcf7f !important;
-        outline-offset: 2px !important;
-      }
+/* Highlight elements not using design system spacing */
+.debug-mode [style*="margin"]:not([style*="var(--spacing)"]),
+.debug-mode [style*="padding"]:not([style*="var(--spacing)"]) {
+  outline: 2px solid #6bcf7f !important;
+  outline-offset: 2px !important;
+}
 
-      /* Highlight buttons not using design system */
-      .debug-mode button:not(.btn-primary-new):not(.btn-secondary-new):not(.btn-primary):not(.btn-secondary) {
-        outline: 3px solid #4ecdc4 !important;
-        outline-offset: 3px !important;
-      }
+/* Highlight buttons not using design system */
+.debug-mode button:not(.btn-primary-new):not(.btn-secondary-new):not(.btn-primary):not(.btn-secondary) {
+  outline: 3px solid #4ecdc4 !important;
+  outline-offset: 3px !important;
+}
 
-      /* Highlight forms not using design system */
-      .debug-mode input:not(.form-input-new):not(.form-control),
-      .debug-mode select:not(.form-select),
-      .debug-mode textarea:not(.form-control) {
-        outline: 3px solid #45b7d1 !important;
-        outline-offset: 3px !important;
-      }
+/* Highlight forms not using design system */
+.debug-mode input:not(.form-input-new):not(.form-control),
+.debug-mode select:not(.form-select),
+.debug-mode textarea:not(.form-control) {
+  outline: 3px solid #45b7d1 !important;
+  outline-offset: 3px !important;
+}
 
-      /* Highlight cards not using design system */
-      .debug-mode .card:not(.card-new) {
-        outline: 3px solid #f9ca24 !important;
-        outline-offset: 3px !important;
-      }
+/* Highlight cards not using design system */
+.debug-mode .card:not(.card-new) {
+  outline: 3px solid #f9ca24 !important;
+  outline-offset: 3px !important;
+}

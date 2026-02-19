@@ -20,7 +20,7 @@
   <link rel="preload" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" as="style">
   <script>
     // Prevent flash of light theme by setting theme immediately
-    (function() {
+    (function () {
       const theme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -118,6 +118,19 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    {% if category == 'message' %}{% set category = 'info' %}{% endif %}
+    {% if category == 'error' %}{% set category = 'danger' %}{% endif %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
     {% block content %}{% endblock %}
   </main>
 
@@ -221,15 +234,14 @@
             <p class="mb-0">Invalid username or password. Please try again.</p>
           </div>
           <div class="modal-footer border-0">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">OK</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Password Update Modal -->
-    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel"
-      aria-hidden="true">
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header border-0">
@@ -240,7 +252,7 @@
             <p class="mb-0" id="passwordModalMessage"></p>
           </div>
           <div class="modal-footer border-0">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">OK</button>
           </div>
         </div>
       </div>
@@ -260,7 +272,7 @@
             <p class="mb-0" id="successMessage"></p>
           </div>
           <div class="modal-footer border-0">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">OK</button>
           </div>
         </div>
       </div>

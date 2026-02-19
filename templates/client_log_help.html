@@ -10,47 +10,61 @@
                     <h2 class="mb-0"><i class="fas fa-question-circle"></i> How to Use the Client Log Page</h2>
                 </div>
                 <div class="card-body">
-                    <p class="lead">Follow these simple steps to log your entry and exit using the Client Log system.</p>
+                    <p class="lead">Follow these simple steps to log your entry and exit using the Client Log system.
+                    </p>
 
                     <h4 class="mt-4"><i class="fas fa-list-ol"></i> Process Flow</h4>
                     <ol class="list-group list-group-numbered">
                         <li class="list-group-item">
-                            <strong>Start the Camera:</strong> Click the "Start Camera" button to activate your device's camera.
+                            <strong>Start the Camera:</strong> Click the "Start Camera" button to activate your device's
+                            camera.
                         </li>
                         <li class="list-group-item">
-                            <strong>Scan Your Face:</strong> Position your face within the camera view and ensure good lighting for accurate recognition.
+                            <strong>Scan Your Face:</strong> Position your face within the camera view and ensure good
+                            lighting for accurate recognition.
                         </li>
                         <li class="list-group-item">
-                            <strong>Verify Identification:</strong> Wait for the system to identify you. Check that your name appears correctly in the "Match" section. If incorrect, use the "Override" button to manually select or enter your details.
+                            <strong>Verify Identification:</strong> Wait for the system to identify you. Check that your
+                            name appears correctly in the "Match" section. If incorrect, use the "Override" button to
+                            manually select or enter your details.
                         </li>
                         <li class="list-group-item">
-                            <strong>Select Purpose(s):</strong> Choose one or more purposes for your visit from the checkboxes (e.g., Receive Document/s Requested, Submit Document/s, etc.).
+                            <strong>Select Purpose(s):</strong> Choose one or more purposes for your visit from the
+                            checkboxes (e.g., Receive Document/s Requested, Submit Document/s, etc.).
                         </li>
                         <li class="list-group-item">
-                            <strong>Type Additional Information:</strong> Provide specific details such as the document name or the person you are visiting.
+                            <strong>Type Additional Information:</strong> Provide specific details such as the document
+                            name or the person you are visiting.
                         </li>
                         <li class="list-group-item">
-                            <strong>Click "Time In":</strong> Press the "Time In" button to record your entry. You will hear a success sound and see a confirmation message.
+                            <strong>Click "Time In":</strong> Press the "Time In" button to record your entry. You will
+                            hear a success sound and see a confirmation message.
                         </li>
                         <li class="list-group-item">
-                            <strong>Log Out When Leaving:</strong> When you are ready to leave, find your entry in the "Client Logs" section on the right and click the "Logout" button next to your name.
+                            <strong>Log Out When Leaving:</strong> When you are ready to leave, find your entry in the
+                            "Client Logs" section on the right and click the "Logout" button next to your name.
                         </li>
                     </ol>
 
                     <div class="alert alert-success mt-4">
-                        <i class="fas fa-check-circle"></i> <strong>Done!</strong> Your visit has been successfully logged.
+                        <i class="fas fa-check-circle"></i> <strong>Done!</strong> Your visit has been successfully
+                        logged.
                     </div>
 
                     <h4 class="mt-4"><i class="fas fa-info-circle"></i> Additional Tips</h4>
                     <ul class="list-unstyled">
-                        <li><i class="fas fa-lightbulb text-warning"></i> Ensure your face is clearly visible and well-lit for better recognition.</li>
-                        <li><i class="fas fa-lightbulb text-warning"></i> If the camera doesn't recognize you, use the "Override" feature to manually enter your information.</li>
-                        <li><i class="fas fa-lightbulb text-warning"></i> All fields marked with an asterisk (*) are required.</li>
-                        <li><i class="fas fa-lightbulb text-warning"></i> You can only log out if you are currently logged in (shown in the "Client Logs" section).</li>
+                        <li><i class="fas fa-lightbulb text-warning"></i> Ensure your face is clearly visible and
+                            well-lit for better recognition.</li>
+                        <li><i class="fas fa-lightbulb text-warning"></i> If the camera doesn't recognize you, use the
+                            "Override" feature to manually enter your information.</li>
+                        <li><i class="fas fa-lightbulb text-warning"></i> All fields marked with an asterisk (*) are
+                            required.</li>
+                        <li><i class="fas fa-lightbulb text-warning"></i> You can only log out if you are currently
+                            logged in (shown in the "Client Logs" section).</li>
                     </ul>
 
                     <div class="text-center mt-4">
-                        <a href="{{ url_for('client.client_log') }}" class="btn btn-primary btn-lg">
+                        <a href="{{ url_for('client.client_log') }}" class="btn btn-outline-primary btn-lg">
                             <i class="fas fa-arrow-left"></i> Back to Client Log
                         </a>
                     </div>

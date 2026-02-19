@@ -4,7 +4,7 @@ from functools import wraps
 from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials, get_admin_by_id, update_admin_password, verify_admin_pin
 from models.client_model import *
 from models.client_model import search_clients
-from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding, improve_client_embedding
+from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding, improve_client_embedding, delete_embeddings_by_client_id
 from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
 from models.csm_form_model import insert_csm_form, get_csm_forms_filtered
@@ -171,50 +171,81 @@ def edit(id):
             age=(int(request.form.get("age")) if request.form.get("age") not in (None, '') else None)
         )
 
-        # handle updated photo (data URL)
-        photo_data = request.form.get("photo_data")
-        if photo_data:
+
+        # handle updated photos (3 angles)
+        photo_center = request.form.get("photo_data_center")
+        photo_left = request.form.get("photo_data_left")
+        photo_right = request.form.get("photo_data_right")
+        
+        # Fallback for single photo (e.g. from old UI or direct API)
+        if not photo_center:
+            photo_center = request.form.get("photo_data")
+
+        # If any photo data is provided, we update the face data
+        if photo_center or photo_left or photo_right:
             try:
                 # Need to use the ACTUAL client_id string (e.g. "HR-S26-001") for file name and embedding
-                # Actual client_id string (e.g. "HR-S26-001")
-                # We can fetch the client to get the string ID.
-                # Although we just updated it, so we can use the form data or fetch fresh.
-                # Form data might have it as hidden field 'client_id' IF we trusted it, 
-                # but better to fetch from DB or use the one we just updated.
-                # The update_client function doesn't return the doc. 
-                # Let's get it.
                 updated_client = get_client_by_id(id)
                 actual_client_id = updated_client.get('client_id')
                 
                 if not actual_client_id:
                      flash("Error: Could not determine Client ID for photo update.")
                 else:
-                    # extract base64 payload
-                    m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
-                    if m:
-                        img_b64 = m.group(2)
+                    # 1. Clear ALL existing embeddings for this client to avoid mixing old/new or duplicates
+                    delete_embeddings_by_client_id(actual_client_id)
+
+                    processed_count = 0
+                    
+                    # Helper to process and save
+                    def process_and_add(p_data, cid, save_file=False):
+                        if not p_data: return False
+                        try:
+                            m = re.match(r"data:(image/\w+);base64,(.*)", p_data)
+                            if m:
+                                img_b64 = m.group(2)
+                            else:
+                                img_b64 = p_data.split(",", 1)[1] if "," in p_data else p_data
+                            image_bytes = base64.b64decode(img_b64)
+
+                            # Save file if Main/Center
+                            if save_file:
+                                clients_dir = os.path.join(os.getcwd(), "Clients")
+                                os.makedirs(clients_dir, exist_ok=True)
+                                file_path = os.path.join(clients_dir, f"{cid}.jpg")
+                                with open(file_path, "wb") as f:
+                                    f.write(image_bytes)
+                                # Load from file for embedding (safer/consistent with add)
+                                img = face_recognition.load_image_file(file_path)
+                            else:
+                                # Load from bytes
+                                img = face_recognition.load_image_file(io.BytesIO(image_bytes))
+
+                            encodings = face_recognition.face_encodings(img)
+                            if encodings:
+                                embedding = list(encodings[0])
+                                add_face_embedding(cid, embedding)
+                                return True
+                        except Exception as e:
+                            print(f"Error processing angle for {cid}: {e}")
+                        return False
+
+                    # Process Center (Main)
+                    if process_and_add(photo_center, actual_client_id, save_file=True):
+                        processed_count += 1
+                    
+                    # Process Left
+                    if process_and_add(photo_left, actual_client_id):
+                        processed_count += 1
+                        
+                    # Process Right
+                    if process_and_add(photo_right, actual_client_id):
+                        processed_count += 1
+
+                    if processed_count == 0:
+                        flash("No face detected in the uploaded photo(s); embeddings not updated.")
                     else:
-                        # fallback if data URL prefix missing
-                        img_b64 = photo_data.split(",", 1)[1] if "," in photo_data else photo_data
+                        flash(f"Photos updated. {processed_count} angle(s) processed.")
 
-                    image_bytes = base64.b64decode(img_b64)
-
-                    clients_dir = os.path.join(os.getcwd(), "Clients")
-                    os.makedirs(clients_dir, exist_ok=True)
-                    # Use actual_client_id for filename
-                    file_path = os.path.join(clients_dir, f"{actual_client_id}.jpg")
-                    with open(file_path, "wb") as f:
-                        f.write(image_bytes)
-
-                    # compute new face encoding
-                    img = face_recognition.load_image_file(file_path)
-                    encodings = face_recognition.face_encodings(img)
-                    if encodings:
-                        embedding = list(encodings[0])
-                        # Use actual_client_id for embedding
-                        update_face_embedding(actual_client_id, embedding)
-                    else:
-                        flash("No face detected in the uploaded photo; embedding not updated.")
             except Exception as e:
                 flash(f"Failed to process photo: {e}")
 

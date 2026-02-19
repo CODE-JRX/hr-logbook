@@ -170,9 +170,10 @@
                 <input class="form-control" type="number" name="age" value="{{ client.age or '' }}" min="0" max="150">
             </div>
             <div class="mb-3">
-                <label class="form-label"><i class="fas fa-camera"></i> Update Photo (Optional)</label>
+                <label class="form-label"><i class="fas fa-camera"></i> Update Photos (3 Angles Required)</label>
                 <div class="row g-2">
-                    <div class="col-md-6">
+                    <!-- Main Camera Area -->
+                    <div class="col-md-7">
                         <div class="mx-auto shadow-sm rounded media-frame" id="cameraCanvas" style="cursor: pointer;"
                             title="Click to start camera">
                             <video id="video" autoplay playsinline style="display:none; border-radius:6px;"></video>
@@ -188,50 +189,79 @@
                                 <div style="font-size:38px; opacity:0.6">📷</div>
                                 <div style="margin-top:6px;">Camera Preview</div>
                             </div>
-                            <canvas id="canvas" width="420" height="320"
-                                style="display:none; position:absolute; top:0; left:0; border-radius:6px;"></canvas>
+                            <!-- Canvas for capturing -->
+                            <canvas id="canvas" width="420" height="320" style="display:none;"></canvas>
                         </div>
 
                         <div class="mt-3 text-center">
                             <button id="camera-action" type="button" class="btn btn-outline-primary me-2"><i
                                     class="fas fa-play"></i> Start Camera</button>
-                            <button id="file-toggle" type="button" class="btn btn-outline-secondary"><i
-                                    class="fas fa-upload"></i> Use file</button>
+                            <div id="capture-controls" class="d-inline-block" style="display:none !important;">
+                                <button id="capture-btn" type="button" class="btn btn-outline-primary" disabled><i
+                                        class="fas fa-camera"></i>
+                                    Capture <span id="capture-target">Center</span></button>
+                                <button id="retake-btn" type="button" class="btn btn-secondary ms-2"
+                                    style="display:none;"><i class="fas fa-redo"></i> Retake All</button>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <small class="text-muted" id="instruction-text">To update photos, please capture 3 angles:
+                                Center, Left, Right.</small>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <div class="border rounded p-0 media-frame" id="previewBox">
-                                {% if client.client_id %}
-                                <img src="/static/clients/{{ client.client_id }}.jpg"
-                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-                                    style="width:100%; height:100%; object-fit:cover;">
-                                <div style="display:none; text-align:center; width:100%;">
-                                    <span class="text-muted">No image captured | Preview</span>
-                                </div>
-                                {% else %}
-                                <div style="text-align:center; width:100%;"> <span class="text-muted">No image captured
-                                        | Preview</span></div>
-                                {% endif %}
-                                <div id="message-overlay" class="message-overlay"></div>
+                    <!-- Thumbnails Area -->
+                    <div class="col-md-5">
+                        <!-- Current Photo Display -->
+
+
+                        <div class="d-flex flex-column gap-2">
+                            <!-- Center Preview -->
+                            <div class="border rounded p-1 position-relative"
+                                style="background:#f8fafc; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <img id="preview-center" style="max-height: 100%; max-width: 100%; display: none;" />
+                                <span class="text-muted small position-absolute" id="label-center"
+                                    style="opacity: 0.5;">Center View</span>
+                                <div class="position-absolute top-0 end-0 p-1" id="tick-center" style="display:none;"><i
+                                        class="fas fa-check-circle text-success"></i></div>
+                            </div>
+                            <!-- Left Preview -->
+                            <div class="border rounded p-1 position-relative"
+                                style="background:#f8fafc; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <img id="preview-left" style="max-height: 100%; max-width: 100%; display: none;" />
+                                <span class="text-muted small position-absolute" id="label-left"
+                                    style="opacity: 0.5;">Left Side View</span>
+                                <div class="position-absolute top-0 end-0 p-1" id="tick-left" style="display:none;"><i
+                                        class="fas fa-check-circle text-success"></i></div>
+                            </div>
+                            <!-- Right Preview -->
+                            <div class="border rounded p-1 position-relative"
+                                style="background:#f8fafc; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <img id="preview-right" style="max-height: 100%; max-width: 100%; display: none;" />
+                                <span class="text-muted small position-absolute" id="label-right"
+                                    style="opacity: 0.5;">Right Side View</span>
+                                <div class="position-absolute top-0 end-0 p-1" id="tick-right" style="display:none;"><i
+                                        class="fas fa-check-circle text-success"></i></div>
                             </div>
                         </div>
 
-                        <div id="fileArea" style="display:none;">
-                            <label for="fileInput" class="form-label">Upload image</label>
-                            <input id="fileInput" class="form-control" type="file" accept="image/*">
-                            <div class="form-text">If camera is unavailable, upload a photo (JPEG/PNG). Max 5MB.</div>
+                        <div id="message-overlay" class="message-overlay mt-2 position-relative" style="display:none;">
+                        </div>
+
+                        <div class="mt-3">
+                            <button class="btn btn-success w-100" type="submit"><i class="fas fa-save"></i>
+                                Update</button>
+                            <a class="btn btn-outline-secondary w-100 mt-2" href="/clients"><i
+                                    class="fas fa-arrow-left"></i> Back</a>
                         </div>
                     </div>
                 </div>
-                <input type="hidden" name="photo_data" id="photo_data">
-            </div>
+                <!-- Hidden inputs for 3 angles -->
+                <input type="hidden" name="photo_data_center" id="photo_data_center">
+                <input type="hidden" name="photo_data_left" id="photo_data_left">
+                <input type="hidden" name="photo_data_right" id="photo_data_right">
 
-            <div class="d-flex gap-2 justify-content-end">
-                <button class="btn btn-success" type="submit"><i class="fas fa-save"></i> Update</button>
-                <a class="btn btn-outline-secondary" href="/clients"><i class="fas fa-arrow-left"></i> Back</a>
-            </div>
+
         </form>
     </div>
 </div>
@@ -252,240 +282,175 @@
 
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
-    const preview = document.getElementById('preview');
     const placeholder = document.getElementById('camera-placeholder');
     const actionBtn = document.getElementById('camera-action');
-    const photoInput = document.getElementById('photo_data');
-    const previewBox = document.getElementById('previewBox');
-    const fileToggle = document.getElementById('file-toggle');
-    const fileArea = document.getElementById('fileArea');
-    const fileInput = document.getElementById('fileInput');
-    let messageOverlay = document.getElementById('message-overlay');
+    const captureControls = document.getElementById('capture-controls');
+    const captureBtn = document.getElementById('capture-btn');
+    const retakeBtn = document.getElementById('retake-btn');
+    const captureTarget = document.getElementById('capture-target');
+    const instructionText = document.getElementById('instruction-text');
+    const messageOverlay = document.getElementById('message-overlay');
     const cameraCanvas = document.getElementById('cameraCanvas');
-    let stream = null;
-    let cameraState = 'stopped'; // 'stopped' | 'started' | 'captured'
-    let faceVerified = false; // Track if face has been verified
-    let messageTimeout = null; // To manage message timeout
+    const saveBtn = document.querySelector('button[type="submit"]'); // The Update Button
 
-    // Function to show message overlay
+    // Input fields
+    const inputs = {
+        0: document.getElementById('photo_data_center'),
+        1: document.getElementById('photo_data_left'),
+        2: document.getElementById('photo_data_right')
+    };
+
+    // Preview elements
+    const previews = {
+        0: document.getElementById('preview-center'),
+        1: document.getElementById('preview-left'),
+        2: document.getElementById('preview-right')
+    };
+
+    const ticks = {
+        0: document.getElementById('tick-center'),
+        1: document.getElementById('tick-left'),
+        2: document.getElementById('tick-right')
+    };
+
+    let stream = null;
+    let cameraState = 'stopped'; // 'stopped' | 'started'
+    let captureStep = 0; // 0=Center, 1=Left, 2=Right, 3=Done
+
     function showMessage(message, type) {
-        console.log('Showing message:', message, 'type:', type);
-        if (!messageOverlay) messageOverlay = document.getElementById('message-overlay');
         messageOverlay.textContent = message;
         messageOverlay.className = `message-overlay ${type}`;
         messageOverlay.style.display = 'block';
-        // Clear any existing timeout
-        if (messageTimeout) clearTimeout(messageTimeout);
-        // Hide after 4 seconds
-        messageTimeout = setTimeout(() => {
+        setTimeout(() => {
             messageOverlay.style.display = 'none';
         }, 4000);
     }
 
-    // Function to hide message overlay
-    function hideMessage() {
-        if (!messageOverlay) messageOverlay = document.getElementById('message-overlay');
-        messageOverlay.style.display = 'none';
-        if (messageTimeout) {
-            clearTimeout(messageTimeout);
-            messageTimeout = null;
-        }
-    }
-
-    // Combined camera action function
-    async function cameraAction() {
+    async function startCamera() {
         try {
-            if (cameraState === 'stopped') {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
-                video.srcObject = stream;
-                video.style.display = 'block';
-                placeholder.style.display = 'none';
-                actionBtn.textContent = 'Capture';
-                cameraState = 'started';
-                return;
-            }
+            stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+            video.srcObject = stream;
+            video.style.display = 'block';
+            placeholder.style.display = 'none';
+            actionBtn.style.display = 'none';
+            captureControls.style.display = 'inline-block';
+            captureControls.style.setProperty('display', 'inline-block', 'important');
 
-            if (cameraState === 'started') {
-                if (!stream) { alert('Start the camera first'); return; }
-
-                const ctx = canvas.getContext('2d');
-                // Calculate the visible area in video coordinates to match object-fit: cover
-                const containerW = 420;
-                const containerH = 320;
-                const vw = video.videoWidth || 420;
-                const vh = video.videoHeight || 320;
-                const scale = Math.max(containerW / vw, containerH / vh);
-                const scaledW = vw * scale;
-                const scaledH = vh * scale;
-                let sourceX = 0, sourceY = 0, sourceW = vw, sourceH = vh;
-                if (scaledW > containerW) {
-                    // crop horizontally
-                    const cropAmount = (scaledW - containerW) / scale;
-                    sourceX = cropAmount / 2;
-                    sourceW = vw - cropAmount;
-                } else {
-                    // crop vertically
-                    const cropAmount = (scaledH - containerH) / scale;
-                    sourceY = cropAmount / 2;
-                    sourceH = vh - cropAmount;
-                }
-                // Set canvas size to the cropped visible area, then scale down if needed
-                let targetW = sourceW;
-                let targetH = sourceH;
-                const MAX_W = 800;
-                if (targetW > MAX_W) {
-                    const scaleDown = MAX_W / targetW;
-                    targetW = Math.round(targetW * scaleDown);
-                    targetH = Math.round(targetH * scaleDown);
-                }
-                canvas.width = targetW;
-                canvas.height = targetH;
-                // Draw only the visible cropped part
-                ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-
-                // Clear all children of previewBox except message-overlay
-                // Simplest way to ensure clean state including overlay is:
-                previewBox.innerHTML = '';
-                previewBox.appendChild(messageOverlay);
-
-                const img = document.createElement('img'); img.src = dataUrl; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
-                previewBox.insertBefore(img, messageOverlay);
-                video.style.display = 'none';
-                actionBtn.textContent = 'Stop Camera';
-                cameraState = 'captured';
-                photoInput.value = dataUrl;
-
-                // Verify face
-                const verificationResult = await verifyFace(dataUrl);
-                if (verificationResult.ok) {
-                    faceVerified = true;
-                    showMessage('Face verified successfully!', 'success');
-                } else {
-                    faceVerified = false;
-                    showMessage(verificationResult.message, 'error');
-                }
-                return;
-            }
-
-            if (cameraState === 'captured') {
-                if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-                video.srcObject = null;
-                video.style.display = 'none';
-                placeholder.style.display = 'block';
-                photoInput.value = '';
-                faceVerified = false; // Reset face verification
-                actionBtn.textContent = 'Start Camera';
-                cameraState = 'stopped';
-
-                // Reset preview to original image or placeholder
-                // Reset preview to original image or placeholder
-                previewBox.innerHTML = `
-                {% if client.client_id %}
-                <img src="/static/clients/{{ client.client_id }}.jpg" onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<div style=\\'text-align:center; width:100%;\\'> <span class=\\'text-muted\\'>No image captured | Preview</span></div>';" style="width:100%; height:100%; object-fit:cover;">
-                <div style="display:none; text-align:center; width:100%;"> 
-                    <span class="text-muted">No image captured | Preview</span>
-                </div>
-                {% else %}
-                <div style="text-align:center; width:100%;"> <span class="text-muted">No image captured | Preview</span></div>
-                {% endif %}
-                <div id="message-overlay" class="message-overlay"></div>
-                `;
-                // Re-get message overlay reference since we replaced innerHTML
-                messageOverlay = document.getElementById('message-overlay');
-
-                hideMessage(); // Hide any existing message
-                return;
-            }
+            captureBtn.disabled = false;
+            cameraState = 'started';
+            updateUIForStep();
         } catch (err) {
             alert('Camera error: ' + err.message);
         }
     }
 
-    // Button click handler
-    actionBtn.addEventListener('click', cameraAction);
-
-    // Make the entire camera canvas clickable
-    if (cameraCanvas) {
-        cameraCanvas.addEventListener('click', (e) => {
-            // Prevent triggering if clicking on the button itself to avoid double execution
-            if (e.target === actionBtn) return;
-            cameraAction();
-        });
+    function stopCamera() {
+        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+        video.srcObject = null;
+        video.style.display = 'none';
+        placeholder.style.display = 'block';
+        actionBtn.style.display = 'inline-block';
+        actionBtn.textContent = 'Start Camera';
+        captureControls.style.display = 'none';
+        cameraState = 'stopped';
     }
 
-    // File upload fallback
-    fileToggle.addEventListener('click', () => {
-        if (fileArea.style.display === 'none' || fileArea.style.display === '') {
-            fileArea.style.display = 'block';
-            actionBtn.disabled = true;
-            fileToggle.textContent = 'Use camera';
+    function updateUIForStep() {
+        // Enforce all-or-nothing for photo update during capture
+        // If we are in the middle of capturing (step 0, 1, 2), we should distinct visually
+        // but verification logic is in the form submit.
+
+        if (captureStep === 0) {
+            captureTarget.textContent = "Center";
+            instructionText.textContent = "Please look at the camera (Center).";
+            captureBtn.disabled = false;
+            captureBtn.style.display = 'inline-block';
+            retakeBtn.style.display = 'none';
+        } else if (captureStep === 1) {
+            captureTarget.textContent = "Left Side";
+            instructionText.textContent = "Please turn slightly to show your LEFT side.";
+        } else if (captureStep === 2) {
+            captureTarget.textContent = "Right Side";
+            instructionText.textContent = "Please turn slightly to show your RIGHT side.";
+        } else if (captureStep === 3) {
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'inline-block';
+            instructionText.textContent = "All angles captured. Ready to Update.";
+            stopCamera();
+        }
+    }
+
+    function capture() {
+        if (captureStep > 2) return;
+
+        const ctx = canvas.getContext('2d');
+        const containerW = 420;
+        const containerH = 320;
+        const vw = video.videoWidth || 420;
+        const vh = video.videoHeight || 320;
+        const scale = Math.max(containerW / vw, containerH / vh);
+        const scaledW = vw * scale;
+        const scaledH = vh * scale;
+        let sourceX = 0, sourceY = 0, sourceW = vw, sourceH = vh;
+
+        if (scaledW > containerW) {
+            const cropAmount = (scaledW - containerW) / scale;
+            sourceX = cropAmount / 2;
+            sourceW = vw - cropAmount;
         } else {
-            fileArea.style.display = 'none';
-            actionBtn.disabled = false;
-            fileToggle.textContent = 'Use file';
+            const cropAmount = (scaledH - containerH) / scale;
+            sourceY = cropAmount / 2;
+            sourceH = vh - cropAmount;
+        }
+
+        canvas.width = 420;
+        canvas.height = 320;
+        ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, 420, 320);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+        inputs[captureStep].value = dataUrl;
+        previews[captureStep].src = dataUrl;
+        previews[captureStep].style.display = 'block';
+        ticks[captureStep].style.display = 'block';
+
+        captureStep++;
+        updateUIForStep();
+    }
+
+    function retakeAll() {
+        captureStep = 0;
+        [0, 1, 2].forEach(i => {
+            inputs[i].value = '';
+            previews[i].style.display = 'none';
+            previews[i].src = '';
+            ticks[i].style.display = 'none';
+        });
+        startCamera();
+        updateUIForStep();
+    }
+
+    // Event Listeners
+    actionBtn.addEventListener('click', startCamera);
+    captureBtn.addEventListener('click', capture);
+    retakeBtn.addEventListener('click', retakeAll);
+
+    // Form Submit Validation
+    document.querySelector('form').addEventListener('submit', function (e) {
+        // If capture has started (step > 0) but not finished (step < 3), prevent submit
+        if (captureStep > 0 && captureStep < 3) {
+            e.preventDefault();
+            alert("Please complete capturing all 3 angles (Center, Left, Right) or refresh to cancel photo update.");
+            return;
+        }
+        // If step is 0 (no new photos) or 3 (all new photos), allow submit.
+
+        // Disable button to prevent double submit
+        const btn = this.querySelector('button[type="submit"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
         }
     });
 
-    // Allow re-selecting the same file
-    if (fileInput) {
-        fileInput.addEventListener('click', function () {
-            this.value = '';
-        });
-
-        fileInput.addEventListener('change', async (e) => {
-            const f = e.target.files && e.target.files[0];
-            if (!f) return;
-            if (f.size > 5 * 1024 * 1024) { alert('File too large (max 5MB)'); return; }
-
-            // Reset verification state
-            faceVerified = false;
-            photoInput.value = '';
-            hideMessage();
-
-            const reader = new FileReader();
-            reader.onload = async function (ev) {
-                const data = ev.target.result;
-                photoInput.value = data;
-
-                // Clear all children of previewBox except message-overlay
-                previewBox.innerHTML = '';
-                previewBox.appendChild(messageOverlay);
-
-                const img = document.createElement('img'); img.src = data; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
-                previewBox.insertBefore(img, messageOverlay);
-
-                // Verify face
-                showMessage('Verifying face...', 'normal');
-                const verificationResult = await verifyFace(data);
-                if (verificationResult.ok) {
-                    faceVerified = true;
-                    showMessage('Face verified successfully!', 'success');
-                } else {
-                    faceVerified = false;
-                    showMessage(verificationResult.message, 'error');
-                }
-            };
-            reader.readAsDataURL(f);
-        });
-    }
-
-    // Function to verify face using the server endpoint
-    async function verifyFace(photoData) {
-        try {
-            const response = await fetch('/verify_face', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({ photo_data: photoData })
-            });
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error('Face verification error:', error);
-            return { ok: false, message: 'Error verifying face. Please try again.' };
-        }
-    }
 </script>
 {% endblock %}

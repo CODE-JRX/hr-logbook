@@ -13,13 +13,23 @@ def add_face_embedding(client_id, embedding_list):
     cursor.close()
     db.close()
 
-def update_face_embedding(client_id, embedding_list):
+
+def delete_embeddings_by_client_id(client_id):
     db = get_db()
     cursor = db.cursor()
-    # MySQL handling for face embedding updates
-    # Check logic in improve_client_embedding.
-    
-    # For now, let's keep it consistent with the logic in improve_client_embedding.
+    cursor.execute("DELETE FROM face_embeddings WHERE client_id = %s", (client_id,))
+    db.commit()
+    cursor.close()
+    db.close()
+
+def update_face_embedding(client_id, embedding_list):
+    # For a full update where we replace all embeddings (e.g. from edit page with 3 angles),
+    # we should clear old ones first.
+    # However, this function signature suggests a single embedding update. 
+    # To be safe and flexible, let's just use add_face_embedding after clearing manually in the route if needed.
+    # Or we can make this function clear and add. 
+    # But since we might add 3 embeddings, let's keep this simple:
+    # This specific function might be deprecated in favor of manual delete + add loop in route.
     pass
 
 def get_embedding_by_client_id(client_id):

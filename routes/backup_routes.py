@@ -13,6 +13,14 @@ class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (datetime, date)):
             return obj.isoformat()
+        if isinstance(obj, bytes):
+            # Attempt to decode bytes to utf-8 string
+            try:
+                return obj.decode('utf-8')
+            except UnicodeDecodeError:
+                # Fallback to base64 if not valid utf-8 (though unlikely for our use case)
+                import base64
+                return base64.b64encode(obj).decode('ascii')
         return super(DateTimeEncoder, self).default(obj)
 
 # Define local admin_required to avoid circular/complex imports with all_routes
@@ -84,7 +92,9 @@ def download_backup():
         )
         
     except Exception as e:
-        flash(f"Backup failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        flash(f"Backup failed: {str(e)}", "danger")
         return redirect(url_for('client.admin_dashboard'))
 
 
