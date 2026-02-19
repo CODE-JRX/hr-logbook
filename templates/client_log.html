@@ -37,70 +37,6 @@
 		justify-content: center;
 	}
 
-	.camera-card {
-		margin: 0;
-		width: 460px;
-		height: 460px;
-		background: #0f1720;
-		border-radius: 8px;
-		border: 4px solid rgba(13, 110, 253, 0.12);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: relative;
-	}
-
-	/* Face position guide: subtle broken square shown over the camera preview */
-	#face-guide {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 58%;
-		height: 58%;
-		pointer-events: none;
-		z-index: 12;
-	}
-
-	#face-guide .fg-corner {
-		position: absolute;
-		width: clamp(36px, 9%, 60px);
-		height: clamp(36px, 9%, 60px);
-		box-sizing: border-box;
-		border-radius: 4px;
-		/* soft gray that doesn't overpower the UI */
-		border-color: rgba(154, 166, 188, 0.28);
-		border-style: solid;
-		/* show only two sides per corner to create the "broken" square look */
-	}
-
-	#face-guide .top-left {
-		top: 0;
-		left: 0;
-		border-right: none;
-		border-bottom: none;
-	}
-
-	#face-guide .top-right {
-		top: 0;
-		right: 0;
-		border-left: none;
-		border-bottom: none;
-	}
-
-	#face-guide .bottom-right {
-		bottom: 0;
-		right: 0;
-		border-left: none;
-		border-top: none;
-	}
-
-	#face-guide .bottom-left {
-		bottom: 0;
-		left: 0;
-		border-right: none;
-		border-top: none;
-	}
 
 	.system-log-card {
 		width: 320px;
@@ -167,7 +103,9 @@
 		display: block;
 	}
 
-	#purpose_checkboxes .form-check:hover {
+	#purpose_checkboxes .form-check:hover,
+	#purpose_checkboxes .form-check-input:hover,
+	#purpose_checkboxes .form-check-label:hover {
 		cursor: pointer;
 	}
 
@@ -378,7 +316,6 @@
 			</div>
 		</div>
 
-		<p id="error" style="display:none;" class="text-danger mt-2"></p>
 	</div>
 </div>
 {% endblock %}
@@ -417,24 +354,20 @@
 	const btnPurposeNext = document.getElementById('btn_purpose_next');
 	const btnTimeIn = document.getElementById('btn_time_in');
 
-	const errorP = document.getElementById('error');
 	const cameraError = document.getElementById('camera-error');
 
 	function setError(msg) {
 		const m = String(msg || '');
-		// Update logic to handle multiple modals - usually we show errors inside modals now
 		if (cameraError) {
-			if (m && (m.toLowerCase().includes('no face') || m.toLowerCase().includes('detect'))) {
+			const lowerMsg = m.toLowerCase();
+			// Display if contains specific keywords OR show all errors if user meant all "system messages"
+			// Given the user's specific request for "No matching client found", we ensure it's included.
+			if (m && (lowerMsg.includes('no face') || lowerMsg.includes('detect') || lowerMsg.includes('no matching client found') || lowerMsg.includes('error') || lowerMsg.includes('fail'))) {
 				cameraError.textContent = m;
 				cameraError.style.display = 'block';
 			} else {
 				cameraError.style.display = 'none';
 			}
-		}
-		if (errorP) {
-			// Page level error mainly for system issues
-			errorP.textContent = msg || '';
-			errorP.style.display = msg ? 'block' : 'none';
 		}
 	}
 
@@ -540,7 +473,10 @@
 
 	function useTyped() {
 		const v = manualSearch && manualSearch.value && manualSearch.value.trim();
-		if (!v) { errorP.textContent = 'Please type an ID or name before using.'; return; }
+		if (!v) {
+			setError('Please type an ID or name before using.');
+			return;
+		}
 		// use the typed value
 		handleMatchFound({
 			client_id: v,

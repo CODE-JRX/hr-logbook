@@ -6,118 +6,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <style>
-    .media-frame {
-        width: 100%;
-        aspect-ratio: 4 / 3;
-        /* modern browsers */
-        max-height: 420px;
-        background: #0f1720;
-        border-radius: 8px;
-        border: 3px solid rgba(13, 110, 253, 0.08);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .media-frame video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    /* Make preview match live preview — use cover so framing matches */
-    .media-frame img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    /* Camera guide: subtle broken square shown over the live preview */
-    #face-guide {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 60%;
-        height: 60%;
-        pointer-events: none;
-        z-index: 6;
-    }
-
-    #face-guide .fg-corner {
-        position: absolute;
-        width: clamp(32px, 8%, 56px);
-        height: clamp(32px, 8%, 56px);
-        box-sizing: border-box;
-        border-radius: 4px;
-        border-color: rgba(154, 166, 188, 0.28);
-        border-style: solid;
-    }
-
-    #face-guide .top-left {
-        top: 0;
-        left: 0;
-        border-right: none;
-        border-bottom: none;
-    }
-
-    #face-guide .top-right {
-        top: 0;
-        right: 0;
-        border-left: none;
-        border-bottom: none;
-    }
-
-    #face-guide .bottom-right {
-        bottom: 0;
-        right: 0;
-        border-left: none;
-        border-top: none;
-    }
-
-    #face-guide .bottom-left {
-        bottom: 0;
-        left: 0;
-        border-right: none;
-        border-top: none;
-    }
-
     #previewBox {
         padding: .5rem;
         background: #f8fafc;
-    }
-
-    .message-overlay {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        right: 10px;
-        padding: 6px 10px;
-        border-radius: 6px;
-        color: white;
-        font-weight: bold;
-        text-align: center;
-        z-index: 10;
-        display: none;
-        font-size: 12px;
-        line-height: 1.2;
-        word-wrap: break-word;
-    }
-
-    .message-overlay.success {
-        background-color: rgba(25, 135, 84, 1);
-    }
-
-    .message-overlay.error {
-        background-color: rgba(220, 53, 69, 1);
-    }
-
-    .message-overlay.normal {
-        background-color: rgba(13, 110, 253, 0.9);
     }
 </style>
 {% endblock %}
@@ -174,9 +65,10 @@
                 <div class="row g-2">
                     <!-- Main Camera Area -->
                     <div class="col-md-7">
-                        <div class="mx-auto shadow-sm rounded media-frame" id="cameraCanvas" style="cursor: pointer;"
-                            title="Click to start camera">
-                            <video id="video" autoplay playsinline style="display:none; border-radius:6px;"></video>
+                        <div class="camera-card mx-auto shadow-sm rounded" id="cameraCanvas">
+                            <!-- video preview (fills card) -->
+                            <video id="video" width="420" height="420" autoplay playsinline muted
+                                style="object-fit:cover; width:420px; height:420px; border-radius:6px; display:none;"></video>
 
                             <!-- face position guide (subtle broken square corners) -->
                             <div id="face-guide" aria-hidden="true">
@@ -185,17 +77,30 @@
                                 <div class="fg-corner bottom-right"></div>
                                 <div class="fg-corner bottom-left"></div>
                             </div>
+
+                            <!-- placeholder when camera not active -->
                             <div id="camera-placeholder" class="text-center text-muted" style="color:#9aa6bc">
-                                <div style="font-size:38px; opacity:0.6">📷</div>
-                                <div style="margin-top:6px;">Camera Preview</div>
+                                <div style="font-size:44px; opacity:0.5">📷</div>
+                                <div style="margin-top:8px;">Camera Preview</div>
                             </div>
-                            <!-- Canvas for capturing -->
-                            <canvas id="canvas" width="420" height="320" style="display:none;"></canvas>
+
+                            <!-- captured preview overlay -->
+                            <canvas id="canvas" width="420" height="420"
+                                style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px;"></canvas>
+                            <img id="preview" src="" alt="Preview"
+                                style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:6px; background:#0f1720;" />
+
+                            <div id="scan-line" style="animation: scan 2s linear;"></div>
+
+                            <!-- camera action button placed inside the camera container -->
+                            <button id="camera-action" type="button" title="Start camera for registration"
+                                class="btn btn-lg"
+                                style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); z-index:10; min-width:140px; background:rgba(0,0,0,0.7); color:white; border:none; border-radius:6px; padding:8px 16px;">
+                                <i class="fas fa-play me-2"></i>Start Camera
+                            </button>
                         </div>
 
                         <div class="mt-3 text-center">
-                            <button id="camera-action" type="button" class="btn btn-outline-primary me-2"><i
-                                    class="fas fa-play"></i> Start Camera</button>
                             <div id="capture-controls" class="d-inline-block" style="display:none !important;">
                                 <button id="capture-btn" type="button" class="btn btn-outline-primary" disabled><i
                                         class="fas fa-camera"></i>
@@ -282,6 +187,8 @@
 
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('preview');
+    const scanLine = document.getElementById('scan-line');
     const placeholder = document.getElementById('camera-placeholder');
     const actionBtn = document.getElementById('camera-action');
     const captureControls = document.getElementById('capture-controls');
@@ -318,6 +225,7 @@
     let captureStep = 0; // 0=Center, 1=Left, 2=Right, 3=Done
 
     function showMessage(message, type) {
+        if (!messageOverlay) return;
         messageOverlay.textContent = message;
         messageOverlay.className = `message-overlay ${type}`;
         messageOverlay.style.display = 'block';
@@ -332,7 +240,12 @@
             video.srcObject = stream;
             video.style.display = 'block';
             placeholder.style.display = 'none';
-            actionBtn.style.display = 'none';
+            preview.style.display = 'none';
+
+            // Update action button for integrated UI
+            actionBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Camera';
+            actionBtn.style.background = 'rgba(220, 53, 69, 0.7)'; // Reddish for stop
+
             captureControls.style.display = 'inline-block';
             captureControls.style.setProperty('display', 'inline-block', 'important');
 
@@ -349,17 +262,27 @@
         video.srcObject = null;
         video.style.display = 'none';
         placeholder.style.display = 'block';
-        actionBtn.style.display = 'inline-block';
-        actionBtn.textContent = 'Start Camera';
-        captureControls.style.display = 'none';
+        preview.style.display = 'none';
+
+        actionBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start Camera';
+        actionBtn.style.background = 'rgba(0,0,0,0.7)';
+
+        // Only hide controls if capture is not finished (to allow Retake All)
+        if (captureStep !== 3) {
+            captureControls.style.display = 'none';
+        }
         cameraState = 'stopped';
     }
 
-    function updateUIForStep() {
-        // Enforce all-or-nothing for photo update during capture
-        // If we are in the middle of capturing (step 0, 1, 2), we should distinct visually
-        // but verification logic is in the form submit.
+    function toggleCamera() {
+        if (cameraState === 'stopped') {
+            startCamera();
+        } else {
+            stopCamera();
+        }
+    }
 
+    function updateUIForStep() {
         if (captureStep === 0) {
             captureTarget.textContent = "Center";
             instructionText.textContent = "Please look at the camera (Center).";
@@ -385,9 +308,9 @@
 
         const ctx = canvas.getContext('2d');
         const containerW = 420;
-        const containerH = 320;
+        const containerH = 420;
         const vw = video.videoWidth || 420;
-        const vh = video.videoHeight || 320;
+        const vh = video.videoHeight || 420;
         const scale = Math.max(containerW / vw, containerH / vh);
         const scaledW = vw * scale;
         const scaledH = vh * scale;
@@ -404,10 +327,26 @@
         }
 
         canvas.width = 420;
-        canvas.height = 320;
-        ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, 420, 320);
+        canvas.height = 420;
+        ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, 420, 420);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 
+        // Show scan animation
+        scanLine.style.display = 'block';
+        scanLine.style.animation = 'none';
+        setTimeout(() => { scanLine.style.animation = 'scan 2s linear'; }, 10);
+
+        // Briefly show the captured photo in the main frame then hide it as we move to next step
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+        setTimeout(() => {
+            if (cameraState === 'started') {
+                preview.style.display = 'none';
+                scanLine.style.display = 'none';
+            }
+        }, 1500);
+
+        // Save to hiddden input and update thumb preview
         inputs[captureStep].value = dataUrl;
         previews[captureStep].src = dataUrl;
         previews[captureStep].style.display = 'block';
@@ -430,9 +369,30 @@
     }
 
     // Event Listeners
-    actionBtn.addEventListener('click', startCamera);
-    captureBtn.addEventListener('click', capture);
-    retakeBtn.addEventListener('click', retakeAll);
+    actionBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleCamera();
+    });
+
+    if (cameraCanvas) {
+        cameraCanvas.addEventListener('click', () => {
+            if (cameraState === 'stopped') {
+                startCamera();
+            } else if (cameraState === 'started') {
+                capture();
+            }
+        });
+    }
+
+    captureBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        capture();
+    });
+
+    retakeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        retakeAll();
+    });
 
     // Form Submit Validation
     document.querySelector('form').addEventListener('submit', function (e) {

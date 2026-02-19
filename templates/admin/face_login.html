@@ -6,130 +6,6 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <style>
-	.media-frame {
-		width: 100%;
-		aspect-ratio: 4 / 3;
-		/* modern browsers */
-		max-height: 420px;
-		background: #0f1720;
-		border-radius: 8px;
-		border: 3px solid rgba(13, 110, 253, 0.08);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: relative;
-		overflow: hidden;
-	}
-
-	.media-frame video {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
-	}
-
-	/* Make preview match live preview — use cover so framing matches */
-	.media-frame img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
-	}
-
-	/* Camera guide: subtle broken square shown over the live preview */
-	#face-guide {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 60%;
-		height: 60%;
-		pointer-events: none;
-		z-index: 6;
-	}
-
-	#face-guide .fg-corner {
-		position: absolute;
-		width: clamp(32px, 8%, 56px);
-		height: clamp(32px, 8%, 56px);
-		box-sizing: border-box;
-		border-radius: 4px;
-		border-color: rgba(154, 166, 188, 0.28);
-		border-style: solid;
-	}
-
-	#face-guide .top-left {
-		top: 0;
-		left: 0;
-		border-right: none;
-		border-bottom: none;
-	}
-
-	#face-guide .top-right {
-		top: 0;
-		right: 0;
-		border-left: none;
-		border-bottom: none;
-	}
-
-	#face-guide .bottom-right {
-		bottom: 0;
-		right: 0;
-		border-left: none;
-		border-top: none;
-	}
-
-	#face-guide .bottom-left {
-		bottom: 0;
-		left: 0;
-		border-right: none;
-		border-top: none;
-	}
-
-	#previewBox {
-		padding: .5rem;
-		background: #f8fafc;
-	}
-
-	.message-overlay {
-		position: absolute;
-		top: 10px;
-		left: 10px;
-		right: 10px;
-		padding: 6px 10px;
-		border-radius: 6px;
-		color: white;
-		font-weight: bold;
-		text-align: center;
-		z-index: 10;
-		display: none;
-		font-size: 12px;
-		line-height: 1.2;
-		word-wrap: break-word;
-	}
-
-	.message-overlay.success {
-		background-color: rgba(25, 135, 84, 1);
-	}
-
-	.message-overlay.error {
-		background-color: rgba(220, 53, 69, 1);
-	}
-</style>
-{% endblock %}
-
-{% block content %}
-<style>
-	@keyframes scan {
-		0% {
-			top: 0;
-		}
-
-		100% {
-			top: 100%;
-		}
-	}
-
 	.modal,
 	.modal-dialog {
 		z-index: 9999 !important;
@@ -154,70 +30,6 @@
 		justify-content: center;
 	}
 
-	.camera-card {
-		margin: 0;
-		width: 460px;
-		height: 460px;
-		background: #0f1720;
-		border-radius: 8px;
-		border: 4px solid rgba(13, 110, 253, 0.12);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: relative;
-	}
-
-	/* Face position guide: subtle broken square shown over the camera preview */
-	#face-guide {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 58%;
-		height: 58%;
-		pointer-events: none;
-		z-index: 12;
-	}
-
-	#face-guide .fg-corner {
-		position: absolute;
-		width: clamp(36px, 9%, 60px);
-		height: clamp(36px, 9%, 60px);
-		box-sizing: border-box;
-		border-radius: 4px;
-		/* soft gray that doesn't overpower the UI */
-		border-color: rgba(154, 166, 188, 0.28);
-		border-style: solid;
-		/* show only two sides per corner to create the "broken" square look */
-	}
-
-	#face-guide .top-left {
-		top: 0;
-		left: 0;
-		border-right: none;
-		border-bottom: none;
-	}
-
-	#face-guide .top-right {
-		top: 0;
-		right: 0;
-		border-left: none;
-		border-bottom: none;
-	}
-
-	#face-guide .bottom-right {
-		bottom: 0;
-		right: 0;
-		border-left: none;
-		border-top: none;
-	}
-
-	#face-guide .bottom-left {
-		bottom: 0;
-		left: 0;
-		border-right: none;
-		border-top: none;
-	}
 
 	.login-card {
 		width: 320px;
@@ -249,6 +61,36 @@
 		}
 	}
 </style>
+{% endblock %}
+
+{% block content %}
+max-height: 460px;
+overflow: auto;
+border-radius: 8px;
+border: 4px solid rgba(0, 0, 0, 0.06);
+background: var(--card-bg);
+padding: 12px;
+color: var(--text-color);
+}
+
+@media (max-width: 767px) {
+.admin-face-login-container {
+flex-direction: column;
+gap: 16px;
+}
+
+.camera-card {
+width: 100%;
+height: auto;
+min-height: 300px;
+}
+
+.login-card {
+width: 100%;
+max-height: none;
+}
+}
+</style>
 <div class="card shadow-lg">
 	<div class="card-body text-center">
 		<div class="admin-face-login-container">
@@ -278,12 +120,9 @@
 					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px;"></canvas>
 				<img id="preview" src="" alt="Preview"
 					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:6px; background:#0f1720;" />
-				<div id="scan-line"
-					style="display:none; position:absolute; top:0; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, rgba(0,255,0,0.8), transparent); z-index:20; animation: scan 2s linear;">
-				</div>
+				<div id="scan-line"></div>
 				<!-- camera error overlay (shown inside camera container at top) -->
-				<div id="camera-error"
-					style="display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:25; background:rgba(0,0,0,0.6); color:#fff; padding:6px 10px; border-radius:6px; font-weight:600; font-size:0.95rem;">
+				<div id="camera-error" class="camera-error-overlay">
 					No face detected
 				</div>
 				<!-- camera action button placed inside the camera container -->

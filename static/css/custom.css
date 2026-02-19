@@ -2353,3 +2353,109 @@ textarea:disabled {
   outline: 3px solid #f9ca24 !important;
   outline-offset: 3px !important;
 }
+
+/* =================================================================
+   PHASE 3: Camera UI Patterns (Unified)
+   ================================================================= */
+.camera-card {
+  margin: 0;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 460px;
+  max-height: 460px;
+  background: #0f1720;
+  border-radius: 8px;
+  border: 4px solid rgba(13, 110, 253, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+#face-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 58%;
+  height: 58%;
+  pointer-events: none;
+  z-index: 12;
+}
+
+#face-guide .fg-corner {
+  position: absolute;
+  width: clamp(32px, 8%, 60px);
+  height: clamp(32px, 8%, 60px);
+  box-sizing: border-box;
+  border-radius: 4px;
+  border-color: rgba(154, 166, 188, 0.28);
+  border-style: solid;
+}
+
+#face-guide .top-left {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+#face-guide .top-right {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+#face-guide .bottom-right {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+#face-guide .bottom-left {
+  bottom: 0;
+  left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+#scan-line {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.8), transparent);
+  z-index: 20;
+}
+
+@keyframes scan {
+  0% {
+    top: 0;
+  }
+
+  100% {
+    top: 100%;
+  }
+}
+
+.camera-error-overlay {
+  display: none;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
