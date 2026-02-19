@@ -205,7 +205,7 @@
 					<div style="margin-top:8px;">Camera Preview</div>
 					<!--<h5 class="mt-3" style="color:#9aa6bc; font-weight:600;">Client Log (Face Recognition)</h5>
 					<p class="text-muted small" style="color:#9aa6bc;">Capture Client photo and record entry/exit-->
-					information</p>
+
 				</div>
 
 				<!-- captured preview overlay (inside camera container so absolute sizing is constrained) -->
@@ -227,18 +227,63 @@
 					Camera</button>
 			</div>
 
-			<!-- Match card -->
-			<div class="match-card">
-				<!-- Match (Client) card will appear here (always visible) -->
-				<div id="result" style="display:block;">
-					<p class="mb-1" style="text-align: left;"><strong>Match:</strong> <span id="match_name"
-							style="color:red;"></span> <small id="match_gender" class="text-muted"
-							style="display:none;"></small> <small id="match_age" class="text-muted"
-							style="display:none;"></small></p>
-					<hr>
-					<div class="mb-2">
-						<label class="form-label"><i class="fas fa-question-circle"></i> Purpose/s *</label>
-						<hr>
+
+			<!-- System log card -->
+			<div class="system-log-card">
+				<div class="d-flex justify-content-center gap-2 mb-3">
+					<button type="button" title="Use override if you are not identified correctly!"
+						class="btn btn-outline-secondary w-100" data-bs-toggle="modal"
+						data-bs-target="#overrideModal"><i class="fas fa-edit"></i> Override</button>
+				</div>
+				<hr>
+				<h6 class="mb-2">Client Logs</h6>
+				<div id="systemLog" style="font-size:0.9rem; line-height:1.25;">Loading...</div>
+			</div>
+		</div>
+
+		<!-- Match Modal -->
+		<div class="modal fade" id="matchModal" tabindex="-1" aria-labelledby="matchModalLabel" aria-hidden="true"
+			data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="matchModalLabel">Match Found</h5>
+					</div>
+					<div class="modal-body">
+						<div class="text-center mb-3">
+							<!-- Display photo if available, or icon -->
+							<img id="match_photo_preview" src="" alt="Client Photo"
+								style="max-width: 150px; border-radius: 8px; display: none;" class="mb-2 mx-auto">
+							<div id="match_photo_placeholder" style="font-size: 64px; color: #ccc;" class="mb-2">
+								<i class="fas fa-user-circle"></i>
+							</div>
+							<h4 id="match_name_modal" class="fw-bold"></h4>
+							<p class="text-muted">
+								<span id="match_gender_modal"></span>
+								<span id="match_age_modal"></span>
+							</p>
+						</div>
+					</div>
+					<div class="modal-footer justify-content-center">
+						<button id="btn_not_me" type="button" class="btn btn-danger me-2">That's not me, Scan
+							again</button>
+						<button id="btn_thats_me" type="button" class="btn btn-success">That's me</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Purpose Modal -->
+		<div class="modal fade" id="purposeModal" tabindex="-1" aria-labelledby="purposeModalLabel" aria-hidden="true"
+			data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="purposeModalLabel">Select Purpose</h5>
+					</div>
+					<div class="modal-body text-start">
+						<label class="form-label mb-3"><i class="fas fa-question-circle"></i> What is your
+							purpose?</label>
 						<div id="purpose_checkboxes">
 							<div class="form-check">
 								<input class="form-check-input" type="checkbox" value="RECEIVE DOCUMENT/S REQUESTED"
@@ -268,30 +313,40 @@
 								<label class="form-check-label" for="purpose_6">OTHERS</label>
 							</div>
 						</div>
+						<p id="purpose_error" class="text-danger mt-2" style="display:none;">Please select at least one
+							purpose.
+						</p>
 					</div>
-
-					<p id="action_msg" class="text-success mt-2" style="display:none;"></p>
+					<div class="modal-footer">
+						<button id="btn_purpose_next" type="button" class="btn btn-primary">Next</button>
+					</div>
 				</div>
 			</div>
+		</div>
 
-			<!-- System log card -->
-			<div class="system-log-card">
-				<div class="mb-2" id="additional_info_div">
-					<label for="additional_info" title="Specific purpose and/or for whom." class="form-label"><i
-							class="fas fa-info-circle"></i> Additional Information *</label>
-					<input type="text" title="Specific purpose and/or for whom." id="additional_info"
-						placeholder="Please specify..." class="form-control">
+		<!-- Additional Info Modal -->
+		<div class="modal fade" id="additionalInfoModal" tabindex="-1" aria-labelledby="additionalInfoModalLabel"
+			aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="additionalInfoModalLabel">Additional Information</h5>
+					</div>
+					<div class="modal-body text-start">
+						<label for="additional_info" title="Specific purpose and/or for whom." class="form-label"><i
+								class="fas fa-info-circle"></i> Please specify details</label>
+						<input type="text" title="Specific purpose and/or for whom." id="additional_info"
+							placeholder="E.g. DTR of Mr. Dela Cruz" class="form-control">
+						<p id="info_error" class="text-danger mt-2" style="display:none;">Please provide additional
+							information.
+						</p>
+					</div>
+					<div class="modal-footer">
+						<button id="btn_time_in" type="button" class="btn btn-success"><i
+								class="fas fa-sign-in-alt"></i> Time
+							In</button>
+					</div>
 				</div>
-				<div class="d-flex justify-content-center gap-2">
-					<button id="time_in" title="Record the client's entry with the selected purpose"
-						class="btn btn-success"><i class="fas fa-sign-in-alt"></i> Time In</button>
-					<button type="button" title="Use override if you are not identified correctly!"
-						class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#overrideModal"><i
-							class="fas fa-edit"></i> Override</button>
-				</div>
-				<hr>
-				<h6 class="mb-2">Client Logs</h6>
-				<div id="systemLog" style="font-size:0.9rem; line-height:1.25;">Loading...</div>
 			</div>
 		</div>
 
@@ -337,36 +392,52 @@
 	const placeholder = document.getElementById('camera-placeholder');
 	const actionBtn = document.getElementById('camera-action');
 	const cameraCard = document.querySelector('.camera-card');
-	const resultDiv = document.getElementById('result');
-	const matchName = document.getElementById('match_name');
+	// Removed resultDiv and card elements
 	const purposeCheckboxes = document.querySelectorAll('#purpose_checkboxes input[type="checkbox"]');
-	const additionalInfoDiv = document.getElementById('additional_info_div');
 	const additionalInfoInput = document.getElementById('additional_info');
-	const timeInBtn = document.getElementById('time_in');
-	const actionMsg = document.getElementById('action_msg');
+	// New modal elements
+	const matchModalEl = document.getElementById('matchModal');
+	const matchModal = new bootstrap.Modal(matchModalEl);
+	const matchNameModal = document.getElementById('match_name_modal');
+	const matchGenderModal = document.getElementById('match_gender_modal');
+	const matchAgeModal = document.getElementById('match_age_modal');
+	const matchPhotoPreview = document.getElementById('match_photo_preview');
+	const matchPhotoPlaceholder = document.getElementById('match_photo_placeholder');
+
+	const purposeModalEl = document.getElementById('purposeModal');
+	const purposeModal = new bootstrap.Modal(purposeModalEl);
+	const purposeError = document.getElementById('purpose_error');
+
+	const additionalInfoModalEl = document.getElementById('additionalInfoModal');
+	const additionalInfoModal = new bootstrap.Modal(additionalInfoModalEl);
+	const infoError = document.getElementById('info_error');
+
+	const btnThatsMe = document.getElementById('btn_thats_me');
+	const btnNotMe = document.getElementById('btn_not_me');
+	const btnPurposeNext = document.getElementById('btn_purpose_next');
+	const btnTimeIn = document.getElementById('btn_time_in');
+
 	const errorP = document.getElementById('error');
 	const cameraError = document.getElementById('camera-error');
 
 	function setError(msg) {
 		const m = String(msg || '');
-		const isSpecial = /no face/i.test(m) || /face not detected/i.test(m) || /no faces?/i.test(m) || (/face detected/i.test(m) && /no/i.test(m)) || /no identified client/i.test(m) || /please select at least one purpose/i.test(m) || /please provide additional information/i.test(m);
-		if (isSpecial) {
-			// show only in cameraError
-			if (cameraError) { cameraError.textContent = msg; cameraError.style.display = 'block'; }
-			// hide page-level error
-			errorP.style.display = 'none';
-		} else {
-			// set page-level error
-			errorP.textContent = msg || '';
-			if (msg) {
-				errorP.style.display = 'block';
+		// Update logic to handle multiple modals - usually we show errors inside modals now
+		if (cameraError) {
+			if (m && (m.toLowerCase().includes('no face') || m.toLowerCase().includes('detect'))) {
+				cameraError.textContent = m;
+				cameraError.style.display = 'block';
 			} else {
-				errorP.style.display = 'none';
+				cameraError.style.display = 'none';
 			}
-			// hide camera error
-			if (cameraError) cameraError.style.display = 'none';
+		}
+		if (errorP) {
+			// Page level error mainly for system issues
+			errorP.textContent = msg || '';
+			errorP.style.display = msg ? 'block' : 'none';
 		}
 	}
+
 	// Manual search elements
 	const manualSearch = document.getElementById('manual_search');
 	const suggestionsBox = document.getElementById('search_suggestions');
@@ -381,7 +452,7 @@
 		};
 	}
 
-	// Sound functions using Web Audio API
+	// Sound functions
 	function playSuccessSound() {
 		try {
 			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -389,14 +460,12 @@
 			const gainNode = audioContext.createGain();
 			oscillator.connect(gainNode);
 			gainNode.connect(audioContext.destination);
-			oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // Pleasant high frequency
+			oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
 			gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
 			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
 			oscillator.start(audioContext.currentTime);
 			oscillator.stop(audioContext.currentTime + 0.2);
-		} catch (e) {
-			console.warn('Success sound failed:', e);
-		}
+		} catch (e) { console.warn('Success sound failed:', e); }
 	}
 
 	function playErrorSound() {
@@ -406,14 +475,12 @@
 			const gainNode = audioContext.createGain();
 			oscillator.connect(gainNode);
 			gainNode.connect(audioContext.destination);
-			oscillator.frequency.setValueAtTime(200, audioContext.currentTime); // Harsh low frequency
+			oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
 			gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
 			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
 			oscillator.start(audioContext.currentTime);
 			oscillator.stop(audioContext.currentTime + 0.5);
-		} catch (e) {
-			console.warn('Error sound failed:', e);
-		}
+		} catch (e) { console.warn('Error sound failed:', e); }
 	}
 
 	async function performSearch(q) {
@@ -434,14 +501,18 @@
 				el.textContent = (item.full_name ? item.full_name + ' — ' : '') + item.client_id;
 				el.dataset.clientId = item.client_id;
 				el.dataset.fullName = item.full_name || '';
+				el.dataset.gender = item.gender || '';
+				el.dataset.age = item.age || '';
+				// photo url if available? item.photo_url could be added to backend search
 				el.setAttribute('data-bs-dismiss', 'modal');
 				el.addEventListener('click', () => {
 					// pick this suggestion
-					currentClientId = el.dataset.clientId;
-					matchName.textContent = el.dataset.fullName || el.dataset.clientId;
-					resultDiv.style.display = 'block';
-					actionMsg.style.display = 'none';
-					purposeCheckboxes.forEach(cb => cb.disabled = false);
+					handleMatchFound({
+						client_id: el.dataset.clientId,
+						full_name: el.dataset.fullName,
+						gender: el.dataset.gender,
+						age: el.dataset.age
+					});
 					suggestionsBox.style.display = 'none';
 				});
 				suggestionsBox.appendChild(el);
@@ -460,7 +531,6 @@
 		manualSearch.addEventListener('keydown', (e) => {
 			if (e.key === 'Enter') {
 				e.preventDefault();
-				// if suggestions visible, pick first; otherwise use typed
 				const first = suggestionsBox.querySelector('button');
 				if (first) { first.click(); }
 				else { useTyped(); }
@@ -471,21 +541,21 @@
 	function useTyped() {
 		const v = manualSearch && manualSearch.value && manualSearch.value.trim();
 		if (!v) { errorP.textContent = 'Please type an ID or name before using.'; return; }
-		// use the typed value as client_id (logs accept any string)
-		currentClientId = v;
-		matchName.textContent = v;
-		resultDiv.style.display = 'block';
-		actionMsg.style.display = 'none';
+		// use the typed value
+		handleMatchFound({
+			client_id: v,
+			full_name: v,
+			gender: '',
+			age: ''
+		});
 		suggestionsBox.style.display = 'none';
-		// Close the modal
+		// Close the override modal
 		const modal = document.getElementById('overrideModal');
 		const bsModal = bootstrap.Modal.getInstance(modal);
 		if (bsModal) bsModal.hide();
 	}
 
 	if (useTypedBtn) useTypedBtn.addEventListener('click', useTyped);
-
-	// Additional info is always visible for all purposes
 
 	function stopCamera() {
 		if (stream) {
@@ -504,21 +574,99 @@
 
 	let stream = null;
 	let currentClientId = null;
-	let cameraState = 'stopped'; // 'stopped' | 'started' | 'captured'
+	let cameraState = 'stopped';
 	let lastPurpose = null;
 	let capturedPhotoData = null;
 
-	// Camera action function
+	// Handle a successful match (from camera or manual override)
+	function handleMatchFound(clientData) {
+		currentClientId = clientData.client_id;
+		matchNameModal.textContent = clientData.full_name || '(no name)';
+
+		const gender = clientData.gender ? ('• ' + clientData.gender) : '';
+		const age = clientData.age ? ('• ' + clientData.age) : '';
+		matchGenderModal.textContent = gender;
+		matchAgeModal.textContent = age;
+
+		// If we wanted to show a photo, we'd set it here. For now show placeholder or captured logic
+		// matchPhotoPreview.src = ... 
+		matchPhotoPreview.style.display = 'none';
+		matchPhotoPlaceholder.style.display = 'block';
+
+		playSuccessSound();
+		matchModal.show();
+	}
+
+	// Modal Button Handlers
+
+	// 1. That's me
+	btnThatsMe.addEventListener('click', () => {
+		matchModal.hide();
+		// Clear previous selections
+		purposeCheckboxes.forEach(cb => cb.checked = false);
+		purposeError.style.display = 'none';
+		purposeModal.show();
+	});
+
+	// 2. That's not me. Scan again
+	btnNotMe.addEventListener('click', () => {
+		matchModal.hide();
+		currentClientId = null;
+		// If camera was stopped (e.g. from manual override), maybe we shouldn't auto start?
+		// But if it was from scan, we want to scan again.
+		// Let's assume user wants to retry scanning.
+		if (cameraState === 'stopped') {
+			cameraAction(); // Start camera
+		} else if (cameraState === 'captured') {
+			// retry capture immediately? or just let them click scan?
+			// Resetting to 'started' state to allow re-scan
+			preview.style.display = 'none';
+			video.style.display = 'block';
+			scanLine.style.display = 'none';
+			cameraState = 'started';
+			actionBtn.textContent = 'SCAN';
+		}
+	});
+
+	// 3. Purpose Next
+	btnPurposeNext.addEventListener('click', () => {
+		// Validate purpose
+		let selected = false;
+		purposeCheckboxes.forEach(cb => { if (cb.checked) selected = true; });
+		if (!selected) {
+			purposeError.style.display = 'block';
+			return;
+		}
+		purposeError.style.display = 'none';
+		purposeModal.hide();
+
+		// Reset info input
+		additionalInfoInput.value = '';
+		infoError.style.display = 'none';
+		additionalInfoModal.show();
+	});
+
+	// 4. Time In
+	btnTimeIn.addEventListener('click', () => {
+		const info = additionalInfoInput.value.trim();
+		if (!info) {
+			infoError.style.display = 'block';
+			return;
+		}
+		infoError.style.display = 'none';
+		// Send Log
+		sendLog('time_in');
+		additionalInfoModal.hide();
+	});
+
+
 	async function cameraAction() {
 		setError('');
 		if (cameraState === 'stopped') {
-			// start camera
 			try {
 				stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
-				console.log('Stream obtained:', stream);
 				video.srcObject = stream;
-				await video.play(); // Ensure video starts playing
-				console.log('Video playing, dimensions:', video.videoWidth, 'x', video.videoHeight);
+				await video.play();
 				video.style.display = 'block';
 				placeholder.style.display = 'none';
 				cameraState = 'started';
@@ -532,10 +680,8 @@
 		}
 
 		if (cameraState === 'started') {
-			// capture
 			if (!stream) { setError('Start the camera first'); return; }
 			const ctx = canvas.getContext('2d');
-			// Calculate the visible area in video coordinates to match object-fit: cover
 			const containerW = 420;
 			const containerH = 420;
 			const vw = video.videoWidth || 420;
@@ -545,17 +691,14 @@
 			const scaledH = vh * scale;
 			let sourceX = 0, sourceY = 0, sourceW = vw, sourceH = vh;
 			if (scaledW > containerW) {
-				// crop horizontally
 				const cropAmount = (scaledW - containerW) / scale;
 				sourceX = cropAmount / 2;
 				sourceW = vw - cropAmount;
 			} else {
-				// crop vertically
 				const cropAmount = (scaledH - containerH) / scale;
 				sourceY = cropAmount / 2;
 				sourceH = vh - cropAmount;
 			}
-			// Set canvas size to the cropped visible area, then scale down if needed
 			let targetW = sourceW;
 			let targetH = sourceH;
 			const MAX_W = 800;
@@ -566,90 +709,71 @@
 			}
 			canvas.width = targetW;
 			canvas.height = targetH;
-			// Draw only the visible cropped part
 			ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
-			// encode as JPEG (quality 0.9)
 			const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 			preview.src = dataUrl;
 			preview.style.display = 'block';
 			scanLine.style.display = 'block';
-			// Reset animation to restart on each capture
 			scanLine.style.animation = 'none';
-			setTimeout(() => {
-				scanLine.style.animation = 'scan 2s linear';
-			}, 10);
-			canvas.style.display = 'none'; // keep canvas hidden; we use it only for capture
-			// show captured overlay and hide live video
+			setTimeout(() => { scanLine.style.animation = 'scan 2s linear'; }, 10);
+			canvas.style.display = 'none';
 			video.style.display = 'none';
-			// Ensure preview uses contain to avoid any stretching
 			preview.style.objectFit = 'contain';
 			cameraState = 'captured';
 			actionBtn.textContent = 'Stop Camera';
 			capturedPhotoData = dataUrl;
 
-			// send to server for identification
 			const fd = new FormData();
 			fd.append('photo_data', dataUrl);
 			try {
 				const res = await fetch('/identify', { method: 'POST', body: fd });
 				const body = await res.json();
 				if (body.ok) {
-					playSuccessSound(); // Play success sound on successful identification
-					currentClientId = body.client_id;
-					matchName.textContent = body.full_name || '(no name)';
-					const mg = document.getElementById('match_gender');
-					if (mg) mg.textContent = body.gender ? ('• ' + body.gender) : '';
-					const ma = document.getElementById('match_age');
-					if (ma) ma.textContent = body.age ? ('• ' + body.age) : '';
-					resultDiv.style.display = 'block';
-					actionMsg.style.display = 'none';
-					purposeCheckboxes.forEach(cb => cb.disabled = false);
+					// Success - Show Match Modal
+					handleMatchFound({
+						client_id: body.client_id,
+						full_name: body.full_name,
+						gender: body.gender,
+						age: body.age
+					});
 				} else {
-					playErrorSound(); // Play error sound on failed identification
-					// keep match card visible but indicate no match so operator can use manual override
-					setError(body.error || 'No match');
-					currentClientId = null;
-					matchName.textContent = '(no match)';
-					const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
-					const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
-					resultDiv.style.display = 'block';
-					actionMsg.style.display = 'none';
+					playErrorSound();
+					setError(body.error || 'No match found');
+					// allow retry
+					setTimeout(() => {
+						// Optional: auto reset or just let them click Stop/Start?
+						// Let's just update UI to show error and let user decide
+					}, 2000);
 				}
 			} catch (err) {
 				setError('Identification failed: ' + err.message);
-				currentClientId = null;
-				matchName.textContent = '(no match)';
-				const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
-				const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
-				resultDiv.style.display = 'block';
 			}
 			return;
 		}
 
 		if (cameraState === 'captured') {
-			// stop camera and reset
-			if (stream) {
-				stream.getTracks().forEach(t => t.stop());
-				stream = null;
-			}
-			video.srcObject = null;
-			video.style.display = 'none';
-			placeholder.style.display = 'block';
-			preview.style.display = 'none';
-			canvas.style.display = 'none';
-			cameraState = 'stopped';
-			actionBtn.textContent = 'Start Camera';
+			captureReset();
 			return;
 		}
 	}
 
-	// Combined camera button handler
-	actionBtn.addEventListener('click', cameraAction);
+	function captureReset() {
+		if (stream) {
+			stream.getTracks().forEach(t => t.stop());
+			stream = null;
+		}
+		video.srcObject = null;
+		video.style.display = 'none';
+		placeholder.style.display = 'block';
+		preview.style.display = 'none';
+		canvas.style.display = 'none';
+		cameraState = 'stopped';
+		actionBtn.textContent = 'Start Camera';
+	}
 
-	// Make the entire camera card clickable
+	actionBtn.addEventListener('click', cameraAction);
 	if (cameraCard) {
 		cameraCard.addEventListener('click', (e) => {
-			// Prevent triggering if clicking on the button itself to avoid double execution
 			if (e.target === actionBtn) return;
 			cameraAction();
 		});
@@ -657,83 +781,49 @@
 
 	async function sendLog(action) {
 		if (!currentClientId) { setError('No identified client'); playErrorSound(); return; }
-		// For time_in we send purposes; for time_out we do NOT include/modify purpose (purpose preserved from time_in)
+
 		let purposes = [];
 		if (action === 'time_in') {
 			purposeCheckboxes.forEach(cb => {
 				if (cb.checked) purposes.push(cb.value);
 			});
 		}
-		const additionalInfo = additionalInfoInput.value.trim();
-		if (action === 'time_in') {
-			if (purposes.length === 0) {
-				setError('Please select at least one purpose.');
-				playErrorSound();
-				return;
-			}
-			if (!additionalInfo) {
-				setError('Please provide additional information.');
-				playErrorSound();
-				return;
-			}
-		}
+
 		try {
 			const res = await fetch('/log_action', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ client_id: currentClientId, action, purposes, additional_info: additionalInfoInput.value || null, photo_data: capturedPhotoData })
+				body: JSON.stringify({
+					client_id: currentClientId,
+					action,
+					purposes,
+					additional_info: additionalInfoInput.value || null,
+					photo_data: capturedPhotoData
+				})
 			});
 			const body = await res.json();
 			if (body.ok) {
-				playSuccessSound(); // Play success sound on successful time in/out
-				if (action === 'time_out') {
-					actionMsg.textContent = 'Time out recorded';
-					actionMsg.style.display = 'block';
-				}
+				playSuccessSound();
 				setError('');
-				if (action === 'time_in') lastPurpose = purposes.join(', ') || null;
-				// after time_in, clear current match and reset form fields
-				if (action === 'time_in') {
-					currentClientId = null;
-					// clear the match card displayed values
-					matchName.textContent = '';
-					const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
-					const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
-					purposeCheckboxes.forEach(cb => cb.checked = false);
-					additionalInfoInput.value = '';
-					lastPurpose = null;
-					// clear the captured image and reset camera
-					stopCamera();
-					capturedPhotoData = null;
-				}
-				// after time_out, clear current match and reset purpose input
-				if (action === 'time_out') {
-					currentClientId = null;
-					// keep the match card visible but clear the displayed values so operator can use manual search
-					matchName.textContent = '';
-					const mg = document.getElementById('match_gender'); if (mg) mg.textContent = '';
-					const ma = document.getElementById('match_age'); if (ma) ma.textContent = '';
-					purposeCheckboxes.forEach(cb => cb.disabled = false);
-					purposeCheckboxes.forEach(cb => cb.checked = false);
-					additionalInfoInput.value = '';
-					lastPurpose = null;
-				}
-
-				// refresh the Today's Logs panel immediately so operator sees the update
+				// Refresh logs
 				if (typeof refreshTodayLogs === 'function') {
 					try { refreshTodayLogs(); } catch (e) { console.warn('refreshTodayLogs failed', e); }
 				}
+				// Cleanup
+				currentClientId = null;
+				captureReset();
+
+				// Show a brief success toast or message on page?
+				// existing implementation just showed it in the list
 			} else {
-				playErrorSound(); // Play error sound on failed logging
-				errorP.textContent = body.error || 'Failed to record log';
+				playErrorSound();
+				setError(body.error || 'Failed to record log');
 			}
 		} catch (err) {
-			playErrorSound(); // Play error sound on logging failure
-			errorP.textContent = 'Logging failed: ' + err.message;
+			playErrorSound();
+			setError('Logging failed: ' + err.message);
 		}
 	}
-
-	timeInBtn.addEventListener('click', () => sendLog('time_in'));
 
 	// Fetch and show system logs (only logged-in clients) in the right-side div
 	async function refreshTodayLogs() {
@@ -750,7 +840,6 @@
 				el.innerHTML = '<div class="text-muted">No active clients.</div>';
 				return;
 			}
-			// Create list items for each logged-in client
 			el.innerHTML = '';
 			data.forEach(r => {
 				const item = document.createElement('div');
@@ -773,31 +862,20 @@
 		}
 	}
 
-	// Logout a specific client
 	async function logoutClient(clientId) {
 		try {
 			const res = await fetch('/logout_client/' + encodeURIComponent(clientId), { method: 'POST' });
 			const body = await res.json();
-			if (body.ok) {
-				// Refresh the logs
-				refreshTodayLogs();
-			} else {
-				alert('Failed to logout client: ' + (body.error || 'Unknown error'));
-			}
-		} catch (err) {
-			alert('Logout failed: ' + err.message);
-		}
+			if (body.ok) { refreshTodayLogs(); }
+			else { alert('Failed to logout client: ' + (body.error || 'Unknown error')); }
+		} catch (err) { alert('Logout failed: ' + err.message); }
 	}
 
-	// initial load and periodic refresh
 	refreshTodayLogs();
 	setInterval(refreshTodayLogs, 10000);
 
-	// Ensure modal input gets focus when modal opens
 	document.getElementById('overrideModal').addEventListener('shown.bs.modal', function () {
 		document.getElementById('manual_search').focus();
 	});
-
-
 </script>
 {% endblock %}
