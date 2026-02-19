@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Admin Profile — HR Logbook{% endblock %}
+{% block title %}Admin Profile  HR Logbook{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -73,8 +73,7 @@
             </div>
             <div class="info-item">
                 <span class="info-label">Account Created</span>
-                <span class="info-value">{{ admin.created_at.strftime('%B %d, %Y') if admin.created_at else 'N/A'
-                    }}</span>
+                <span class="info-value">{{ admin.created_at.strftime('%B %d, %Y') if admin.created_at else 'N/A' }}</span>
             </div>
         </div>
 
@@ -96,8 +95,7 @@
                 </div>
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" class="btn btn-outline-primary">Update Password</button>
-                    <a href="{{ url_for('client.admin_dashboard') }}" class="btn btn-outline-secondary">Back to
-                        Dashboard</a>
+                    <a href="{{ url_for('client.admin_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
                 </div>
             </form>
         </div>
@@ -110,31 +108,24 @@
 {% if messages %}
 {% for message in messages %}
 {% if 'password' in message.lower() %}
-{% if 'successfully' in message.lower() %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var modal = new bootstrap.Modal(document.getElementById('passwordModal'));
         var modalLabel = document.getElementById('passwordModalLabel');
         var modalMessage = document.getElementById('passwordModalMessage');
         modalMessage.textContent = {{ message | tojson }};
+        
+        {% if 'successfully' in message.lower() %}
         modalLabel.innerHTML = '<i class="fas fa-check-circle me-2 text-success"></i>Password Updated Successfully';
         modalLabel.className = 'modal-title text-success';
-        modal.show();
-    });
-</script>
-{% else %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var modal = new bootstrap.Modal(document.getElementById('passwordModal'));
-        var modalLabel = document.getElementById('passwordModalLabel');
-        var modalMessage = document.getElementById('passwordModalMessage');
-        modalMessage.textContent = {{ message | tojson }};
+        {% else %}
         modalLabel.innerHTML = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>Password Update Failed';
         modalLabel.className = 'modal-title text-danger';
+        {% endif %}
+        
         modal.show();
     });
 </script>
-{% endif %}
 {% endif %}
 {% endfor %}
 {% endif %}
