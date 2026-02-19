@@ -117,10 +117,16 @@
 	<div class="card-header d-flex justify-content-between align-items-center">
 		<h5 class="mb-0" style="color: var(--text-color);"><i class="fas fa-camera"></i> Client Log (Face Recognition)
 		</h5>
-		<a href="{{ url_for('client.client_log_help') }}" class="btn btn-outline-primary btn-sm"
-			title="How to use Client Log">
-			<i class="fas fa-question-circle"></i> Help
-		</a>
+		<div class="d-flex gap-2">
+			<button type="button" title="Use override if you are not identified correctly!"
+				class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#overrideModal">
+				<i class="fas fa-edit"></i> Override
+			</button>
+			<a href="{{ url_for('client.client_log_help') }}" class="btn btn-outline-primary btn-sm"
+				title="How to use Client Log">
+				<i class="fas fa-question-circle"></i> Help
+			</a>
+		</div>
 	</div>
 	<div class="card-body text-center">
 		<div class="client-log-container">
@@ -168,13 +174,7 @@
 
 			<!-- System log card -->
 			<div class="system-log-card">
-				<div class="d-flex justify-content-center gap-2 mb-3">
-					<button type="button" title="Use override if you are not identified correctly!"
-						class="btn btn-outline-secondary w-100" data-bs-toggle="modal"
-						data-bs-target="#overrideModal"><i class="fas fa-edit"></i> Override</button>
-				</div>
-				<hr>
-				<h6 class="mb-2">Client Logs</h6>
+				<h6 class="mb-2">Active Client/s</h6>
 				<div id="systemLog" style="font-size:0.9rem; line-height:1.25;">Loading...</div>
 			</div>
 		</div>
