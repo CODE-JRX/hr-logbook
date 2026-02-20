@@ -36,6 +36,10 @@
 		align-items: flex-start;
 		justify-content: center;
 	}
+	/* Mirror the camera feed horizontally */
+	#video {
+		transform: scaleX(-1);
+	}
 
 
 	.system-log-card {
@@ -76,6 +80,9 @@
 			width: 100%;
 			height: auto;
 			min-height: 300px;
+		}
+		#canvas {
+  			transform: scaleX(-1);
 		}
 
 		.system-log-card {
@@ -634,7 +641,11 @@
 			}
 			canvas.width = targetW;
 			canvas.height = targetH;
+			ctx.save();
+			ctx.translate(targetW, 0);
+			ctx.scale(-1, 1);
 			ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, targetW, targetH);
+			ctx.restore();
 			const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 			preview.src = dataUrl;
 			preview.style.display = 'block';
