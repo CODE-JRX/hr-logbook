@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% block title %}Home — HR Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+  .hero-section {
+    position: relative;
+    color: white;
+    height: 500px;
+    overflow: hidden;
+  }
+
+  .hero-section .carousel,
+  .hero-section .carousel-inner,
+  .hero-section .carousel-item {
+    height: 100%;
+  }
+
+  .hero-section .carousel-item img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+
+  .hero-section .carousel-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.35) 0%, rgba(118, 75, 162, 0.35) 100%);
+    z-index: 1;
+  }
+
+  .hero-section .carousel-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .hero-section .carousel-overlay {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+  }
+
+  [data-theme="dark"] .hero-section .carousel-overlay::before {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .hero-section .hero-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    text-align: center;
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .hero-section h1 {
+    font-weight: 700;
+    margin-bottom: 20px;
+    font-size: 3.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    display: inline-block;
+  }
+
+  .hero-section .lead {
+    font-size: 1.5rem;
+    opacity: 0.95;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  .hero-section .carousel-control-prev,
+  .hero-section .carousel-control-next {
+    z-index: 3;
+  }
+
+  .hero-section .carousel-indicators {
+    z-index: 3;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section {
+      height: 400px;
+    }
+
+    .hero-section h1 {
+      font-size: 2.5rem;
+      padding: 12px 20px;
+    }
+
+    .hero-section .lead {
+      font-size: 1.25rem;
+      padding: 8px 16px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .hero-section {
+      height: 350px;
+    }
+
+    .hero-section h1 {
+      font-size: 2rem;
+      padding: 10px 15px;
+    }
+
+    .hero-section .lead {
+      font-size: 1.1rem;
+      padding: 6px 12px;
+    }
+  }
+
+
+  .feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+
+  .feature-card .card-body {
+    padding: 30px;
+  }
+
+  .feature-card .card-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #667eea;
+  }
+
+  .feature-card h5 {
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .btn-hero {
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="hero-section">
+  <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true"
+        aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+    </div>
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="{{ url_for('static', filename='resources/Carousel/img-1.jpg') }}" class="d-block w-100" alt="Slide 1">
+      </div>
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='resources/Carousel/img-2.jpg') }}" class="d-block w-100" alt="Slide 2">
+      </div>
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='resources/Carousel/img-3.jpg') }}" class="d-block w-100" alt="Slide 3">
+      </div>
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='resources/Carousel/img-4.png') }}" class="d-block w-100" alt="Slide 4">
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+  <div class="carousel-overlay"></div>
+  <div class="hero-content">
+    <h1 class="display-4"><i class="fas fa-home"></i> Welcome to HRMO e-Logbook</h1>
+    <p class="lead">Fast client time logging using face recognition — simple, secure, and modern.</p>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+      <a href="/client-log" class="btn btn-light btn-hero"><i class="fas fa-clipboard-list"></i> Open Client Log</a>
+      <a href="/clients" class="btn btn-outline-light btn-hero"><i class="fas fa-users"></i> See Clients</a>
+    </div>
+  </div>
+</header>
+
+
+<main class="container my-5">
+  <div class="row g-4">
+    <a href="/client-log" style="text-decoration: none; color: inherit;">
+      <div class="col-md-4">
+        <div class="card feature-card h-100">
+          <div class="card-body text-center">
+            <div class="card-icon">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <h5>Client Log</h5>
+            <p class="text-muted">Quickly log time-in/time-out using face detection and review logs.</p>
+            <a href="/client-log" class="btn btn-outline-primary btn-hero  ">Get Started</a>
+          </div>
+        </div>
+      </div>
+    </a>
+
+
+    <div class="col-md-4">
+      <div class="card feature-card h-100">
+        <div class="card-body text-center">
+          <div class="card-icon">
+            <i class="fas fa-user-friends"></i>
+          </div>
+          <h5>Client Records</h5>
+          <p class="text-muted">Manage client profiles and photos with ease.</p>
+          <a href="/clients" class="btn btn-success btn-hero  ">Manage Records</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card feature-card h-100">
+        <div class="card-body text-center">
+          <div class="card-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h5>Admin Dashboard</h5>
+          <p class="text-muted">View analytics and reports. Restricted to administrators.</p>
+          <a href="/admin/dashboard" class="btn btn-warning btn-hero  ">Access Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% endblock %}

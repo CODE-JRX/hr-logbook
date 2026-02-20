@@ -18,6 +18,8 @@ import io
 import face_recognition
 import numpy as np
 from datetime import datetime
+import subprocess
+import sys
 
 client_bp = Blueprint("client", __name__)
 
@@ -52,6 +54,80 @@ def client_data_ajax():
 @client_bp.route("/")
 def home():
     return render_template("index.html", year=datetime.now().year)
+
+@client_bp.route("/api/check-db")
+def check_db_route():
+    try:
+        conn = get_db()
+        if conn:
+            conn.close()
+            return jsonify({'ok': True, 'message': 'Database connection successful'})
+        else:
+            return jsonify({'ok': False, 'message': 'Could not get a connection from the pool'})
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)})
+
+@client_bp.route("/api/troubleshoot-db", methods=["POST"])
+def troubleshoot_db_route():
+    try:
+        log_lines = []
+
+        # ── Step 1: Try starting MySQL via mysql_start.bat ──────────────────────
+        bat_path = r'D:\xampp\mysql_start.bat'
+        log_lines.append(f"[Step 1] Attempting to start MySQL via: {bat_path}")
+
+        try:
+            bat_result = subprocess.run(
+                [bat_path],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                shell=True
+            )
+            bat_out = (bat_result.stdout + "\n" + bat_result.stderr).strip()
+            log_lines.append(bat_out if bat_out else "(no output from bat file)")
+        except Exception as bat_err:
+            log_lines.append(f"Warning: Could not run bat file — {bat_err}")
+
+        # Give MySQL a moment to come up
+        import time
+        time.sleep(3)
+
+        # ── Step 2: Re-check DB connection ──────────────────────────────────────
+        log_lines.append("[Step 2] Re-checking database connection...")
+        db_ok = False
+        try:
+            from db import get_db
+            conn = get_db()
+            if conn:
+                conn.close()
+                db_ok = True
+        except Exception:
+            db_ok = False
+
+        if db_ok:
+            log_lines.append("MySQL started successfully via bat file. No further action needed.")
+            return jsonify({
+                'ok': True,
+                'message': 'MySQL started successfully',
+                'output': '\n'.join(log_lines)
+            })
+
+        # ── Step 3: Bat file didn't help — run the data-folder fix ──────────────
+        log_lines.append("[Step 3] MySQL still not reachable. Running data-folder fix (fix_mysql.py)...")
+        script_path = os.path.join(os.getcwd(), 'scripts', 'fix_mysql.py')
+        result = subprocess.run([sys.executable, script_path], capture_output=True, text=True)
+        fix_out = (result.stdout + "\n" + result.stderr).strip()
+        log_lines.append(fix_out)
+        ok = result.returncode == 0
+
+        return jsonify({
+            'ok': ok,
+            'message': 'Fix procedure completed' if ok else 'Fix procedure failed',
+            'output': '\n'.join(log_lines)
+        })
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
 
 
 @client_bp.route("/add", methods=["GET", "POST"])

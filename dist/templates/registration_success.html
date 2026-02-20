@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Registration Successful</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <style>
+    body {
+      padding: 40px;
+      background: var(--bg-color);
+      font-family: var(--font-family);
+      color: var(--text-color);
+    }
+
+    .card {
+      max-width: 680px;
+      margin: 40px auto;
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+
+<body>
+  <div style="position: absolute; top: 20px; right: 20px;">
+    <button id="theme-toggle" class="btn btn-link" aria-label="Toggle theme">
+      <i title="Toggle Theme" class="fas fa-moon" id="theme-icon"></i>
+    </button>
+  </div>
+  <div class="card shadow-sm">
+    <div class="card-body text-center">
+      <h4 class="card-title">{{ message or 'Success' }}</h4>
+      <p class="text-muted">You will be redirected shortly.</p>
+      <p><a href="{{ redirect_url }}" class="btn btn-outline-primary">Continue now</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Theme toggle functionality
+    (function () {
+      const html = document.documentElement;
+      // Check for saved theme preference or default to light mode
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      html.setAttribute('data-theme', currentTheme);
+    })();
+
+    // Redirect after a short delay (milliseconds)
+    (function () {
+      var delay = {{ delay or 3000 }
+    };
+    setTimeout(function () { window.location.href = "{{ redirect_url }}"; }, delay);
+    }) ();
+  </script>
+</body>
+
+</html>

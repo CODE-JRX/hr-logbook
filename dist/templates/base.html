@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}HR e-Loglook{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="HRMO e-Loglook: Fast, secure client time logging with face recognition technology.">
+  <meta name="keywords" content="HR e-Loglook, client logging, face recognition, time tracking, HRMO">
+  <meta name="author" content="code:jrx">
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='resources/school-LOGO.png') }}" type="image/png">
+  <!-- Preload critical resources -->
+  <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}"
+    as="style">
+  <link rel="preload" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" as="style">
+  <script>
+    // Prevent flash of light theme by setting theme immediately
+    (function () {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  {% block head_extra %}{% endblock %}
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg site-nav fixed-top">
+    <div class="container">
+      <a class="navbar-brand logo-link" href="{{ url_for('client.home') }}">
+        <div class="logo-box">
+          <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR e-Loglook logo"
+            class="site-logo">
+        </div>
+        <span class="title"><span class="hr-mo">HRMO</span> e-Loglook</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          {% if session.admin_id %}
+          <li class="nav-item">
+            <a class="nav-link" href="/client-log"><i class="fas fa-clipboard-list"></i>Client Log</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/CSM-form" target="_blank" rel="noopener"><i
+                class="fas fa-file-signature"></i>Satisfactory Form</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add"><i class="fas fa-user-plus"></i>Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/clients"><i class="fas fa-users"></i>Clients Record</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" id="reportsDropdown" data-bs-toggle="dropdown"
+              aria-expanded="false"><i class="fas fa-chart-line"></i>Reports</a>
+            <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="reportsDropdown">
+              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list"
+                    style="margin-right: 5px;"></i>Log Report</a>
+              </li>
+              <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature"
+                    style="margin-right: 5px;"></i>Satisfactory
+                  Report</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" id="adminDropdown" data-bs-toggle="dropdown"
+              aria-expanded="false"><i class="fas fa-user-cog"></i>Admin</a>
+            <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu" aria-labelledby="adminDropdown">
+              <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt"
+                    style="margin-right: 5px;"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="/admin/signup"><i class="fas fa-user-plus"
+                    style="margin-right: 5px;"></i>Add Admin</a></li>
+              <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user-circle"
+                    style="margin-right: 5px;"></i>Profile</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item text-danger" href="/admin/logout"><i class="fas fa-sign-out-alt"
+                    style="margin-right: 5px;"></i>Logout</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <button id="theme-toggle" class="btn btn-link nav-link" aria-label="Toggle theme">
+              <i title="Toggle Theme" class="fas fa-moon" id="theme-icon"></i>
+            </button>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="/client-log"><i class="fas fa-clipboard-list"></i>Client Log</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/CSM-form" target="_blank" rel="noopener"><i
+                class="fas fa-file-signature"></i>Satisfactory Form</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/terms-of-use"><i class="fas fa-user-plus"></i>Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/login"><i class="fas fa-sign-in-alt"></i>Admin</a>
+          </li>
+          <li class="nav-item">
+            <button id="theme-toggle" class="btn btn-link nav-link" aria-label="Toggle theme">
+              <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    {% if category == 'message' %}{% set category = 'info' %}{% endif %}
+    {% if category == 'error' %}{% set category = 'danger' %}{% endif %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="row">
+        <!-- Brand Section -->
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="footer-brand">
+            <div class="footer-logo-link">
+              <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HRMO e-Loglook Logo"
+                class="footer-logo-img">
+              <span class="footer-title">HRMO e-Loglook</span>
+            </div>
+            <p class="footer-description">Fast, secure client time logging with face recognition technology.</p>
+          </div>
+        </div>
+
+        <!-- Quick Links Section -->
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="footer-section">
+            <h5 class="footer-title">Quick Links</h5>
+            <ul class="footer-links">
+              <li><a href="{{ url_for('client.home') }}"><i class="fas fa-home"></i> Home</a></li>
+              <li><a href="/client-log"><i class="fas fa-clipboard-list"></i> Client Log</a></li>
+              <li><a href="/CSM-form" target="_blank" rel="noopener"><i class="fas fa-file-signature"></i> Satisfactory
+                  Form</a></li>
+              <li><a href="terms-of-use" target="_blank"><i class="fas fa-file-contract"></i> Terms of Use</a></li>
+              <li><a href="privacy-policy" target="_blank"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="col-lg-4 col-md-12 mb-4">
+          <div class="footer-section">
+            <h5 class="footer-title">Contact</h5>
+            <ul class="footer-contact">
+              <li><i class="fas fa-envelope"></i> <a href="mailto:support@hrmologbook.com">support@hrmologbook.com</a>
+              </li>
+              <li><i class="fas fa-phone"></i> <a href="tel:##########">## ### ### ###</a></li>
+              <li><i class="fas fa-map-marker-alt"></i> Poblacion, Laganiglang, Abra</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copyright Section -->
+      <div class="footer-bottom">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <p class="copyright">&copy; {{ year }} HRMO e-Loglook. All rights reserved.</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <p class="developer">Developed by <a href="#" class="developer-link">code:jrx</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='scripts/jquery.js') }}"></script>
+  <script src="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js') }}"></script>
+
+  <!-- Global Modal Container for better z-index layering -->
+  <div id="global-modal-container">
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title text-warning" id="deleteModalLabel">
+              <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0">Delete <strong id="clientName"></strong>?</p>
+            <small class="text-danger">This action cannot be undone.</small>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Error Modal -->
+    <div class="modal fade" id="loginErrorModal" tabindex="-1" aria-labelledby="loginErrorModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title text-danger" id="loginErrorModalLabel">
+              <i class="fas fa-exclamation-circle me-2"></i>Login Failed
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0">Invalid username or password. Please try again.</p>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Update Modal -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title" id="passwordModalLabel"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0" id="passwordModalMessage"></p>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title text-success" id="successModalLabel">
+              <i class="fas fa-check-circle me-2"></i>Success
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0" id="successMessage"></p>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // Force visual and value uppercase for text-like inputs and textareas.
+      // Applies to input types: text, search. Excludes email, password, number, date, file, hidden.
+      const allowedTypes = new Set(['text', 'search']);
+
+      function shouldTransform(el) {
+        if (!el) return false;
+        const tag = el.tagName;
+        if (tag === 'TEXTAREA') return true;
+        if (tag !== 'INPUT') return false;
+        return allowedTypes.has((el.type || '').toLowerCase());
+      }
+
+      function toUpperPreserveSelection(el) {
+        try {
+          const start = el.selectionStart;
+          const end = el.selectionEnd;
+          el.value = el.value.toUpperCase();
+          // restore selection if possible
+          if (typeof start === 'number' && typeof end === 'number') el.setSelectionRange(start, end);
+        } catch (e) {
+          // ignore on elements that don't support selection
+          el.value = el.value.toUpperCase();
+        }
+      }
+
+      document.addEventListener('input', function (e) {
+        const el = e.target;
+        if (shouldTransform(el)) {
+          toUpperPreserveSelection(el);
+        }
+      }, true);
+
+      // Handle paste to ensure pasted text becomes uppercase
+      document.addEventListener('paste', function (e) {
+        const el = e.target;
+        if (!shouldTransform(el)) return;
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const up = text.toUpperCase();
+        // insert at cursor position
+        const start = el.selectionStart || 0;
+        const end = el.selectionEnd || 0;
+        const val = el.value || '';
+        el.value = val.slice(0, start) + up + val.slice(end);
+        const pos = start + up.length;
+        try { el.setSelectionRange(pos, pos); } catch (_) { }
+        // trigger input event so any listeners update
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }, true);
+
+      // Visual hint: show uppercase in UI (CSS) when focused
+      document.addEventListener('focusin', function (e) { if (shouldTransform(e.target)) e.target.style.textTransform = 'uppercase'; }, true);
+      document.addEventListener('focusout', function (e) { if (shouldTransform(e.target)) e.target.style.textTransform = ''; }, true);
+    })();
+
+    // Theme toggle functionality
+    (function () {
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeIcon = document.getElementById('theme-icon');
+      const html = document.documentElement;
+
+      // Check for saved theme preference or default to light mode
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      html.setAttribute('data-theme', currentTheme);
+      updateIcon(currentTheme);
+
+      function updateIcon(theme) {
+        if (theme === 'dark') {
+          themeIcon.className = 'fas fa-sun';
+        } else {
+          themeIcon.className = 'fas fa-moon';
+        }
+      }
+
+      themeToggle.addEventListener('click', function () {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+      });
+    })();
+
+    // Global modal functionality
+    document.addEventListener('DOMContentLoaded', function () {
+      // Delete confirmation modal
+      let deleteId = null;
+      window.confirmDelete = function (button) {
+        deleteId = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name');
+        const clientNameElement = document.getElementById('clientName');
+        if (clientNameElement) {
+          clientNameElement.textContent = name;
+        }
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+      };
+
+      // Handle confirm delete
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function () {
+          if (deleteId) {
+            window.location.href = '/delete/' + deleteId;
+          }
+        });
+      }
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+
+</html>

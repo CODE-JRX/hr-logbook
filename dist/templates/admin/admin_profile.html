@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Admin Profile  HR Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+    .profile-card {
+        max-width: 600px;
+        margin: 0.5rem auto;
+    }
+
+    .admin-info {
+        background-color: var(--card-bg, #fff);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .info-item {
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding-bottom: 0.5rem;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--text-muted, #6c757d);
+    }
+
+    .info-value {
+        font-weight: 500;
+    }
+
+    .change-password-section {
+        background-color: var(--card-bg, #fff);
+        padding: 1.5rem;
+        border-radius: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color, #0d6efd);
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-card">
+        <div class="admin-info shadow-sm">
+            <h4 class="section-title"><i class="fas fa-user-circle"></i> Account Information</h4>
+            <div class="info-item">
+                <span class="info-label">First Name</span>
+                <span class="info-value">{{ admin.first_name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Last Name</span>
+                <span class="info-value">{{ admin.last_name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email Address</span>
+                <span class="info-value">{{ admin.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Account Created</span>
+                <span class="info-value">{{ admin.created_at.strftime('%B %d, %Y') if admin.created_at else 'N/A' }}</span>
+            </div>
+        </div>
+
+        <div class="change-password-section shadow-sm">
+            <h4 class="section-title"><i class="fas fa-key"></i> Change Password</h4>
+            <form action="{{ url_for('client.change_password') }}" method="POST">
+                <div class="mb-3">
+                    <label for="old_password" class="form-label">Old Password</label>
+                    <input type="password" class="form-control" id="old_password" name="old_password" required>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <label for="new_password" class="form-label">New Password</label>
+                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Confirm New Password</label>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-outline-primary">Update Password</button>
+                    <a href="{{ url_for('client.admin_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+{% if 'password' in message.lower() %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+        var modalLabel = document.getElementById('passwordModalLabel');
+        var modalMessage = document.getElementById('passwordModalMessage');
+        modalMessage.textContent = {{ message | tojson }};
+        
+        {% if 'successfully' in message.lower() %}
+        modalLabel.innerHTML = '<i class="fas fa-check-circle me-2 text-success"></i>Password Updated Successfully';
+        modalLabel.className = 'modal-title text-success';
+        {% else %}
+        modalLabel.innerHTML = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>Password Update Failed';
+        modalLabel.className = 'modal-title text-danger';
+        {% endif %}
+        
+        modal.show();
+    });
+</script>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endwith %}
+{% endblock %}

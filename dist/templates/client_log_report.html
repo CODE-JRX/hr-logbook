@@ -1,0 +1,493 @@
+{% extends 'base.html' %}
+{% block title %}Logs Report — HR Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+  .no-print {
+    display: block;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: left;
+  }
+
+  /* Print-friendly layout */
+  @media print {
+
+    /* Static colors for printing - unaffected by theme */
+    body,
+    html,
+    * {
+      color: #000 !important;
+      background: #fff !important;
+      background-color: #fff !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    nav,
+    .site-nav,
+    .no-print,
+    .card-header {
+      display: none !important;
+    }
+
+    body::before {
+      display: none !important;
+    }
+
+    .container {
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .card {
+      border: none !important;
+      box-shadow: none !important;
+      display: block !important;
+      background: transparent !important;
+    }
+
+    .card-body {
+      padding: 0 !important;
+    }
+
+    .results-card {
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+
+    .table-responsive {
+      overflow: visible !important;
+      display: block !important;
+    }
+
+    @page {
+      size: landscape;
+      margin: 0.5in;
+    }
+
+    /* Ensure table headers repeat and rows don't break awkwardly */
+    table {
+      font-size: 11px;
+      width: 100% !important;
+      border-collapse: collapse !important;
+      table-layout: auto !important;
+    }
+
+    thead {
+      display: table-header-group !important;
+    }
+
+    tr {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    td,
+    th {
+      word-wrap: break-word !important;
+    }
+
+    /* Ensure all text elements are black */
+    .print-header,
+    .results-table,
+    th,
+    td,
+    p,
+    span,
+    div,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: #000 !important;
+      background: #fff !important;
+      background-color: #fff !important;
+    }
+
+    /* Table headers should be black text on white background */
+    .results-table thead th {
+      background: #fff !important;
+      background-color: #fff !important;
+      color: #000 !important;
+      border: 1px solid #000 !important;
+    }
+
+    /* Table cells */
+    .results-table tbody td {
+      color: #000 !important;
+      background: #fff !important;
+      background-color: #fff !important;
+      border: 1px solid #000 !important;
+    }
+  }
+
+  .results-card {
+    background: var(--card-bg);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    margin-bottom: 20px;
+  }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: var(--font-family);
+    table-layout: auto;
+    min-width: 1000px;
+    /* Prevent collapse on search */
+  }
+
+  .results-table thead {
+    background-color: var(--primary-color);
+    color: white !important;
+  }
+
+  .results-table th,
+  .results-table td {
+    padding: 5px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    font-family: inherit;
+  }
+
+  /* Use class for striping to maintain consistency during filtering */
+  .results-table tbody tr.striped-row {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+
+  .results-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s ease;
+  }
+
+  .print-only {
+    display: none !important;
+  }
+
+  .print-header {
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .filter-card-header {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  @media print {
+    .print-only {
+      display: block !important;
+    }
+  }
+
+  /* Small screen adjustments for better table rendering */
+  @media (max-width: 768px) {
+    .results-table {
+      font-size: 10px;
+      min-width: 1000px;
+    }
+
+    .results-table th,
+    .results-table td {
+      padding: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .table-responsive {
+      overflow-x: visible;
+    }
+
+    .results-card {
+      overflow-x: auto;
+    }
+
+    #searchInput {
+      width: 100%;
+    }
+
+    .card-header .btn {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+
+    .card-body .form-control,
+    .card-body .form-select {
+      font-size: 14px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function tableToCSV(table) {
+    const rows = Array.from(table.querySelectorAll('tr'));
+    return rows.map(r => Array.from(r.querySelectorAll('th,td')).map(cell => '"' + (cell.textContent || '').replace(/"/g, '""') + '"').join(',')).join('\n');
+  }
+
+  const exportBtn = document.getElementById('exportCsvBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function () {
+      const tbl = document.getElementById('logsTable');
+      if (!tbl) return alert('No data to export');
+      const csv = tableToCSV(tbl);
+      const filename = 'client_logs_' + (new Date()).toISOString().slice(0, 10) + '.csv';
+      downloadCSV(csv, filename);
+    });
+  }
+
+  // Search functionality
+  const searchInput = document.getElementById('searchInput');
+  const logsTableBody = document.querySelector('#logsTable tbody');
+  const filterForm = document.getElementById('filterForm');
+  const limitBtns = document.querySelectorAll('#limit');
+
+  function updateTableStriping() {
+    const filter = searchInput.value.toLowerCase();
+    const table = document.getElementById('logsTable');
+    if (!table) return;
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    let visibleIndex = 0;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows.length === 1 && rows[i].cells.length === 1) continue; // Skip "No records found"
+
+      const cells = rows[i].getElementsByTagName('td');
+      let match = false;
+      for (let j = 0; j < cells.length; j++) {
+        if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+          match = true;
+          break;
+        }
+      }
+
+      if (match) {
+        rows[i].style.display = '';
+        // Dynamically update zebra striping
+        if (visibleIndex % 2 === 1) {
+          rows[i].classList.add('striped-row');
+        } else {
+          rows[i].classList.remove('striped-row');
+        }
+        visibleIndex++;
+      } else {
+        rows[i].style.display = 'none';
+        rows[i].classList.remove('striped-row');
+      }
+    }
+  }
+
+  async function updateFilters() {
+    const formData = new FormData(document.getElementById('filterForm'));
+    const limit = document.getElementById('limit').value;
+    const params = new URLSearchParams(formData);
+    params.set('limit', limit);
+
+    // Update URL without reloading
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+
+    try {
+      const response = await fetch(newUrl, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      const data = await response.json();
+      if (data.html) {
+        logsTableBody.innerHTML = data.html;
+        updateTableStriping();
+      }
+    } catch (error) {
+      console.error('Error fetching filtered data:', error);
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', updateTableStriping);
+  }
+
+  // Initial striping on load
+  updateTableStriping();
+
+  // Attach AJAX listeners to filters
+  document.querySelectorAll('#filterForm select, #filterForm input[type="date"]').forEach(el => {
+    el.addEventListener('change', updateFilters);
+  });
+
+  const limitSelect = document.getElementById('limit');
+  if (limitSelect) {
+    limitSelect.addEventListener('change', updateFilters);
+  }
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="print-only print-header">
+  <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+    <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="School Logo"
+      style="height: 150px; margin-right: 20px;">
+    <div style="text-align: center;">
+      <h2 style="margin: 0;">ABRA STATE INSTITUTE OF SCIENCES AND TECHNOLOGY</h2>
+      <h3 style="margin: 0; margin-top: 10px;">Main Campus, Lagangliang, Abra</h3>
+    </div>
+    <img src="{{ url_for('static', filename='resources/HRMO-LOGO.png') }}" alt="HRMO Logo"
+      style="height: 150px; margin-left: 20px;">
+  </div><br>
+
+  <small>Client Log Report</small><br>
+  <small>{{ filters.start_date or 'N/A' }} to {{ filters.end_date or 'N/A' }}</small>
+</div>
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><i class="fas fa-file-alt"></i> Client Log Report</h5>
+    <div class="d-flex gap-2 no-print" role="group" aria-label="actions">
+      <button class="btn btn-sm btn-outline-success" type="button" onclick="window.open(window.location.href + (window.location.search ? '&' : '?') + 'print=1', '_blank')"><i class="fas fa-print"></i>
+        <span class="d-none d-md-inline">Print</span></button>
+      <button class="btn btn-sm btn-outline-primary" type="button" id="exportCsvBtn"><i class="fas fa-download"></i>
+        <span class="d-none d-md-inline">Export CSV</span></button>
+      <a class="btn btn-sm btn-outline-secondary" href="/client-log-report"><i class="fas fa-times"></i> <span
+          class="d-none d-md-inline">Clear</span></a>
+    </div>
+  </div>
+
+  <!-- Filter Controls Section -->
+  <div class="card-body border-bottom no-print">
+    <form id="filterForm" method="get" class="row g-3 align-items-end">
+      <!-- Preserve limit parameter -->
+      <input type="hidden" name="limit" value="{{ filters.limit or '25' }}">
+
+      <div class="col-md-3 col-6">
+        <label class="form-label"><i class="fas fa-question-circle"></i> Purpose</label>
+        <select class="form-select" name="purpose">
+          <option value="">All</option>
+          {% for p in purposes %}
+          <option value="{{ p }}" {% if filters.purpose==p %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 col-6">
+        <label class="form-label"><i class="fas fa-building"></i> Department</label>
+        <select class="form-select" name="department">
+          <option value="">All</option>
+          {% for d in departments %}
+          <option value="{{ d }}" {% if filters.department==d %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 col-6">
+        <label for="start_date" class="form-label"><i class="fas fa-calendar-alt"></i> From</label>
+        <input class="form-control" type="date" name="start_date" id="start_date"
+          value="{{ filters.start_date or '' }}">
+      </div>
+      <div class="col-md-3 col-6">
+        <label for="end_date" class="form-label"><i class="fas fa-calendar-alt"></i> To</label>
+        <input class="form-control" type="date" name="end_date" id="end_date" value="{{ filters.end_date or '' }}">
+      </div>
+    </form>
+  </div>
+
+  <!-- Results Section -->
+  <div class="card-body border-bottom no-print">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-6 no-print">
+        <label for="searchInput" class="form-label"><i class="fas fa-search"></i> Search</label>
+        <input type="text" class="form-control" id="searchInput" placeholder="Search by name, purpose, or department">
+      </div>
+      <div class="col-md-6 no-print">
+        <label for="limit" class="form-label"><i class="fas fa-list"></i> Rows Displayed</label>
+        <div style="display: inline-flex; align-items: center; gap: 8px; width: 100%;">
+          <select id="limit" name="limit" class="form-select">
+            <option value="25" {% if filters.limit=='25' %}selected{% endif %}>25</option>
+            <option value="50" {% if filters.limit=='50' %}selected{% endif %}>50</option>
+            <option value="100" {% if filters.limit=='100' %}selected{% endif %}>100</option>
+            <option value="all" {% if filters.limit=='all' %}selected{% endif %}>All</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="results-card">
+      <div class="table-responsive">
+        <table id="logsTable" class="results-table">
+          <thead>
+            <tr>
+              <th>NO.</th>
+              <th>FULL NAME</th>
+              <th>GENDER</th>
+              <th>AGE</th>
+              <th>DEPARTMENT</th>
+              <th>PURPOSE</th>
+              <th>ADDITIONAL INFO</th>
+              <th>TIME IN</th>
+              <th>TIME OUT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in logs %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ l.full_name or '' }}</td>
+              <td>{{ l.gender or '' }}</td>
+              <td>{{ l.age or '' }}</td>
+              <td>{{ l.department or '' }}</td>
+              <td>{{ l.purpose or '' }}</td>
+              <td>{{ l.additional_info or '' }}</td>
+              <td>{{ l.time_in }}</td>
+              <td>{{ l.time_out or '' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
