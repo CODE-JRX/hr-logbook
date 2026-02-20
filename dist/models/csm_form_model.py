@@ -1,4 +1,4 @@
-from db import get_db
+from db import get_db, get_db_cursor
 from datetime import datetime
 import mysql.connector
 
@@ -7,9 +7,6 @@ def insert_csm_form(
     email, service_availed, awareness_of_cc, cc_of_this_office_was, cc_help_you,
     sdq_vals, suggestion
 ):
-    db = get_db()
-    cursor = db.cursor()
-    
     # Handle SDQ values
     sdqs = [None] * 9
     if sdq_vals:
@@ -42,62 +39,55 @@ def insert_csm_form(
     )
     
     try:
-        cursor.execute(query, values)
-        db.commit()
-        last_id = cursor.lastrowid
-        return str(last_id)
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(query, values)
+            last_id = cursor.lastrowid
+            return str(last_id)
     except mysql.connector.Error as err:
         print(f"Error inserting CSM form: {err}")
         return None
-    finally:
-        cursor.close()
-        db.close()
 
 def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=None, age_min=None, age_max=None, service=None, limit=None):
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    
-    sql = "SELECT * FROM csm_form"
-    where_clauses = []
-    params = []
-    
-    if start_date:
-        where_clauses.append("date >= %s")
-        params.append(start_date)
-    if end_date:
-        where_clauses.append("date <= %s")
-        params.append(end_date)
-    if gender:
-        where_clauses.append("sex = %s")
-        params.append(gender)
-    if region:
-        where_clauses.append("region_of_residence LIKE %s")
-        params.append(f"%{region}%")
-    if age_min is not None:
-        where_clauses.append("age >= %s")
-        params.append(age_min)
-    if age_max is not None:
-        where_clauses.append("age <= %s")
-        params.append(age_max)
-    if service:
-        where_clauses.append("service_availed LIKE %s")
-        params.append(f"%{service}%")
+    with get_db_cursor() as cursor:
+        sql = "SELECT * FROM csm_form"
+        where_clauses = []
+        params = []
         
-    if where_clauses:
-        sql += " WHERE " + " AND ".join(where_clauses)
+        if start_date:
+            where_clauses.append("date >= %s")
+            params.append(start_date)
+        if end_date:
+            where_clauses.append("date <= %s")
+            params.append(end_date)
+        if gender:
+            where_clauses.append("sex = %s")
+            params.append(gender)
+        if region:
+            where_clauses.append("region_of_residence LIKE %s")
+            params.append(f"%{region}%")
+        if age_min is not None:
+            where_clauses.append("age >= %s")
+            params.append(age_min)
+        if age_max is not None:
+            where_clauses.append("age <= %s")
+            params.append(age_max)
+        if service:
+            where_clauses.append("service_availed LIKE %s")
+            params.append(f"%{service}%")
+            
+        if where_clauses:
+            sql += " WHERE " + " AND ".join(where_clauses)
+            
+        sql += " ORDER BY date DESC, id DESC"
         
-    sql += " ORDER BY date DESC, id DESC"
-    
-    if limit and limit != 'all':
-        sql += " LIMIT %s"
-        params.append(int(limit))
+        if limit and limit != 'all':
+            sql += " LIMIT %s"
+            params.append(int(limit))
+            
+        cursor.execute(sql, params)
+        rows = cursor.fetchall()
         
-    cursor.execute(sql, params)
-    rows = cursor.fetchall()
-    
-    for doc in rows:
-        doc['id'] = str(doc['id'])
-        
-    cursor.close()
-    db.close()
-    return rows
+        for doc in rows:
+            doc['id'] = str(doc['id'])
+            
+        return rows

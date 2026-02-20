@@ -12,6 +12,15 @@
       padding: .5rem;
       background: #f8fafc;
     }
+    /* Mirror the camera feed horizontally */
+    #video {
+      transform: scaleX(-1);
+    }
+    @media (max-width: 767px) {
+      #canvas {
+        transform: scaleX(-1);
+      }
+    }
   </style>
   {% endblock %}
   <div class="card-header d-flex justify-content-between align-items-center">
@@ -61,7 +70,7 @@
         <div class="col-md-6">
           <label for="age" class="form-label"><i class="fas fa-birthday-cake"></i> Age <span
               class="text-danger">*</span></label>
-          <input class="form-control" type="number" name="age" id="age" min="0" max="150" placeholder="e.g. 35">
+          <input class="form-control" type="number" name="age" id="age" min="0" max="150" placeholder="e.g.  35">
         </div>
 
         <div class="col-md-6">
@@ -329,7 +338,11 @@
 
     canvas.width = 420;
     canvas.height = 420;
+    ctx.save();
+    ctx.translate(420, 0);
+    ctx.scale(-1, 1);
     ctx.drawImage(video, sourceX, sourceY, sourceW, sourceH, 0, 0, 420, 420);
+    ctx.restore();
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 
     // Show scan animation

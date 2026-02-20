@@ -12,7 +12,7 @@ def main():
     try:
         # User requested: username: admin, pass: admin1001
         # accepted args: first_name, last_name, email, password
-        admin_id = add_admin("Admin", "User", "admin@me", "admin1001")
+        admin_id = add_admin("Admin", "User", "admin@me2", "admin1001")
         print(f"Successfully added admin user with ID: {admin_id}")
         print("Username (Email): admin@me")
         print("Password: admin1001")
