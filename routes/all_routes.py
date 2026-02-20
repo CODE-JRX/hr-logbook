@@ -58,12 +58,8 @@ def home():
 @client_bp.route("/api/check-db")
 def check_db_route():
     try:
-        conn = get_db()
-        if conn:
-            conn.close()
+        with get_db_cursor() as cursor:
             return jsonify({'ok': True, 'message': 'Database connection successful'})
-        else:
-            return jsonify({'ok': False, 'message': 'Could not get a connection from the pool'})
     except Exception as e:
         return jsonify({'ok': False, 'message': str(e)})
 
@@ -97,10 +93,8 @@ def troubleshoot_db_route():
         log_lines.append("[Step 2] Re-checking database connection...")
         db_ok = False
         try:
-            from db import get_db
-            conn = get_db()
-            if conn:
-                conn.close()
+            from db import get_db_cursor
+            with get_db_cursor() as cursor:
                 db_ok = True
         except Exception:
             db_ok = False
@@ -1022,38 +1016,31 @@ def verify_face():
 def generate_control_no():
     """Generate a new control number in the format HR-S<YY>-<NextID>"""
     try:
-        db = get_db()
-        # Find the latest control_no to increment
-        # Format: HR-S<YY>-<NNN>
-        year = datetime.now().year
-        yy = str(year)[-2:]
-        prefix = f"HR-S{yy}-"
-        
-        # We can find the last created document that starts with this prefix
-        # or simplified: just count + 1 (risk of collision if deletion happens, but adhering to requested logic of "NextID")
-        # Let's try to find max from matching documents.
-        
-        latest_form = db.csm_form.find(
-            {"control_no": {"$regex": f"^{prefix}"}}
-        ).sort("control_no", -1).limit(1)
-        
-        next_id = 1
-        try:
-            doc = list(latest_form)
-            if doc:
-                last_no = doc[0].get('control_no')
+        with get_db_cursor() as cursor:
+            # Find the latest control_no to increment
+            # Format: HR-S<YY>-<NNN>
+            year = datetime.now().year
+            yy = str(year)[-2:]
+            prefix = f"HR-S{yy}-"
+            
+            # Find the latest one using MySQL pattern matching
+            query = "SELECT control_no FROM csm_form WHERE control_no LIKE %s ORDER BY control_no DESC LIMIT 1"
+            cursor.execute(query, (f"{prefix}%",))
+            row = cursor.fetchone()
+            
+            next_id = 1
+            if row:
+                last_no = row['control_no']
                 # extract last 3 digits
                 parts = last_no.split('-')
                 if len(parts) >= 3:
-                     next_id = int(parts[-1]) + 1
-        except:
-            pass
+                    try:
+                        next_id = int(parts[-1]) + 1
+                    except (ValueError, IndexError):
+                        next_id = 1
             
-        control_no = f"{prefix}{next_id:03d}"
-        
-        return jsonify({'control_no': control_no}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+            control_no = f"{prefix}{next_id:03d}"
+            return jsonify({'control_no': control_no}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1074,38 +1061,50 @@ def log_action():
             purpose_str = ', '.join(purposes) if purposes else None
             add_time_in(client_id, purpose_str, additional_info)
 
-            # Handle Face Embedding Update (Adaptive Learning)
-            photo_data = data.get('photo_data')
-            if photo_data:
-                try:
-                    # Extract base64
-                    m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
-                    if m:
-                        img_b64 = m.group(2)
-                    else:
-                        img_b64 = photo_data.split(',', 1)[1] if ',' in photo_data else photo_data
-                    
-                    image_bytes = base64.b64decode(img_b64)
-                    
-                    # Load and encode
-                    img = face_recognition.load_image_file(io.BytesIO(image_bytes))
-                    encodings = face_recognition.face_encodings(img)
-                    
-                    if encodings:
-                        new_embedding = list(encodings[0])
-                        # Attempt to improve the embedding
-                        # We use a loose match_threshold (0.6) to ensure it's at least SOMEWHAT close to the user 
-                        # before we consider adding/merging it.
-                        result = improve_client_embedding(client_id, new_embedding)
-                        print(f"Embedding update for {client_id}: {result}")
-                except Exception as e:
-                    print(f"Failed to update embedding for {client_id}: {e}")
-
         else:
             # Do not update purpose on time_out; purpose should come from the original time_in
             add_time_out(client_id)
         return jsonify({'ok': True}), 200
     except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+@client_bp.route('/learn_face', methods=['POST'])
+def learn_face():
+    data = request.json or {}
+    client_id = data.get('client_id')
+    photo_data = data.get('photo_data')
+
+    if not client_id or not photo_data:
+        return jsonify({'ok': False, 'error': 'Missing client_id or photo_data'}), 400
+
+    try:
+        # Extract base64
+        m = re.match(r"data:(image/\w+);base64,(.*)", photo_data)
+        if m:
+            img_b64 = m.group(2)
+        else:
+            img_b64 = photo_data.split(',', 1)[1] if ',' in photo_data else photo_data
+        
+        image_bytes = base64.b64decode(img_b64)
+        
+        # Load and encode
+        img = face_recognition.load_image_file(io.BytesIO(image_bytes))
+        encodings = face_recognition.face_encodings(img)
+        
+        if encodings:
+            new_embedding = list(encodings[0])
+            # Attempt to improve the embedding
+            # We use a loose match_threshold (0.6) to ensure it's at least SOMEWHAT close to the user 
+            # before we consider adding/merging it.
+            result = improve_client_embedding(client_id, new_embedding)
+            print(f"Embedding update for {client_id}: {result}")
+            return jsonify({'ok': True, 'result': result}), 200
+        else:
+            return jsonify({'ok': False, 'error': 'No face detected'}), 200
+
+    except Exception as e:
+        print(f"Failed to update embedding for {client_id}: {e}")
         return jsonify({'ok': False, 'error': str(e)}), 500
 
 

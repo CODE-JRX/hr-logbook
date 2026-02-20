@@ -1,0 +1,13 @@
+--- Verifying Face Learning for TEST-LEARNING-001 ---
+Cleaning up previous test data...
+Creating dummy client...
+Adding initial embedding...
+Initial embeddings count: 1
+Simulating Time-In with face distance: 0.1032 (Expected < 0.25 for merge)
+Result 1: merged_existing
+Updated embeddings count: 1
+Embedding shift from original: 0.020649
+PASS: Embedding successfully merged.
+Could not generate a face vector within [0.25, 0.5] distance range.
+Cleaning up...
+Test Complete.

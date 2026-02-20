@@ -298,19 +298,16 @@
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<label for="manual_search" class="form-label mb-1">Search by name or ID (manual
+						<label for="manual_search" class="form-label mb-1">Search by name(manual
 							override)</label>
 						<div class="input-group">
 							<input type="text" id="manual_search" title="Search for a client by name or client ID"
-								class="form-control" placeholder="Type name or ID..." aria-label="Search client"
-								autofocus>
-							<button id="use_typed" title="Use the entered text as the client identifier"
-								class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Use</button>
+								class="form-control" placeholder="Type name.." aria-label="Search client" autofocus>
 						</div>
 						<div id="search_suggestions" class="list-group mt-2"
 							style="max-height:160px; overflow:auto; display:none;"></div>
 						<div class="form-text mt-1">If the camera identifies the wrong person, search and select the
-							correct client or press <strong>Use</strong> to accept the typed ID.</div>
+							correct client.</div>
 					</div>
 				</div>
 			</div>
@@ -374,7 +371,6 @@
 	// Manual search elements
 	const manualSearch = document.getElementById('manual_search');
 	const suggestionsBox = document.getElementById('search_suggestions');
-	const useTypedBtn = document.getElementById('use_typed');
 
 	// Debounce helper
 	function debounce(fn, wait) {
@@ -466,32 +462,10 @@
 				e.preventDefault();
 				const first = suggestionsBox.querySelector('button');
 				if (first) { first.click(); }
-				else { useTyped(); }
 			}
 		});
 	}
 
-	function useTyped() {
-		const v = manualSearch && manualSearch.value && manualSearch.value.trim();
-		if (!v) {
-			setError('Please type an ID or name before using.');
-			return;
-		}
-		// use the typed value
-		handleMatchFound({
-			client_id: v,
-			full_name: v,
-			gender: '',
-			age: ''
-		});
-		suggestionsBox.style.display = 'none';
-		// Close the override modal
-		const modal = document.getElementById('overrideModal');
-		const bsModal = bootstrap.Modal.getInstance(modal);
-		if (bsModal) bsModal.hide();
-	}
-
-	if (useTypedBtn) useTypedBtn.addEventListener('click', useTyped);
 
 	function stopCamera() {
 		if (stream) {
@@ -538,6 +512,21 @@
 	// 1. That's me
 	btnThatsMe.addEventListener('click', () => {
 		matchModal.hide();
+
+		// Trigger face learning (self-improvement)
+		if (currentClientId && capturedPhotoData) {
+			fetch('/learn_face', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					client_id: currentClientId,
+					photo_data: capturedPhotoData
+				})
+			}).then(res => res.json())
+				.then(data => console.log('Face learning result:', data))
+				.catch(err => console.error('Face learning failed:', err));
+		}
+
 		// Clear previous selections
 		purposeCheckboxes.forEach(cb => cb.checked = false);
 		purposeError.style.display = 'none';
@@ -733,8 +722,8 @@
 					client_id: currentClientId,
 					action,
 					purposes,
-					additional_info: additionalInfoInput.value || null,
-					photo_data: capturedPhotoData
+					additional_info: additionalInfoInput.value || null
+					// photo_data removed; learning now happens on "That's me" click
 				})
 			});
 			const body = await res.json();

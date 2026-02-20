@@ -64,33 +64,6 @@
 {% endblock %}
 
 {% block content %}
-max-height: 460px;
-overflow: auto;
-border-radius: 8px;
-border: 4px solid rgba(0, 0, 0, 0.06);
-background: var(--card-bg);
-padding: 12px;
-color: var(--text-color);
-}
-
-@media (max-width: 767px) {
-.admin-face-login-container {
-flex-direction: column;
-gap: 16px;
-}
-
-.camera-card {
-width: 100%;
-height: auto;
-min-height: 300px;
-}
-
-.login-card {
-width: 100%;
-max-height: none;
-}
-}
-</style>
 <div class="card shadow-lg">
 	<div class="card-body text-center">
 		<div class="admin-face-login-container">
@@ -172,7 +145,7 @@ max-height: none;
 			</div>
 			<div class="modal-footer justify-content-center">
 				<button type="button" class="btn btn-outline-primary w-100" onclick="submitPin()">Verify</button>
-				<button type="button" class="btn btn-secondary w-100 mt-2" onclick="cancelPin()">Cancel</button>
+				<button type="button" class="btn btn-outline-secondary w-100 mt-2" onclick="cancelPin()">Cancel</button>
 			</div>
 		</div>
 	</div>
@@ -401,6 +374,13 @@ max-height: none;
 	if (pinModalEl) {
 		pinModalEl.addEventListener('shown.bs.modal', () => {
 			document.getElementById('pinInput').focus();
+		});
+
+		// Auto-verify PIN when 4 digits are entered
+		document.getElementById('pinInput').addEventListener('input', function (e) {
+			if (this.value.length === 4) {
+				submitPin();
+			}
 		});
 	}
 </script>

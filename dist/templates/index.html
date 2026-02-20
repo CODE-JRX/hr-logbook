@@ -157,6 +157,97 @@
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   }
+
+  /* Connection Checker Styles */
+  #db-status-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+  }
+
+  [data-theme="dark"] #db-status-overlay {
+    background: rgba(15, 23, 42, 0.9);
+  }
+
+  .db-loader {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .fixing-animation {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+  }
+
+  .fixing-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #667eea;
+    border-radius: 50%;
+    animation: dot-pulse 1.5s infinite ease-in-out;
+  }
+
+  .fixing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .fixing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes dot-pulse {
+
+    0%,
+    100% {
+      transform: scale(0.5);
+      opacity: 0.5;
+    }
+
+    50% {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+  }
+
+  .troubleshoot-log {
+    background: #1e293b;
+    color: #38bdf8;
+    padding: 15px;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 15px;
+    display: none;
+    text-align: left;
+  }
 </style>
 {% endblock %}
 
@@ -250,5 +341,129 @@
     </div>
   </div>
 </main>
+{% endblock %}
 
+{% block body_end %}
+<!-- Connection Status Overlay -->
+<div id="db-status-overlay">
+  <div class="db-loader"></div>
+  <h4 id="status-text">Verifying Database Connection...</h4>
+  <p class="text-muted">Please wait while we check system readiness.</p>
+</div>
+
+<!-- Database Error Modal -->
+<div class="modal fade" id="dbErrorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="dbErrorModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-danger text-white border-0">
+        <h5 class="modal-title" id="dbErrorModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Database
+          Connection Failed</h5>
+      </div>
+      <div class="modal-body text-center py-4">
+        <div class="text-danger mb-4" style="font-size: 4rem;">
+          <i class="fas fa-database"></i>
+        </div>
+        <p class="lead">We couldn't connect to the MySQL database.</p>
+        <p>This usually happens when MySQL stops unexpectedly in XAMPP.</p>
+
+        <div id="fixing-section" style="display: none;">
+          <div class="fixing-animation">
+            <div class="fixing-dot"></div>
+            <div class="fixing-dot"></div>
+            <div class="fixing-dot"></div>
+          </div>
+          <p class="fw-bold text-primary">Starting MySQL service...</p>
+          <p class="small text-muted">Trying mysql_start.bat first; if that fails, a data-folder fix will run
+            automatically.</p>
+        </div>
+
+        <div id="troubleshoot-result" class="troubleshoot-log"></div>
+      </div>
+      <div class="modal-footer border-0 justify-content-center">
+        <button type="button" id="btn-troubleshoot" class="btn btn-primary btn-hero w-75">
+          <i class="fas fa-tools me-2"></i>Troubleshoot & Fix
+        </button>
+        <button type="button" id="btn-refresh" class="btn btn-outline-secondary btn-hero w-75" style="display: none;"
+          onclick="location.reload()">
+          <i class="fas fa-sync me-2"></i>Reload Page
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const overlay = document.getElementById('db-status-overlay');
+    const statusText = document.getElementById('status-text');
+    const errorModal = new bootstrap.Modal(document.getElementById('dbErrorModal'));
+    const btnTroubleshoot = document.getElementById('btn-troubleshoot');
+    const btnRefresh = document.getElementById('btn-refresh');
+    const fixingSection = document.getElementById('fixing-section');
+    const logSection = document.getElementById('troubleshoot-result');
+
+    // Wait for 3 seconds before checking DB
+    setTimeout(() => {
+      checkConnection();
+    }, 2000);
+
+    function checkConnection() {
+      fetch('/api/check-db')
+        .then(response => response.json())
+        .then(data => {
+          if (data.ok) {
+            // Success: Fade out overlay
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+              overlay.style.display = 'none';
+            }, 500);
+          } else {
+            showError();
+          }
+        })
+        .catch(error => {
+          console.error('DB Check Error:', error);
+          showError();
+        });
+    }
+
+    function showError() {
+      overlay.style.display = 'none';
+      errorModal.show();
+    }
+
+    btnTroubleshoot.addEventListener('click', function () {
+      btnTroubleshoot.disabled = true;
+      btnTroubleshoot.style.display = 'none';
+      fixingSection.style.display = 'block';
+
+      fetch('/api/troubleshoot-db', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          fixingSection.style.display = 'none';
+          logSection.style.display = 'block';
+          logSection.innerText = data.output;
+
+          if (data.ok) {
+            logSection.classList.remove('text-danger');
+            logSection.classList.add('text-success');
+            logSection.innerHTML += "\n\n--- FIX COMPLETED SUCCESSFULLY ---";
+            btnRefresh.style.display = 'block';
+            btnRefresh.classList.replace('btn-outline-secondary', 'btn-success');
+          } else {
+            logSection.classList.add('text-danger');
+            logSection.innerHTML += "\n\n--- FIX FAILED ---";
+            btnRefresh.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          fixingSection.style.display = 'none';
+          logSection.style.display = 'block';
+          logSection.innerText = "Fetch Error: " + error;
+          btnRefresh.style.display = 'block';
+        });
+    });
+  });
+</script>
 {% endblock %}

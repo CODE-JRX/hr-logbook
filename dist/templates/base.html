@@ -289,6 +289,9 @@
 
       function shouldTransform(el) {
         if (!el) return false;
+        // Respect explicit opts-out via autocapitalize
+        if (el.getAttribute('autocapitalize') === 'none' || el.getAttribute('autocapitalize') === 'off') return false;
+
         const tag = el.tagName;
         if (tag === 'TEXTAREA') return true;
         if (tag !== 'INPUT') return false;
@@ -394,6 +397,7 @@
     });
   </script>
   {% block scripts %}{% endblock %}
+  {% block body_end %}{% endblock %}
 </body>
 
 </html>

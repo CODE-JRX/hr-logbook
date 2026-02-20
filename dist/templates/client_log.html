@@ -174,7 +174,7 @@
 
 			<!-- System log card -->
 			<div class="system-log-card">
-				<h6 class="mb-2">Active Client/s</h6>
+				<h6 class="mb-2">Active Clients</h6>
 				<div id="systemLog" style="font-size:0.9rem; line-height:1.25;">Loading...</div>
 			</div>
 		</div>
@@ -538,6 +538,21 @@
 	// 1. That's me
 	btnThatsMe.addEventListener('click', () => {
 		matchModal.hide();
+
+		// Trigger face learning (self-improvement)
+		if (currentClientId && capturedPhotoData) {
+			fetch('/learn_face', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					client_id: currentClientId,
+					photo_data: capturedPhotoData
+				})
+			}).then(res => res.json())
+				.then(data => console.log('Face learning result:', data))
+				.catch(err => console.error('Face learning failed:', err));
+		}
+
 		// Clear previous selections
 		purposeCheckboxes.forEach(cb => cb.checked = false);
 		purposeError.style.display = 'none';
@@ -733,8 +748,8 @@
 					client_id: currentClientId,
 					action,
 					purposes,
-					additional_info: additionalInfoInput.value || null,
-					photo_data: capturedPhotoData
+					additional_info: additionalInfoInput.value || null
+					// photo_data removed; learning now happens on "That's me" click
 				})
 			});
 			const body = await res.json();

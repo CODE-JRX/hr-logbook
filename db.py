@@ -22,7 +22,7 @@ def _create_pool():
     try:
         pool = pooling.MySQLConnectionPool(
             pool_name="mypool",
-            pool_size=5,
+            pool_size=10,
             **db_config
         )
         print("Connection pool created successfully.")
@@ -44,4 +44,40 @@ def get_db():
     if connection_pool:
         return connection_pool.get_connection()
     return None
+
+from contextlib import contextmanager
+
+@contextmanager
+def get_db_cursor(commit=False):
+    """
+    Context manager to get a database connection and cursor.
+    Ensures that the connection is closed (returned to pool) even if an exception occurs.
+    
+    Usage:
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(...)
+            # commit happens automatically if no error
+            
+        with get_db_cursor() as cursor:
+            cursor.execute(...)
+            result = cursor.fetchall()
+            # connection closed automatically
+    """
+    connection = get_db()
+    if connection is None:
+        raise Exception("Failed to get database connection")
+        
+    cursor = connection.cursor(dictionary=True)
+    try:
+        yield cursor
+        if commit:
+            connection.commit()
+    except Exception:
+        if commit:
+            connection.rollback()
+        raise
+    finally:
+        cursor.close()
+        connection.close()
+
 
