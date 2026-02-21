@@ -127,11 +127,14 @@ def troubleshoot_db_route():
 @client_bp.route("/add", methods=["GET", "POST"])
 def add():
     if request.method == "POST":
-        client_id = get_next_client_id()
-        full_name = request.form.get("full_name")
+        client_id  = get_next_client_id()
+        fname      = request.form.get("fname", "").strip()
+        lname      = request.form.get("lname", "").strip()
+        mi         = request.form.get("mi", "").strip()
+        name_ext   = request.form.get("name_ext", "").strip()
         department = request.form.get("department")
-        gender = request.form.get("gender")
-        age = request.form.get("age")
+        gender     = request.form.get("gender")
+        age        = request.form.get("age")
         client_type = request.form.get("client_type")
 
         # create client row
@@ -140,7 +143,8 @@ def add():
             age_val = int(age) if age not in (None, '') else None
         except Exception:
             age_val = None
-        add_client(client_id, full_name, department, gender, age_val, client_type)
+        add_client(client_id, fname, lname, mi=mi, name_ext=name_ext,
+                   department=department, gender=gender, age=age_val, client_type=client_type)
 
         # handle captured photo (data URL)
         # handle captured photos (3 angles)
@@ -234,7 +238,10 @@ def edit(id):
         update_client(
             id,
             client_id=request.form.get("client_id"),
-            full_name=request.form.get("full_name"),
+            fname=request.form.get("fname"),
+            lname=request.form.get("lname"),
+            mi=request.form.get("mi"),
+            name_ext=request.form.get("name_ext"),
             department=request.form.get("department"),
             client_type=request.form.get("client_type"),
             gender=request.form.get("gender"),

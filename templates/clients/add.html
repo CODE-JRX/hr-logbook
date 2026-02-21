@@ -12,10 +12,12 @@
       padding: .5rem;
       background: #f8fafc;
     }
+
     /* Mirror the camera feed horizontally */
     #video {
       transform: scaleX(-1);
     }
+
     @media (max-width: 767px) {
       #canvas {
         transform: scaleX(-1);
@@ -35,14 +37,36 @@
 
     <form method="post" novalidate id="addClientForm">
       <div class="row g-3">
-        <div class="col-12">
-          <label for="full_name" class="form-label"><i class="fas fa-user"></i> Full name <span
+        <!-- Name Fields -->
+        <div class="col-md-5">
+          <label for="fname" class="form-label"><i class="fas fa-user"></i> First Name <span
               class="text-danger">*</span></label>
-          <input class="form-control" type="text" name="full_name" id="full_name" required aria-required="true"
-            placeholder="e.g. JUAN T. DELA CRUZ JR.">
+          <input class="form-control text-uppercase" type="text" name="fname" id="fname" required aria-required="true"
+            placeholder="e.g. JUAN">
+        </div>
+        <div class="col-md-2">
+          <label for="mi" class="form-label">M.I.</label>
+          <input class="form-control text-uppercase" type="text" name="mi" id="mi" maxlength="2" placeholder="e.g. T">
+        </div>
+        <div class="col-md-5">
+          <label for="lname" class="form-label">Last Name <span class="text-danger">*</span></label>
+          <input class="form-control text-uppercase" type="text" name="lname" id="lname" required aria-required="true"
+            placeholder="e.g. DELA CRUZ">
+        </div>
+        <div class="col-md-4">
+          <label for="name_ext" class="form-label">Name Extension</label>
+          <select class="form-select" name="name_ext" id="name_ext">
+            <option value="">— None —</option>
+            <option value="JR">JR</option>
+            <option value="SR">SR</option>
+            <option value="II">II</option>
+            <option value="III">III</option>
+            <option value="IV">IV</option>
+            <option value="V">V</option>
+          </select>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-8">
           <label for="client_type" class="form-label"><i class="fas fa-tags"></i> Client Type <span
               class="text-danger">*</span></label>
           <select class="form-select" name="client_type" id="client_type" required>
@@ -73,7 +97,7 @@
           <input class="form-control" type="number" name="age" id="age" min="0" max="150" placeholder="e.g.  35">
         </div>
 
-        <div class="col-md-6">
+        <div class="col-12">
           <label for="department" class="form-label"><i class="fas fa-building"></i> Department(Optional)</label>
           <input class="form-control" type="text" name="department" id="department" placeholder="e.g. HRMO">
         </div>
@@ -422,7 +446,8 @@
 
   // Validation
   function validateForm() {
-    const name = document.getElementById('full_name').value.trim();
+    const fname = document.getElementById('fname').value.trim();
+    const lname = document.getElementById('lname').value.trim();
     const clientType = document.getElementById('client_type').value;
     const gender = document.getElementById('gender').value;
     const age = document.getElementById('age').value.trim();
@@ -430,11 +455,11 @@
     // Check if all 3 photos are present
     const allPhotos = inputs[0].value && inputs[1].value && inputs[2].value;
 
-    saveBtn.disabled = !(name && clientType && gender && age && allPhotos);
+    saveBtn.disabled = !(fname && lname && clientType && gender && age && allPhotos);
   }
 
-  ['full_name', 'age'].forEach(id => document.getElementById(id).addEventListener('input', validateForm));
-  ['client_type', 'gender'].forEach(id => document.getElementById(id).addEventListener('change', validateForm));
+  ['fname', 'lname', 'mi', 'age'].forEach(id => document.getElementById(id).addEventListener('input', validateForm));
+  ['client_type', 'gender', 'name_ext'].forEach(id => document.getElementById(id).addEventListener('change', validateForm));
 
   document.getElementById('addClientForm').addEventListener('submit', (e) => {
     saveBtn.disabled = true;

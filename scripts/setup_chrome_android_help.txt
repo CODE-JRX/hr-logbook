@@ -1,0 +1,110 @@
+========================================================
+  HRMO e-Logbook — Android Chrome Camera Setup Guide
+  Script: setup_chrome_android.py
+========================================================
+
+WHAT THIS SCRIPT DOES
+---------------------
+Configures Google Chrome on an Android phone/tablet to allow
+camera access over HTTP (not HTTPS) for the HRMO e-Logbook
+web app. It uses ADB (Android Debug Bridge) to:
+
+  1. Write Chrome's command-line flags file with the flag:
+       --unsafely-treat-insecure-origin-as-secure=<your URL>
+  2. Grant the camera permission to Chrome at the OS level.
+  3. Force-stop Chrome so the new flags take effect.
+  4. (Optional) Open Chrome directly to the app URL.
+
+
+PREREQUISITES
+-------------
+
+On the Android Device (one-time setup):
+  1. Enable Developer Options
+       Settings → About Phone → tap "Build Number" 7 times
+       A "Developer Options" menu will appear in Settings.
+
+  2. Enable USB Debugging
+       Settings → Developer Options → USB Debugging → ON
+
+  3. Enable Chrome's command-line flags (IMPORTANT for non-rooted phones)
+       a. Open Chrome on the phone.
+       b. Go to:  chrome://flags
+       c. Search for:  enable-command-line-on-non-rooted-devices
+       d. Set it to "Enabled".
+       e. Tap "Relaunch" to restart Chrome.
+       This step allows Chrome to read the flags file the script writes.
+
+On the PC running the script:
+  • ADB (Android Platform Tools) must be installed and in your PATH.
+    Download: https://developer.android.com/studio/releases/platform-tools
+    After downloading, add the folder to your system PATH variable.
+
+  • Python 3.10 or later must be installed.
+
+
+HOW TO RUN
+----------
+
+1. Connect the Android device to this PC via USB cable.
+   When prompted on the phone, tap "Allow USB Debugging".
+
+2. Open a terminal / command prompt in the scripts\ folder.
+
+3. Run one of the following commands:
+
+   Basic (USB, default URL: http://10.0.0.1:5000):
+     python setup_chrome_android.py
+
+   Custom server URL:
+     python setup_chrome_android.py --url http://192.168.1.100:5000
+
+   Over Wi-Fi (pair first with: adb pair <ip>:<pairing-port>):
+     python setup_chrome_android.py --connect 192.168.1.50:5555
+
+   Setup + open Chrome automatically after:
+     python setup_chrome_android.py --url http://192.168.1.100:5000 --open
+
+
+AFTER THE SCRIPT RUNS
+---------------------
+  1. Open Chrome on the Android device (or it will open automatically
+     if you used --open).
+  2. Navigate to the logbook URL (e.g. http://10.0.0.1:5000).
+  3. If Chrome asks for camera permission, tap "Allow".
+  4. The camera should now work on the HTTP site.
+
+
+TROUBLESHOOTING
+---------------
+
+Problem : "adb not found"
+Fix     : Install Android Platform Tools and add the folder to PATH.
+          Restart your terminal after updating PATH.
+
+Problem : "No authorised device found"
+Fix     : • Make sure USB Debugging is enabled on the phone.
+          • Reconnect the USB cable.
+          • Accept the "Allow USB Debugging" dialog on the phone.
+          • Run: adb devices  (should show your device as "device")
+
+Problem : Camera still blocked after running the script
+Fix     : • Confirm you completed step 3 (chrome://flags) on the phone.
+          • Fully close and reopen Chrome.
+          • Check that the server URL matches exactly what you passed
+            to --url (including the port number).
+
+Problem : "Could not grant camera permission via pm"
+Fix     : Manually allow it in Android Settings:
+          Settings → Apps → Chrome → Permissions → Camera → Allow
+
+
+NOTES
+-----
+  • The script backs up nothing on Android (the flags file is new).
+  • To undo the setup, run:
+      adb shell rm /data/local/tmp/chrome-command-line
+    then relaunch Chrome.
+  • This script only affects the Default Chrome profile on the device.
+
+========================================================

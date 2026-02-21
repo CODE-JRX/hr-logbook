@@ -11,7 +11,7 @@ class TestMultiAngleFacerecognition(unittest.TestCase):
         self.client_id = "TEST-MULTI-001"
         self.full_name = "Test Multi Angle"
         # Create a dummy client
-        add_client(self.client_id, self.full_name, "TEST_DEPT", "MALE", 30, "VISITOR")
+        add_client(self.client_id, "TEST", "MULTI ANGLE", mi="", name_ext="", department="TEST_DEPT", gender="MALE", age=30, client_type="VISITOR")
         
         # Create 3 dummy embeddings (random vectors of length 128)
         # We'll make them distinct but recognizable

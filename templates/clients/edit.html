@@ -10,10 +10,12 @@
         padding: .5rem;
         background: #f8fafc;
     }
+
     /* Mirror the camera feed horizontally */
     #video {
         transform: scaleX(-1);
     }
+
     @media (max-width: 767px) {
         #canvas {
             transform: scaleX(-1);
@@ -33,14 +35,37 @@
         <form method="post" novalidate id="editClientForm">
             <input type="hidden" name="client_id" value="{{ client.client_id }}">
             <div class="row g-3">
-                <div class="col-12">
-                    <label for="full_name" class="form-label"><i class="fas fa-user"></i> Full name <span
+                <!-- Name Fields -->
+                <div class="col-md-5">
+                    <label for="fname" class="form-label"><i class="fas fa-user"></i> First Name <span
                             class="text-danger">*</span></label>
-                    <input class="form-control" type="text" name="full_name" id="full_name"
-                        value="{{ client.full_name }}" required placeholder="e.g. JUAN T. DELA CRUZ JR.">
+                    <input class="form-control text-uppercase" type="text" name="fname" id="fname"
+                        value="{{ client.fname }}" required placeholder="e.g. JUAN">
+                </div>
+                <div class="col-md-2">
+                    <label for="mi" class="form-label">M.I.</label>
+                    <input class="form-control text-uppercase" type="text" name="mi" id="mi" maxlength="2"
+                        value="{{ client.mi }}" placeholder="e.g. T">
+                </div>
+                <div class="col-md-5">
+                    <label for="lname" class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <input class="form-control text-uppercase" type="text" name="lname" id="lname"
+                        value="{{ client.lname }}" required placeholder="e.g. DELA CRUZ">
+                </div>
+                <div class="col-md-4">
+                    <label for="name_ext" class="form-label">Name Extension</label>
+                    <select class="form-select" name="name_ext" id="name_ext">
+                        <option value="" {% if not client.name_ext %}selected{% endif %}>— None —</option>
+                        <option value="JR" {% if client.name_ext=='JR' %}selected{% endif %}>JR</option>
+                        <option value="SR" {% if client.name_ext=='SR' %}selected{% endif %}>SR</option>
+                        <option value="II" {% if client.name_ext=='II' %}selected{% endif %}>II</option>
+                        <option value="III" {% if client.name_ext=='III' %}selected{% endif %}>III</option>
+                        <option value="IV" {% if client.name_ext=='IV' %}selected{% endif %}>IV</option>
+                        <option value="V" {% if client.name_ext=='V' %}selected{% endif %}>V</option>
+                    </select>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-8">
                     <label for="client_type" class="form-label"><i class="fas fa-tags"></i> Client Type <span
                             class="text-danger">*</span></label>
                     <select class="form-select" name="client_type" id="client_type" required>
@@ -77,7 +102,7 @@
                         max="150" placeholder="e.g., 35">
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-12">
                     <label for="department" class="form-label"><i class="fas fa-building"></i> Department</label>
                     <input class="form-control" type="text" name="department" id="department"
                         value="{{ client.department }}" placeholder="OPTIONAL">

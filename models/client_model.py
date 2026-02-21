@@ -32,13 +32,33 @@ def get_client_by_client_id(client_id):
         
         return client
 
-def add_client(client_id, full_name, department=None, gender=None, age=None, client_type=None):
+def add_client(client_id, fname, lname, mi='', name_ext='', department=None, gender=None, age=None, client_type=None):
+    # Normalise parts
+    fname     = fname.strip().upper()     if isinstance(fname, str)     else (fname or '')
+    lname     = lname.strip().upper()     if isinstance(lname, str)     else (lname or '')
+    mi        = mi.strip().upper()        if isinstance(mi, str)        else ''
+    name_ext  = name_ext.strip().upper()  if isinstance(name_ext, str)  else ''
+
+    # Build derived full_name: "FNAME [MI.] LNAME [EXT]"
+    parts = [fname]
+    if mi:
+        parts.append(mi + '.')
+    parts.append(lname)
+    if name_ext:
+        parts.append(name_ext)
+    full_name = ' '.join(parts)
+
     with get_db_cursor(commit=True) as cursor:
-        query = """INSERT INTO clients (client_id, full_name, department, gender, age, client_type)
-                   VALUES (%s, %s, %s, %s, %s, %s)"""
+        query = """INSERT INTO clients
+                     (client_id, full_name, fname, lname, mi, name_ext, department, gender, age, client_type)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         values = (
             client_id.upper() if isinstance(client_id, str) else client_id,
-            full_name.upper() if isinstance(full_name, str) else full_name,
+            full_name,
+            fname,
+            lname,
+            mi,
+            name_ext,
             department.upper() if isinstance(department, str) else department,
             gender.upper() if isinstance(gender, str) else gender,
             age,
@@ -46,17 +66,57 @@ def add_client(client_id, full_name, department=None, gender=None, age=None, cli
         )
         cursor.execute(query, values)
 
-def update_client(id, client_id=None, full_name=None, department=None, gender=None, age=None, client_type=None):
+def update_client(id, client_id=None, fname=None, lname=None, mi=None, name_ext=None,
+                  full_name=None, department=None, gender=None, age=None, client_type=None):
     with get_db_cursor(commit=True) as cursor:
         updates = []
         values = []
-        
+
         if client_id is not None:
             updates.append("client_id = %s")
             values.append(client_id.upper() if isinstance(client_id, str) else client_id)
-        if full_name is not None:
+
+        # Handle individual name parts
+        _fname    = fname.strip().upper()    if isinstance(fname, str)    else None
+        _lname    = lname.strip().upper()    if isinstance(lname, str)    else None
+        _mi       = mi.strip().upper()       if isinstance(mi, str)       else None
+        _name_ext = name_ext.strip().upper() if isinstance(name_ext, str) else None
+
+        if _fname is not None:
+            updates.append("fname = %s")
+            values.append(_fname)
+        if _lname is not None:
+            updates.append("lname = %s")
+            values.append(_lname)
+        if _mi is not None:
+            updates.append("mi = %s")
+            values.append(_mi)
+        if _name_ext is not None:
+            updates.append("name_ext = %s")
+            values.append(_name_ext)
+
+        # If any name part changed, recompute full_name
+        if any(x is not None for x in [_fname, _lname, _mi, _name_ext]):
+            # Fetch current values for parts we didn't receive
+            cursor.execute("SELECT fname, lname, mi, name_ext FROM clients WHERE id = %s", (id,))
+            row = cursor.fetchone() or {}
+            ef = _fname    if _fname    is not None else (row.get('fname')    or '')
+            el = _lname    if _lname    is not None else (row.get('lname')    or '')
+            em = _mi       if _mi       is not None else (row.get('mi')       or '')
+            en = _name_ext if _name_ext is not None else (row.get('name_ext') or '')
+            parts = [ef]
+            if em:
+                parts.append(em + '.')
+            parts.append(el)
+            if en:
+                parts.append(en)
+            updates.append("full_name = %s")
+            values.append(' '.join(parts))
+        elif full_name is not None:
+            # Legacy path: caller passed full_name directly
             updates.append("full_name = %s")
             values.append(full_name.upper() if isinstance(full_name, str) else full_name)
+
         if department is not None:
             updates.append("department = %s")
             values.append(department.upper() if isinstance(department, str) else department)
@@ -75,7 +135,7 @@ def update_client(id, client_id=None, full_name=None, department=None, gender=No
 
         query = f"UPDATE clients SET {', '.join(updates)} WHERE id = %s"
         values.append(id)
-        
+
         cursor.execute(query, values)
 
 def delete_client(id):
