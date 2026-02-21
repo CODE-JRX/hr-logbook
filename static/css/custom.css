@@ -859,9 +859,7 @@ html {
 }
 
 /* Body and general styles */
-.site-logo {
-  height: 44px;
-}
+
 
 body {
   margin: 0;
@@ -895,6 +893,7 @@ nav {
 .site-logo {
   z-index: 2;
   position: relative;
+  height: 65px;
 }
 
 /* Modern navbar styling */
@@ -1046,9 +1045,9 @@ nav {
 
 /* Logo box styling */
 .site-nav .logo-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
+  width: 65px;
+  height: 65px;
+  border-radius: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1059,8 +1058,8 @@ nav {
 }
 
 .site-nav .logo-box img {
-  max-width: 44px;
-  max-height: 44px;
+  max-width: 65px;
+  max-height: 65px;
   object-fit: contain;
   display: block;
 }
@@ -1081,7 +1080,7 @@ nav {
 .site-nav .title {
   color: var(--primary-color);
   font-weight: 700;
-  margin-left: 0.5rem;
+  margin-left: 0px;
   font-size: 1.05rem;
   line-height: 1;
 }

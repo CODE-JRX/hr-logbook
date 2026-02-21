@@ -140,8 +140,8 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg site-nav fixed-top">
-    <div class="container-fluid px-4 px-lg-5">
+  <nav class="navbar navbar-expand-lg site-nav fixed-top p-0">
+    <div class="container-fluid">
       <div id="navBrandWrapper" class="nav-brand-wrapper">
         <div class="nav-brand-light"></div>
         <a class="navbar-brand logo-link" href="{{ url_for('client.home') }}">
@@ -238,7 +238,7 @@
   </main>
 
   <footer class="site-footer">
-    <div class="container-fluid px-4 px-lg-5">
+    <div class="container-fluid">
       <div class="row">
         <!-- Brand Section -->
         <div class="col-lg-4 col-md-6 mb-4">
@@ -330,7 +330,7 @@
             <div id="troubleshoot-result" class="troubleshoot-log"></div>
           </div>
           <div class="modal-footer border-0 justify-content-center">
-            <button type="button" id="btn-troubleshoot" class="btn btn-primary w-75 rounded-pill"
+            <button type="button" id="btn-troubleshoot" class="btn btn-outline-primary w-75 rounded-pill"
               style="padding: 10px 20px;">
               <i class="fas fa-tools me-2"></i>Troubleshoot & Fix
             </button>
@@ -358,8 +358,8 @@
             <small class="text-danger">This action cannot be undone.</small>
           </div>
           <div class="modal-footer border-0">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-danger" id="confirmDeleteBtn">Delete</button>
           </div>
         </div>
       </div>
@@ -597,7 +597,7 @@
                   logSection.classList.add('text-success');
                   logSection.innerHTML += "\n\n--- FIX COMPLETED SUCCESSFULLY ---";
                   btnRefresh.style.display = 'block';
-                  btnRefresh.classList.replace('btn-outline-secondary', 'btn-success');
+                  btnRefresh.classList.replace('btn-outline-secondary', 'btn-outline-success');
                 } else {
                   logSection.classList.add('text-danger');
                   logSection.innerHTML += "\n\n--- FIX FAILED ---";
