@@ -25,19 +25,133 @@
       document.documentElement.setAttribute('data-theme', theme);
     })();
   </script>
+  <style>
+    /* Moving light around the navbar brand */
+    .nav-brand-wrapper {
+      position: relative;
+      display: inline-block;
+      padding: 2px;
+    }
+
+    .nav-brand-light {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: #38bdf8;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #38bdf8, 0 0 20px #38bdf8;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .nav-brand-wrapper.db-checking .nav-brand-light {
+      opacity: 1;
+      animation: chase-light 2s linear infinite;
+    }
+
+    .nav-brand-wrapper.db-error .nav-brand-light {
+      opacity: 1;
+      background-color: #ef4444;
+      box-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444;
+      animation: chase-light 1s linear infinite;
+    }
+
+    @keyframes chase-light {
+      0% {
+        top: 0;
+        left: 0;
+      }
+
+      25% {
+        top: 0;
+        left: calc(100% - 8px);
+      }
+
+      50% {
+        top: calc(100% - 8px);
+        left: calc(100% - 8px);
+      }
+
+      75% {
+        top: calc(100% - 8px);
+        left: 0;
+      }
+
+      100% {
+        top: 0;
+        left: 0;
+      }
+    }
+
+    /* Troubleshoot Modal Styles */
+    .fixing-animation {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 20px 0;
+    }
+
+    .fixing-dot {
+      width: 12px;
+      height: 12px;
+      background-color: #667eea;
+      border-radius: 50%;
+      animation: dot-pulse 1.5s infinite ease-in-out;
+    }
+
+    .fixing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .fixing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes dot-pulse {
+
+      0%,
+      100% {
+        transform: scale(0.5);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    .troubleshoot-log {
+      background: #1e293b;
+      color: #38bdf8;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 15px;
+      display: none;
+      text-align: left;
+    }
+  </style>
   {% block head_extra %}{% endblock %}
 </head>
 
 <body>
   <nav class="navbar navbar-expand-lg site-nav fixed-top">
     <div class="container-fluid px-4 px-lg-5">
-      <a class="navbar-brand logo-link" href="{{ url_for('client.home') }}">
-        <div class="logo-box">
-          <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR e-Loglook logo"
-            class="site-logo">
-        </div>
-        <span class="title"><span class="hr-mo">HRMO</span> e-Loglook</span>
-      </a>
+      <div id="navBrandWrapper" class="nav-brand-wrapper">
+        <div class="nav-brand-light"></div>
+        <a class="navbar-brand logo-link" href="{{ url_for('client.home') }}">
+          <div class="logo-box">
+            <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR e-Loglook logo"
+              class="site-logo">
+          </div>
+          <span class="title"><span class="hr-mo">HRMO</span> e-Loglook</span>
+        </a>
+      </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -186,6 +300,49 @@
 
   <!-- Global Modal Container for better z-index layering -->
   <div id="global-modal-container">
+    <!-- Database Error Modal -->
+    <div class="modal fade" id="dbErrorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="dbErrorModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-danger text-white border-0">
+            <h5 class="modal-title" id="dbErrorModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Database
+              Connection Failed</h5>
+          </div>
+          <div class="modal-body text-center py-4">
+            <div class="text-danger mb-4" style="font-size: 4rem;">
+              <i class="fas fa-database"></i>
+            </div>
+            <p class="lead">We couldn't connect to the MySQL database.</p>
+            <p>This usually happens when MySQL stops unexpectedly in XAMPP.</p>
+
+            <div id="fixing-section" style="display: none;">
+              <div class="fixing-animation">
+                <div class="fixing-dot"></div>
+                <div class="fixing-dot"></div>
+                <div class="fixing-dot"></div>
+              </div>
+              <p class="fw-bold text-primary">Starting MySQL service...</p>
+              <p class="small text-muted">Trying mysql_start.bat first; if that fails, a data-folder fix will run
+                automatically.</p>
+            </div>
+
+            <div id="troubleshoot-result" class="troubleshoot-log"></div>
+          </div>
+          <div class="modal-footer border-0 justify-content-center">
+            <button type="button" id="btn-troubleshoot" class="btn btn-primary w-75 rounded-pill"
+              style="padding: 10px 20px;">
+              <i class="fas fa-tools me-2"></i>Troubleshoot & Fix
+            </button>
+            <button type="button" id="btn-refresh" class="btn btn-outline-secondary w-75 rounded-pill"
+              style="display: none; padding: 10px 20px;" onclick="location.reload()">
+              <i class="fas fa-sync me-2"></i>Reload Page
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -380,6 +537,81 @@
             window.location.href = '/delete/' + deleteId;
           }
         });
+      }
+
+      // DB Connection check
+      const navBrandWrapper = document.getElementById('navBrandWrapper');
+      const dbErrorModalEl = document.getElementById('dbErrorModal');
+      const btnTroubleshoot = document.getElementById('btn-troubleshoot');
+      const btnRefresh = document.getElementById('btn-refresh');
+      const fixingSection = document.getElementById('fixing-section');
+      const logSection = document.getElementById('troubleshoot-result');
+
+      if (navBrandWrapper && dbErrorModalEl) {
+        const dbErrorModal = new bootstrap.Modal(dbErrorModalEl);
+
+        // Add DB Checking class initially
+        navBrandWrapper.classList.add('db-checking');
+
+        setTimeout(() => {
+          checkConnection();
+        }, 1500);
+
+        function checkConnection() {
+          fetch('/api/check-db')
+            .then(response => response.json())
+            .then(data => {
+              if (data.ok) {
+                navBrandWrapper.classList.remove('db-checking');
+              } else {
+                showError();
+              }
+            })
+            .catch(error => {
+              console.error('DB Check Error:', error);
+              showError();
+            });
+        }
+
+        function showError() {
+          navBrandWrapper.classList.remove('db-checking');
+          navBrandWrapper.classList.add('db-error');
+          dbErrorModal.show();
+        }
+
+        if (btnTroubleshoot) {
+          btnTroubleshoot.addEventListener('click', function () {
+            btnTroubleshoot.disabled = true;
+            btnTroubleshoot.style.display = 'none';
+            fixingSection.style.display = 'block';
+
+            fetch('/api/troubleshoot-db', { method: 'POST' })
+              .then(response => response.json())
+              .then(data => {
+                fixingSection.style.display = 'none';
+                logSection.style.display = 'block';
+                logSection.innerText = data.output;
+
+                if (data.ok) {
+                  logSection.classList.remove('text-danger');
+                  logSection.classList.add('text-success');
+                  logSection.innerHTML += "\n\n--- FIX COMPLETED SUCCESSFULLY ---";
+                  btnRefresh.style.display = 'block';
+                  btnRefresh.classList.replace('btn-outline-secondary', 'btn-success');
+                } else {
+                  logSection.classList.add('text-danger');
+                  logSection.innerHTML += "\n\n--- FIX FAILED ---";
+                  btnRefresh.style.display = 'block';
+                }
+              })
+              .catch(error => {
+                fixingSection.style.display = 'none';
+                logSection.style.display = 'block';
+                logSection.innerText = "Fetch Error: " + error;
+                btnRefresh.style.display = 'block';
+              });
+          });
+        }
       }
     });
   </script>
