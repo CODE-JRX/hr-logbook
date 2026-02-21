@@ -49,17 +49,17 @@
                     <label for="fname" class="form-label"><i class="fas fa-user"></i> First Name <span
                             class="text-danger">*</span></label>
                     <input class="form-control text-uppercase" type="text" name="fname" id="fname"
-                        value="{{ client.fname }}" required placeholder="e.g. JUAN">
+                        value="{{ client.fname }}" required placeholder="JUAN">
                 </div>
                 <div class="col-md-2">
                     <label for="mi" class="form-label">M.I.</label>
                     <input class="form-control text-uppercase" type="text" name="mi" id="mi" maxlength="2"
-                        value="{{ client.mi }}" placeholder="e.g. T">
+                        value="{{ client.mi }}" placeholder="NONE">
                 </div>
                 <div class="col-md-5">
                     <label for="lname" class="form-label">Last Name <span class="text-danger">*</span></label>
                     <input class="form-control text-uppercase" type="text" name="lname" id="lname"
-                        value="{{ client.lname }}" required placeholder="e.g. DELA CRUZ">
+                        value="{{ client.lname }}" required placeholder="DELA CRUZ">
                 </div>
                 <div class="col-md-4">
                     <label for="name_ext" class="form-label">Name Extension</label>
@@ -108,13 +108,13 @@
                     <label for="age" class="form-label"><i class="fas fa-birthday-cake"></i> Age <span
                             class="text-danger">*</span></label>
                     <input class="form-control" type="number" name="age" id="age" value="{{ client.age or '' }}" min="0"
-                        max="150" placeholder="e.g., 35">
+                        max="150" placeholder="35">
                 </div>
 
                 <div class="col-12">
                     <label for="department" class="form-label"><i class="fas fa-building"></i> Department</label>
                     <input class="form-control" type="text" name="department" id="department"
-                        value="{{ client.department }}" placeholder="OPTIONAL">
+                        value="{{ client.department }}" placeholder="NONE">
                 </div>
 
                 <div class="col-12">
