@@ -171,17 +171,11 @@ def get_client_count():
 
 def get_next_client_id():
     with get_db_cursor() as cursor:
-        cursor.execute("SELECT client_id FROM clients")
-        max_id = 0
-        for row in cursor.fetchall():
-            try:
-                # cursor is dictionary=True now, so we access by key
-                cid = row['client_id']
-                val = int(cid)
-                if val > max_id:
-                    max_id = val
-            except:
-                pass
+        # We try to find the maximum numeric client_id
+        # We cast to unsigned to ensure we get the numeric max
+        cursor.execute("SELECT MAX(CAST(client_id AS UNSIGNED)) as max_id FROM clients")
+        result = cursor.fetchone()
+        max_id = result['max_id'] if result and result['max_id'] is not None else 0
         return str(max_id + 1)
 
 def search_clients(query, limit=10):

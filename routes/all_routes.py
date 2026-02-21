@@ -69,7 +69,7 @@ def troubleshoot_db_route():
         log_lines = []
 
         # ── Step 1: Try starting MySQL via mysql_start.bat ──────────────────────
-        bat_path = r'D:\xampp\mysql_start.bat'
+        bat_path = os.getenv('MYSQL_START_BAT', r'D:\xampp\mysql_start.bat')
         log_lines.append(f"[Step 1] Attempting to start MySQL via: {bat_path}")
 
         try:
@@ -245,7 +245,7 @@ def edit(id):
             department=request.form.get("department"),
             client_type=request.form.get("client_type"),
             gender=request.form.get("gender"),
-            age=(int(request.form.get("age")) if request.form.get("age") not in (None, '') else None)
+            age=(int(request.form.get("age")) if request.form.get("age") not in (None, '', 'None') and request.form.get("age").isdigit() else None)
         )
 
 
