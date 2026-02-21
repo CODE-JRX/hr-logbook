@@ -36,6 +36,7 @@
 		align-items: flex-start;
 		justify-content: center;
 	}
+
 	/* Mirror the camera feed horizontally */
 	#video {
 		transform: scaleX(-1);
@@ -81,8 +82,9 @@
 			height: auto;
 			min-height: 300px;
 		}
+
 		#canvas {
-  			transform: scaleX(-1);
+			transform: scaleX(-1);
 		}
 
 		.system-log-card {
@@ -140,7 +142,7 @@
 			<div class="camera-card shadow-lg rounded">
 				<!-- video preview (fills card) -->
 				<video id="video" width="420" height="420" autoplay playsinline muted
-					style="object-fit:cover; width:420px; height:420px; border-radius:6px; display:none;"></video>
+					style="object-fit:cover; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px; display:none;"></video>
 
 				<!-- face position guide (subtle broken square corners) -->
 				<div id="face-guide" aria-hidden="true">
@@ -167,6 +169,16 @@
 				<div id="scan-line"
 					style="display:none; position:absolute; top:0; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, rgba(0,255,0,0.8), transparent); z-index:20; animation: scan 2s linear;">
 				</div>
+				<svg id="loading-border"
+					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:22; pointer-events:none;">
+					<rect x="3" y="3" style="width: calc(100% - 6px); height: calc(100% - 6px);" rx="6" ry="6"
+						fill="none" stroke="#ff0000" stroke-width="6" stroke-linecap="round" pathLength="100"
+						stroke-dasharray="20 80">
+						<animate attributeName="stroke-dashoffset" values="100;0" dur="1.5s" repeatCount="indefinite" />
+						<animate attributeName="stroke" values="#ff0000;#ffff00;#00ff00;#00ffff;#0000ff;#ff00ff;#ff0000"
+							dur="2s" repeatCount="indefinite" />
+					</rect>
+				</svg>
 				<!-- camera error overlay (shown inside camera container at top) -->
 				<div id="camera-error"
 					style="display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:25; background:rgba(0,0,0,0.6); color:#fff; padding:6px 10px; border-radius:6px; font-weight:600; font-size:0.95rem;">
@@ -192,7 +204,7 @@
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="matchModalLabel">Match Found</h5>
+						<h5 class="modal-title" id="matchModalLabel">Welcome!</h5>
 					</div>
 					<div class="modal-body">
 						<div class="text-center mb-3">
@@ -263,6 +275,8 @@
 						</p>
 					</div>
 					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" id="btn_purpose_cancel"
+							data-bs-dismiss="modal">Cancel</button>
 						<button id="btn_purpose_next" type="button" class="btn btn-outline-primary">Next</button>
 					</div>
 				</div>
@@ -276,6 +290,8 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title" id="additionalInfoModalLabel">Additional Information</h5>
+						<button type="button" class="btn-close" id="btn_info_close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
 					</div>
 					<div class="modal-body text-start">
 						<label for="additional_info" title="Specific purpose and/or for whom." class="form-label"><i
@@ -287,6 +303,7 @@
 						</p>
 					</div>
 					<div class="modal-footer">
+						<button type="button" class="btn btn-outline-secondary" id="btn_info_back">Back</button>
 						<button id="btn_time_in" type="button" class="btn btn-success"><i
 								class="fas fa-sign-in-alt"></i> Time
 							In</button>
@@ -330,6 +347,7 @@
 	const canvas = document.getElementById('canvas');
 	const preview = document.getElementById('preview');
 	const scanLine = document.getElementById('scan-line');
+	const loadingBorder = document.getElementById('loading-border');
 	const placeholder = document.getElementById('camera-placeholder');
 	const actionBtn = document.getElementById('camera-action');
 	const cameraCard = document.querySelector('.camera-card');
@@ -356,7 +374,10 @@
 	const btnThatsMe = document.getElementById('btn_thats_me');
 	const btnNotMe = document.getElementById('btn_not_me');
 	const btnPurposeNext = document.getElementById('btn_purpose_next');
+	const btnPurposeCancel = document.getElementById('btn_purpose_cancel');
 	const btnTimeIn = document.getElementById('btn_time_in');
+	const btnInfoBack = document.getElementById('btn_info_back');
+	const btnInfoClose = document.getElementById('btn_info_close');
 
 	const cameraError = document.getElementById('camera-error');
 
@@ -484,6 +505,8 @@
 		placeholder.style.display = 'block';
 		preview.style.display = 'none';
 		canvas.style.display = 'none';
+		scanLine.style.display = 'none';
+		if (loadingBorder) loadingBorder.style.display = 'none';
 		cameraState = 'stopped';
 		actionBtn.textContent = 'Start Camera';
 		capturedPhotoData = null;
@@ -559,6 +582,43 @@
 			actionBtn.textContent = 'SCAN';
 		}
 	});
+
+	if (btnInfoBack) {
+		btnInfoBack.addEventListener('click', () => {
+			additionalInfoModal.hide();
+			purposeModal.show();
+		});
+	}
+
+	if (btnInfoClose) {
+		btnInfoClose.addEventListener('click', () => {
+			currentClientId = null;
+			if (cameraState === 'stopped') {
+				cameraAction(); // Start camera
+			} else if (cameraState === 'captured') {
+				preview.style.display = 'none';
+				video.style.display = 'block';
+				scanLine.style.display = 'none';
+				cameraState = 'started';
+				actionBtn.textContent = 'SCAN';
+			}
+		});
+	}
+
+	if (btnPurposeCancel) {
+		btnPurposeCancel.addEventListener('click', () => {
+			currentClientId = null;
+			if (cameraState === 'stopped') {
+				cameraAction(); // Start camera
+			} else if (cameraState === 'captured') {
+				preview.style.display = 'none';
+				video.style.display = 'block';
+				scanLine.style.display = 'none';
+				cameraState = 'started';
+				actionBtn.textContent = 'SCAN';
+			}
+		});
+	}
 
 	// 3. Purpose Next
 	btnPurposeNext.addEventListener('click', () => {
@@ -650,6 +710,7 @@
 			preview.src = dataUrl;
 			preview.style.display = 'block';
 			scanLine.style.display = 'block';
+			if (loadingBorder) loadingBorder.style.display = 'block';
 			scanLine.style.animation = 'none';
 			setTimeout(() => { scanLine.style.animation = 'scan 2s linear'; }, 10);
 			canvas.style.display = 'none';
@@ -664,6 +725,7 @@
 			try {
 				const res = await fetch('/identify', { method: 'POST', body: fd });
 				const body = await res.json();
+				if (loadingBorder) loadingBorder.style.display = 'none';
 				if (body.ok) {
 					// Success - Show Match Modal
 					handleMatchFound({
@@ -682,6 +744,7 @@
 					}, 2000);
 				}
 			} catch (err) {
+				if (loadingBorder) loadingBorder.style.display = 'none';
 				setError('Identification failed: ' + err.message);
 			}
 			return;
@@ -703,6 +766,8 @@
 		placeholder.style.display = 'block';
 		preview.style.display = 'none';
 		canvas.style.display = 'none';
+		scanLine.style.display = 'none';
+		if (loadingBorder) loadingBorder.style.display = 'none';
 		cameraState = 'stopped';
 		actionBtn.textContent = 'Start Camera';
 	}
