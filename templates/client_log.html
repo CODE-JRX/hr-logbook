@@ -199,7 +199,7 @@
 		</div>
 
 		<!-- Match Modal -->
-		<div class="modal fade" id="matchModal" tabindex="-1" aria-labelledby="matchModalLabel" aria-hidden="true"
+		<div class="modal fade" id="matchModal" tabindex="-1" aria-labelledby="matchModalLabel"
 			data-bs-backdrop="static" data-bs-keyboard="false">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -231,7 +231,7 @@
 		</div>
 
 		<!-- Purpose Modal -->
-		<div class="modal fade" id="purposeModal" tabindex="-1" aria-labelledby="purposeModalLabel" aria-hidden="true"
+		<div class="modal fade" id="purposeModal" tabindex="-1" aria-labelledby="purposeModalLabel"
 			data-bs-backdrop="static" data-bs-keyboard="false">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -285,7 +285,7 @@
 
 		<!-- Additional Info Modal -->
 		<div class="modal fade" id="additionalInfoModal" tabindex="-1" aria-labelledby="additionalInfoModalLabel"
-			aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+			data-bs-backdrop="static" data-bs-keyboard="false">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -313,7 +313,7 @@
 		</div>
 
 		<!-- Override Modal -->
-		<div class="modal fade" id="overrideModal" tabindex="-1" aria-labelledby="overrideModalLabel" aria-hidden="true"
+		<div class="modal fade" id="overrideModal" tabindex="-1" aria-labelledby="overrideModalLabel"
 			data-bs-backdrop="false">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -541,6 +541,7 @@
 
 	// 1. That's me
 	btnThatsMe.addEventListener('click', () => {
+		if (document.activeElement) document.activeElement.blur();
 		matchModal.hide();
 
 		// Trigger face learning (self-improvement)
@@ -565,6 +566,7 @@
 
 	// 2. That's not me. Scan again
 	btnNotMe.addEventListener('click', () => {
+		if (document.activeElement) document.activeElement.blur();
 		matchModal.hide();
 		currentClientId = null;
 		// If camera was stopped (e.g. from manual override), maybe we shouldn't auto start?
@@ -585,6 +587,7 @@
 
 	if (btnInfoBack) {
 		btnInfoBack.addEventListener('click', () => {
+			if (document.activeElement) document.activeElement.blur();
 			additionalInfoModal.hide();
 			purposeModal.show();
 		});
@@ -630,6 +633,7 @@
 			return;
 		}
 		purposeError.style.display = 'none';
+		if (document.activeElement) document.activeElement.blur();
 		purposeModal.hide();
 
 		// Reset info input
@@ -648,6 +652,7 @@
 		infoError.style.display = 'none';
 		// Send Log
 		sendLog('time_in');
+		if (document.activeElement) document.activeElement.blur();
 		additionalInfoModal.hide();
 	});
 

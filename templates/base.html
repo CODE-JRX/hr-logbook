@@ -7,10 +7,9 @@
   <title>{% block title %}HR e-Loglook{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/camera.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}" media="print">
+
   <!-- SEO Meta Tags -->
   <meta name="description" content="HRMO e-Loglook: Fast, secure client time logging with face recognition technology.">
   <meta name="keywords" content="HR e-Loglook, client logging, face recognition, time tracking, HRMO">
@@ -305,7 +304,7 @@
   <div id="global-modal-container">
     <!-- Database Error Modal -->
     <div class="modal fade" id="dbErrorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-      aria-labelledby="dbErrorModalLabel" aria-hidden="true">
+      aria-labelledby="dbErrorModalLabel">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
           <div class="modal-header bg-danger text-white border-0">
@@ -347,7 +346,7 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header border-0">
@@ -369,8 +368,7 @@
     </div>
 
     <!-- Login Error Modal -->
-    <div class="modal fade" id="loginErrorModal" tabindex="-1" aria-labelledby="loginErrorModalLabel"
-      aria-hidden="true">
+    <div class="modal fade" id="loginErrorModal" tabindex="-1" aria-labelledby="loginErrorModalLabel">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header border-0">
@@ -390,7 +388,7 @@
     </div>
 
     <!-- Password Update Modal -->
-    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header border-0">
@@ -408,7 +406,7 @@
     </div>
 
     <!-- Success Modal -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header border-0">
@@ -536,6 +534,7 @@
       const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
       if (confirmDeleteBtn) {
         confirmDeleteBtn.addEventListener('click', function () {
+          this.blur(); // Explicit blur to prevent accessibility warning during navigation/hide
           if (deleteId) {
             window.location.href = '/delete/' + deleteId;
           }
@@ -616,6 +615,32 @@
           });
         }
       }
+    });
+
+    // Global Modal Focus Management to fix aria-hidden conflict
+    document.addEventListener('DOMContentLoaded', function () {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        // Set inert on modals that are not currently shown
+        if (!modal.classList.contains('show')) {
+          modal.setAttribute('inert', '');
+        }
+
+        modal.addEventListener('show.bs.modal', function () {
+          this.removeAttribute('inert');
+        });
+
+        modal.addEventListener('hide.bs.modal', function () {
+          // Ensure focus is cleared BEFORE aria-hidden="true" is applied by Bootstrap
+          if (document.activeElement && this.contains(document.activeElement)) {
+            document.activeElement.blur();
+          }
+        });
+
+        modal.addEventListener('hidden.bs.modal', function () {
+          this.setAttribute('inert', '');
+        });
+      });
     });
   </script>
   {% block scripts %}{% endblock %}

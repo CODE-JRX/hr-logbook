@@ -141,32 +141,34 @@ def restore_backup():
                         file_path = os.path.join(db_dir, json_file)
                         
                         if os.path.exists(file_path):
-                            with open(file_path, 'r') as f:
-                                data = json.loads(f.read())
-                            
-                            # Clear table - using DELETE instead of TRUNCATE for better consistency with FK checks and compatibility
-                            cursor.execute(f"DELETE FROM {table}")
-                            cursor.execute(f"ALTER TABLE {table} AUTO_INCREMENT = 1")
-                            
-                            if data:
-                                # Insert rows
-                                columns = data[0].keys()
-                                query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))})"
+                            try:
+                                with open(file_path, 'r', encoding='utf-8') as f:
+                                    data = json.load(f)
                                 
-                                rows_to_insert = []
-                                for row in data:
-                                    # JSON doesn't distinguish between None and missing, 
-                                    # but our dump has all keys.
-                                    values = []
-                                    for col in columns:
-                                        val = row.get(col)
-                                        # Convert ISO strings back to datetime if necessary?
-                                        # mysql-connector usually handles ISO strings for DATETIME if format is correct,
-                                        # but let's see. 
-                                        values.append(val)
-                                    rows_to_insert.append(tuple(values))
+                                # Clear table
+                                cursor.execute(f"DELETE FROM {table}")
+                                cursor.execute(f"ALTER TABLE {table} AUTO_INCREMENT = 1")
+                                
+                                if data:
+                                    columns = list(data[0].keys())
+                                    query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))})"
                                     
-                                cursor.executemany(query, rows_to_insert)
+                                    rows_to_insert = []
+                                    for row in data:
+                                        values = []
+                                        for col in columns:
+                                            val = row.get(col)
+                                            # If the value looks like a base64 encoded string from our encoder, 
+                                            # we might need to decode it if the target is a blob/binary.
+                                            # However, since we don't have many blobs, we'll keep it simple for now
+                                            # and just ensure it's not None where it shouldn't be.
+                                            values.append(val)
+                                        rows_to_insert.append(tuple(values))
+                                        
+                                    cursor.executemany(query, rows_to_insert)
+                            except Exception as table_err:
+                                print(f"Error restoring table {table}: {table_err}")
+                                raise
                     
                     cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
 

@@ -6,6 +6,18 @@
   .card {
     margin-bottom: 1rem
   }
+  .small-stat-card {
+    padding: .5rem .75rem;
+    text-align: center;
+    min-height: 72px;
+  }
+  .small-stat-card h6 { font-size: .85rem; margin-bottom: .25rem; }
+  .small-stat-card h2 { font-size: 1.4rem; margin: 0; }
+  /* Modern chart card styling */
+  .chart-card { position: relative; overflow: hidden; border-radius: .5rem; }
+  .chart-card .chart-bg { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(13,110,253,0.03), rgba(13,110,253,0.06)); pointer-events: none; }
+  .chart-container { position: relative; height: 220px; }
+  @media (max-width: 768px) { .chart-container { height: 160px; } }
 </style>
 {% endblock %}
 
@@ -44,42 +56,73 @@
 
     <div class="card-body">
       <div class="row">
-        <div class="col-md-3">
-          <a href="{{ url_for('client.client_data') }}" class="text-decoration-none">
-            <div class="card shadow-sm p-3">
-              <h6><i class="fas fa-users"></i> Total Registered Clients</h6>
-              <h2>{{ stats.total_clients }}</h2>
+        <div class="col-md-8">
+          <div class="row g-2">
+            <div class="col-4">
+              <a href="{{ url_for('client.client_data') }}" class="text-decoration-none">
+                <div class="card shadow-sm small-stat-card">
+                  <h6><i class="fas fa-users"></i> Total Registered Clients</h6>
+                  <h2>{{ stats.total_clients }}</h2>
+                </div>
+              </a>
             </div>
-          </a>
-        </div>
-        <div class="col-md-3">
-          <a href="{{ url_for('client.client_log_report') }}" class="text-decoration-none">
-            <div class="card shadow-sm p-3">
-              <h6><i class="fas fa-clipboard-list"></i> Total Logs</h6>
-              <h2>{{ stats.total_logs }}</h2>
+            <div class="col-4">
+              <a href="{{ url_for('client.client_log_report') }}" class="text-decoration-none">
+                <div class="card shadow-sm small-stat-card">
+                  <h6><i class="fas fa-clipboard-list"></i> Total Logs</h6>
+                  <h2>{{ stats.total_logs }}</h2>
+                </div>
+              </a>
             </div>
-          </a>
-        </div>
-        <div class="col-md-6">
-          <a href="{{ url_for('client.client_log_report') }}" class="text-decoration-none">
-            <div class="card shadow-sm p-3">
-              <h6><i class="fas fa-chart-line"></i> Recent Activity (last 14 days)</h6>
-              <canvas id="chartActivity" height="80"></canvas>
+            <div class="col-4">
+              <a href="{{ url_for('client.csm_report') }}" class="text-decoration-none">
+                <div class="card shadow-sm small-stat-card">
+                  <h6><i class="fas fa-check-circle"></i> Total Satisfactory Survey</h6>
+                  <h2>{{ stats.total_satisfactory_surveys if stats.total_satisfactory_surveys is defined else 0 }}</h2>
+                </div>
+              </a>
             </div>
-          </a>
-        </div>
-      </div>
+          </div>
 
-      <div class="row mt-3">
-        <div class="col-md-12">
-          <a href="{{ url_for('client.client_log_report') }}" class="text-decoration-none">
-            <div class="card shadow-sm p-3">
-              <h6><i class="fas fa-chart-bar"></i> Purpose Counts</h6>
-              <div style="min-height: 300px; position: relative;">
-                <canvas id="chartPurpose"></canvas>
+          <div class="card shadow-sm p-3 mb-3 mt-2 chart-card">
+            <div class="chart-bg" aria-hidden="true"></div>
+            <h6><i class="fas fa-chart-line"></i> Recent Activity (last 14 days)</h6>
+            <div class="chart-container mt-2">
+              <canvas id="chartActivity"></canvas>
+            </div>
+          </div>
+
+          <div class="card shadow-sm p-3">
+            <h6><i class="fas fa-chart-bar"></i> Purpose Counts</h6>
+            <div style="min-height: 300px; position: relative;">
+              <canvas id="chartPurpose"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card shadow-sm p-3 mb-3">
+            <h6><i class="fas fa-user-circle"></i> Account Information</h6>
+            <div class="d-flex align-items-center justify-content-between">
+              <div style="min-width:0;">
+                <div class="small text-muted">Logged in as</div>
+                <h5 class="mt-2 mb-1">{{ admin.first_name }} {{ admin.last_name }}</h5>
+                <div class="text-muted mb-2">{{ admin.email }}</div>
+                <div class="small text-muted">Account Created: {{ admin.created_at.strftime('%B %d, %Y') if admin.created_at else 'N/A' }}</div>
+                <div class="mt-3">
+                  <a href="{{ url_for('client.admin_profile') }}" class="btn btn-sm btn-outline-primary">View Profile</a>
+                </div>
+              </div>
+              <div class="ms-3 d-flex align-items-center">
+                  <img src="{{ url_for('client.admin_profile_image', admin_id=admin.id) }}" alt="Admin photo" class="rounded-circle" style="width:100px;height:100px;object-fit:cover;border:3px solid #0d6efd;margin-top: -90px;margin-right: 25px;">
               </div>
             </div>
-          </a>
+          </div>
+
+          <div class="card shadow-sm p-3">
+            <h6><i class="fas fa-users"></i> Active Clients</h6>
+            <div id="adminActiveClients" style="font-size:0.9rem; line-height:1.25;">Loading...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -99,10 +142,64 @@
   }
 
   function buildLineChart(ctx, labels, data) {
+    // create a vertical gradient for the area under the line
+    const canvas = ctx.canvas ? ctx.canvas : ctx;
+    const c = (ctx.createLinearGradient) ? ctx : ctx.getContext ? ctx.getContext('2d') : null;
+    const gradient = (c && c.createLinearGradient) ? c.createLinearGradient(0, 0, 0, canvas.height || 220) : 'rgba(13,110,253,0.08)';
+    if (gradient && gradient.addColorStop) {
+      gradient.addColorStop(0, 'rgba(13,110,253,0.22)');
+      gradient.addColorStop(0.6, 'rgba(13,110,253,0.10)');
+      gradient.addColorStop(1, 'rgba(13,110,253,0)');
+    }
+
     return new Chart(ctx, {
       type: 'line',
-      data: { labels, datasets: [{ label: 'Entries', data, fill: false, borderColor: '#0d6efd', tension: 0.2 }] },
-      options: { responsive: true }
+      data: {
+        labels,
+        datasets: [{
+          label: 'Entries',
+          data,
+          fill: true,
+          backgroundColor: gradient,
+          borderColor: '#0d6efd',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#0d6efd',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#212529',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            padding: 8,
+            boxPadding: 6,
+            callbacks: {
+              label: function (context) {
+                return `Entries: ${context.parsed.y}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#6c757d' }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: { color: '#6c757d', precision: 0 }
+          }
+        }
+      }
     });
   }
 
@@ -185,5 +282,54 @@
     const ctxP = document.getElementById('chartPurpose').getContext('2d');
     buildBarChart(ctxP, pLabels, pCounts);
   });
+
+  // Populate active clients section on admin dashboard (reuses /today_logs endpoint)
+  async function refreshAdminActiveClients() {
+    const el = document.getElementById('adminActiveClients');
+    if (!el) return;
+    try {
+      const res = await fetch('/today_logs');
+      const data = await res.json();
+      if (!Array.isArray(data)) {
+        el.innerHTML = '<div class="text-muted">Error loading active clients</div>';
+        return;
+      }
+      if (data.length === 0) {
+        el.innerHTML = '<div class="text-muted">No active clients.</div>';
+        return;
+      }
+      el.innerHTML = '';
+      data.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+        const name = r.full_name || r.client_id;
+        const timeIn = r.time_in ? new Date(r.time_in).toLocaleTimeString() : 'Unknown';
+        const purpose = r.purpose || '';
+        item.innerHTML = `
+          <div class="d-flex flex-column align-items-start" style="text-align: left;">
+            <strong>${name}</strong>
+            <small class="text-muted" style="text-align: left;"><span class="text-success">In: ${timeIn}</span> | <span class="text-primary">${purpose}</span></small>
+          </div>
+          <button class="btn btn-sm btn-outline-danger" title="Logout this client" onclick="logoutClientAdmin('${r.client_id}')">Logout</button>
+        `;
+        el.appendChild(item);
+      });
+    } catch (err) {
+      el.innerHTML = '<div class="text-danger">Failed to load active clients: ' + err.message + '</div>';
+    }
+  }
+
+  async function logoutClientAdmin(clientId) {
+    try {
+      const res = await fetch('/logout_client/' + encodeURIComponent(clientId), { method: 'POST' });
+      const body = await res.json();
+      if (body.ok) { refreshAdminActiveClients(); }
+      else { alert('Failed to logout client: ' + (body.error || 'Unknown error')); }
+    } catch (err) { alert('Logout failed: ' + err.message); }
+  }
+
+  // initial load and periodic refresh
+  refreshAdminActiveClients();
+  setInterval(refreshAdminActiveClients, 10000);
 </script>
 {% endblock %}
