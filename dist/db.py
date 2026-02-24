@@ -34,15 +34,27 @@ def _create_pool():
 # Try to create pool at import time
 connection_pool = _create_pool()
 
+def check_db_availability():
+    """Helper to check if the database is actually reachable."""
+    try:
+        conn = mysql.connector.connect(**db_config)
+        conn.close()
+        return True
+    except mysql.connector.Error:
+        return False
+
 def get_db():
     """Return a connection from the pool. If pool is None (MySQL was down
     at startup), try to create the pool first so the app auto-recovers
     after MySQL is fixed without needing a restart."""
     global connection_pool
-    if connection_pool is None:
-        connection_pool = _create_pool()
-    if connection_pool:
-        return connection_pool.get_connection()
+    try:
+        if connection_pool is None:
+            connection_pool = _create_pool()
+        if connection_pool:
+            return connection_pool.get_connection()
+    except mysql.connector.Error as err:
+        print(f"Error getting connection from pool: {err}")
     return None
 
 from contextlib import contextmanager

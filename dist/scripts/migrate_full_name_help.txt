@@ -1,0 +1,1 @@
+python scripts\migrate_full_name.py --apply

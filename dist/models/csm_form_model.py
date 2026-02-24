@@ -91,3 +91,11 @@ def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=N
             doc['id'] = str(doc['id'])
             
         return rows
+
+
+    def get_csm_form_count():
+        """Return total number of rows in csm_form table."""
+        with get_db_cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) as cnt FROM csm_form")
+            row = cursor.fetchone()
+            return row['cnt'] if row else 0

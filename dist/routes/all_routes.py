@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, get_flashed_messages
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, get_flashed_messages, send_file, make_response
 from db import get_db
 from functools import wraps
 from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials, get_admin_by_id, update_admin_password, verify_admin_pin
@@ -8,6 +8,7 @@ from models.face_embedding_model import add_face_embedding, find_best_match, upd
 from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
 from models.csm_form_model import insert_csm_form, get_csm_forms_filtered
+from db import get_db_cursor
 from models.client_model import get_departments
 from models.log_model import get_logs_by_day, get_department_counts, get_purpose_counts, get_total_logs
 from models.client_model import get_client_count
@@ -15,11 +16,26 @@ import os
 import base64
 import re
 import io
-import face_recognition
 import numpy as np
 from datetime import datetime
 import subprocess
 import sys
+
+# Check for face_recognition dependency at startup
+FACE_MODELS_AVAILABLE = True
+try:
+    import face_recognition
+except ImportError:
+    FACE_MODELS_AVAILABLE = False
+    print("Warning: face_recognition is not installed.")
+except Exception as e:
+    # face_recognition often raises exceptions if models are missing
+    if "face_recognition_models" in str(e).lower():
+        FACE_MODELS_AVAILABLE = False
+        print("Warning: face_recognition_models is missing. Facial recognition will be disabled.")
+    else:
+        print(f"Error loading face_recognition: {e}")
+        FACE_MODELS_AVAILABLE = False
 
 client_bp = Blueprint("client", __name__)
 
@@ -69,7 +85,7 @@ def troubleshoot_db_route():
         log_lines = []
 
         # ── Step 1: Try starting MySQL via mysql_start.bat ──────────────────────
-        bat_path = r'D:\xampp\mysql_start.bat'
+        bat_path = os.getenv('MYSQL_START_BAT', r'D:\xampp\mysql_start.bat')
         log_lines.append(f"[Step 1] Attempting to start MySQL via: {bat_path}")
 
         try:
@@ -127,11 +143,14 @@ def troubleshoot_db_route():
 @client_bp.route("/add", methods=["GET", "POST"])
 def add():
     if request.method == "POST":
-        client_id = get_next_client_id()
-        full_name = request.form.get("full_name")
+        client_id  = get_next_client_id()
+        fname      = request.form.get("fname", "").strip()
+        lname      = request.form.get("lname", "").strip()
+        mi         = request.form.get("mi", "").strip()
+        name_ext   = request.form.get("name_ext", "").strip()
         department = request.form.get("department")
-        gender = request.form.get("gender")
-        age = request.form.get("age")
+        gender     = request.form.get("gender")
+        age        = request.form.get("age")
         client_type = request.form.get("client_type")
 
         # create client row
@@ -140,7 +159,8 @@ def add():
             age_val = int(age) if age not in (None, '') else None
         except Exception:
             age_val = None
-        add_client(client_id, full_name, department, gender, age_val, client_type)
+        add_client(client_id, fname, lname, mi=mi, name_ext=name_ext,
+                   department=department, gender=gender, age=age_val, client_type=client_type)
 
         # handle captured photo (data URL)
         # handle captured photos (3 angles)
@@ -157,6 +177,9 @@ def add():
         # Helper to process an image: save optional file, add embedding
         def process_face_image(p_data, cid, save_as_main=False):
             if not p_data: return False
+            if not FACE_MODELS_AVAILABLE:
+                print(f"Warning: Skipping face processing for {cid} because models are not available.")
+                return False
             try:
                 # extract base64 payload
                 m = re.match(r"data:(image/\w+);base64,(.*)", p_data)
@@ -234,11 +257,14 @@ def edit(id):
         update_client(
             id,
             client_id=request.form.get("client_id"),
-            full_name=request.form.get("full_name"),
+            fname=request.form.get("fname"),
+            lname=request.form.get("lname"),
+            mi=request.form.get("mi"),
+            name_ext=request.form.get("name_ext"),
             department=request.form.get("department"),
             client_type=request.form.get("client_type"),
             gender=request.form.get("gender"),
-            age=(int(request.form.get("age")) if request.form.get("age") not in (None, '') else None)
+            age=(int(request.form.get("age")) if request.form.get("age") not in (None, '', 'None') and request.form.get("age").isdigit() else None)
         )
 
 
@@ -269,6 +295,9 @@ def edit(id):
                     # Helper to process and save
                     def process_and_add(p_data, cid, save_file=False):
                         if not p_data: return False
+                        if not FACE_MODELS_AVAILABLE:
+                            print(f"Warning: Skipping face update for {cid} because models are not available.")
+                            return False
                         try:
                             m = re.match(r"data:(image/\w+);base64,(.*)", p_data)
                             if m:
@@ -691,7 +720,23 @@ def admin_dashboard():
     # Serve dashboard page (stats/empty) - chart data comes from /admin/chart_data
     total_clients = get_client_count()
     total_logs = get_total_logs()
-    return render_template('admin/admin_dashboard.html', stats={'total_clients': total_clients, 'total_logs': total_logs})
+    # Safely compute total satisfactory surveys. Prefer model helper if available,
+    # but fall back to a direct COUNT query if the helper cannot be imported or fails.
+    try:
+        # local import to avoid import-time issues
+        from models.csm_form_model import get_csm_form_count
+        total_satisfactory_surveys = get_csm_form_count()
+    except Exception:
+        try:
+            with get_db_cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) as cnt FROM csm_form")
+                row = cursor.fetchone()
+                total_satisfactory_surveys = row['cnt'] if row else 0
+        except Exception:
+            total_satisfactory_surveys = 0
+    admin = get_admin_by_id(session.get('admin_id'))
+    stats = {'total_clients': total_clients, 'total_logs': total_logs, 'total_satisfactory_surveys': total_satisfactory_surveys}
+    return render_template('admin/admin_dashboard.html', stats=stats, admin=admin)
 
 
 @client_bp.route('/admin/chart_data')
@@ -908,6 +953,38 @@ def admin_profile():
         flash('Admin not found')
         return redirect(url_for('client.admin_dashboard'))
     return render_template('admin/admin_profile.html', admin=admin)
+
+
+@client_bp.route('/admin/profile_image/<admin_id>')
+def admin_profile_image(admin_id):
+    try:
+        admins_dir = os.path.join(os.getcwd(), 'Admins')
+        file_path = os.path.join(admins_dir, f"{admin_id}.jpg")
+        if os.path.exists(file_path):
+            return send_file(file_path, mimetype='image/jpeg')
+    except Exception as e:
+        print(f"Error serving admin image: {e}")
+
+    # Fallback: generate a simple SVG avatar with initials
+    try:
+        admin = get_admin_by_id(admin_id)
+        initials = ''
+        if admin:
+            fn = admin.get('first_name') or ''
+            ln = admin.get('last_name') or ''
+            initials = (fn[:1] + (ln[:1] if ln else '')).upper()
+        if not initials:
+            initials = '?'
+        svg = f"""<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'>
+  <rect width='100%' height='100%' fill='#6c757d'/>
+  <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='96' fill='#fff' font-family='Arial'>{initials}</text>
+</svg>"""
+        return make_response(svg, 200, {'Content-Type': 'image/svg+xml'})
+    except Exception as e:
+        print(f"Error generating fallback avatar: {e}")
+        # final fallback: tiny transparent png response
+        empty_png = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!\xbc\x33\x00\x00\x00\x00IEND\xaeB`\x82'
+        return make_response(empty_png, 200, {'Content-Type': 'image/png'})
 
 @client_bp.route('/admin/change-password', methods=['POST'])
 @admin_required

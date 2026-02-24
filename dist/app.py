@@ -1,10 +1,13 @@
+import os
+from datetime import datetime
+from dotenv import load_dotenv
 from flask import Flask, send_from_directory
 from routes.all_routes import client_bp
-from datetime import datetime
 
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'change-this-to-a-secure-random-string'
+app.secret_key = os.getenv('SECRET_KEY', 'default-unsecure-key-for-dev')
 
 
 @app.context_processor
