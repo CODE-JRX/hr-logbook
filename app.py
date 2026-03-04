@@ -22,6 +22,17 @@ app.register_blueprint(client_bp)
 from routes.backup_routes import backup_bp
 app.register_blueprint(backup_bp)
 
+# Warm up face recognition caches
+try:
+    from models.face_embedding_model import get_face_cache
+    from models.admin_model import get_admin_face_cache
+    print("Warming up face embedding caches...")
+    get_face_cache()
+    get_admin_face_cache()
+    print("Face embedding caches specialized and ready.")
+except Exception as e:
+    print(f"Warning: Failed to warm up face caches: {e}")
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

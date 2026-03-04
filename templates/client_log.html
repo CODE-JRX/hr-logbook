@@ -44,17 +44,21 @@
 
 
 	.system-log-card {
-		width: 320px;
+		width: 420px;
 		min-height: 460px;
 		max-height: 460px;
 		overflow: auto;
 		border-radius: 8px;
-		border: 4px solid rgba(0, 0, 0, 0.06);
+		border: 4px solid rgba(0, 0, 0, 0.05);
 		background: rgba(255, 255, 255, 0.02);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		padding: 12px;
 		color: var(--text-color);
+	}
+
+	[data-theme="dark"] .system-log-card {
+		border-color: rgba(255, 255, 255, 0.1);
 	}
 
 	.match-card {
@@ -63,12 +67,21 @@
 		max-height: 460px;
 		overflow: auto;
 		border-radius: 8px;
-		border: 4px solid rgba(0, 0, 0, 0.06);
+		border: 4px solid rgba(0, 0, 0, 0.05);
 		background: rgba(255, 255, 255, 0.02);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		padding: 12px;
 		color: var(--text-color);
+	}
+
+	[data-theme="dark"] .match-card {
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Also fix the border of log items in dark mode */
+	[data-theme="dark"] #systemLog .border {
+		border-color: rgba(255, 255, 255, 0.1) !important;
 	}
 
 	@media (max-width: 767px) {
@@ -120,6 +133,77 @@
 
 	#purpose_checkboxes .form-check:last-child {
 		margin-bottom: 0;
+	}
+
+	/* Status Dot and Pulse Animation */
+	.status-dot {
+		display: inline-block;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		margin-right: 8px;
+		vertical-align: middle;
+		position: relative;
+		transition: all 0.3s ease;
+	}
+
+	.status-dot::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		animation: status-pulse 2s infinite;
+	}
+
+	.dot-ready {
+		background-color: #28a745;
+		box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+	}
+
+	.dot-ready::after {
+		background-color: #28a745;
+	}
+
+	.dot-scanning {
+		background-color: #0d6efd;
+		box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+	}
+
+	.dot-scanning::after {
+		background-color: #0d6efd;
+	}
+
+	.dot-found {
+		background-color: #198754;
+		box-shadow: 0 0 8px rgba(25, 135, 84, 0.5);
+	}
+
+	.dot-found::after {
+		background-color: #198754;
+	}
+
+	.dot-error {
+		background-color: #dc3545;
+		box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+	}
+
+	.dot-error::after {
+		background-color: #dc3545;
+	}
+
+	@keyframes status-pulse {
+		0% {
+			transform: scale(1);
+			opacity: 0.8;
+		}
+
+		100% {
+			transform: scale(3);
+			opacity: 0;
+		}
 	}
 </style>
 <div class="card shadow-lg">
@@ -179,9 +263,15 @@
 							dur="2s" repeatCount="indefinite" />
 					</rect>
 				</svg>
+				<!-- camera status text -->
+				<div id="camera-status"
+					style="position:absolute; top:12px; right:12px; z-index:25; background:rgba(0,0,0,0.6); color:#fff; padding:5px 14px; border-radius:20px; font-weight:600; font-size:0.75rem; pointer-events:none; border: 1px solid rgba(255,255,255,0.15); letter-spacing: 0.5px; transition: all 0.3s ease; display: flex; align-items: center; backdrop-filter: blur(4px);">
+					<span id="status-dot" class="status-dot dot-ready"></span>
+					<span id="status-text">READY</span>
+				</div>
 				<!-- camera error overlay (shown inside camera container at top) -->
 				<div id="camera-error"
-					style="display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:25; background:rgba(0,0,0,0.6); color:#fff; padding:6px 10px; border-radius:6px; font-weight:600; font-size:0.95rem;">
+					style="display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:25; background:rgba(220,53,69,0.8); color:#fff; padding:6px 10px; border-radius:6px; font-weight:600; font-size:0.95rem; backdrop-filter: blur(4px);">
 					No face detected
 				</div>
 				<!-- camera action button placed inside the camera container -->
@@ -337,6 +427,35 @@
 			</div>
 		</div>
 
+		<!-- Logout Confirm Modal -->
+		<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel"
+			aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+					<div class="modal-header bg-danger text-white border-0">
+						<h5 class="modal-title fw-bold" id="logoutConfirmModalLabel"><i
+								class="fas fa-sign-out-alt me-2"></i> Client Logout</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body p-4 text-center">
+						<p class="mb-1 text-muted small text-uppercase fw-bold letter-spacing-1">Confirmation Required
+						</p>
+						<h5 class="mb-3">Are you sure you want to log out <br><span id="logout_client_name"
+								class="text-danger fw-bold"></span>?</h5>
+						<p class="text-muted small mb-0">This will record their exit time and end the current session.
+						</p>
+					</div>
+					<div class="modal-footer border-0 justify-content-center pb-4">
+						<button type="button" class="btn btn-outline-secondary px-4 h-auto" data-bs-dismiss="modal">Keep
+							Logged In</button>
+						<button id="btn_confirm_logout" type="button" class="btn btn-danger px-4 h-auto fw-bold">Yes,
+							Log Out</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 	</div>
 </div>
 {% endblock %}
@@ -379,7 +498,42 @@
 	const btnInfoBack = document.getElementById('btn_info_back');
 	const btnInfoClose = document.getElementById('btn_info_close');
 
+	const logoutConfirmModalEl = document.getElementById('logoutConfirmModal');
+	const logoutConfirmModal = new bootstrap.Modal(logoutConfirmModalEl);
+	const logoutClientNameSpan = document.getElementById('logout_client_name');
+	const btnConfirmLogout = document.getElementById('btn_confirm_logout');
+
 	const cameraError = document.getElementById('camera-error');
+	const cameraStatus = document.getElementById('camera-status');
+
+	function updateStatus(status) {
+		const statusText = document.getElementById('status-text');
+		const statusDot = document.getElementById('status-dot');
+		if (!statusText || !statusDot) return;
+
+		statusText.textContent = status.toUpperCase();
+
+		// Reset classes
+		statusDot.className = 'status-dot';
+
+		if (status.includes('Scanning')) {
+			statusDot.classList.add('dot-scanning');
+			cameraStatus.style.background = 'rgba(13, 110, 253, 0.2)';
+			cameraStatus.style.borderColor = 'rgba(13, 110, 253, 0.4)';
+		} else if (status.includes('Found')) {
+			statusDot.classList.add('dot-found');
+			cameraStatus.style.background = 'rgba(25, 135, 84, 0.2)';
+			cameraStatus.style.borderColor = 'rgba(25, 135, 84, 0.4)';
+		} else if (status.includes('Error') || status.includes('Fail')) {
+			statusDot.classList.add('dot-error');
+			cameraStatus.style.background = 'rgba(220, 53, 69, 0.2)';
+			cameraStatus.style.borderColor = 'rgba(220, 53, 69, 0.4)';
+		} else {
+			statusDot.classList.add('dot-ready');
+			cameraStatus.style.background = 'rgba(0, 0, 0, 0.6)';
+			cameraStatus.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+		}
+	}
 
 	function setError(msg) {
 		const m = String(msg || '');
@@ -413,30 +567,56 @@
 	function playSuccessSound() {
 		try {
 			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			const oscillator = audioContext.createOscillator();
-			const gainNode = audioContext.createGain();
-			oscillator.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-			gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-			oscillator.start(audioContext.currentTime);
-			oscillator.stop(audioContext.currentTime + 0.2);
+			const now = audioContext.currentTime;
+
+			// Harmonious Chime (F5 and A5)
+			const osc1 = audioContext.createOscillator();
+			const osc2 = audioContext.createOscillator();
+			const gain = audioContext.createGain();
+
+			osc1.frequency.setValueAtTime(698.46, now); // F5
+			osc2.frequency.setValueAtTime(880.00, now); // A5
+
+			osc1.type = 'sine';
+			osc2.type = 'sine';
+
+			gain.gain.setValueAtTime(0, now);
+			gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+			gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+			osc1.connect(gain);
+			osc2.connect(gain);
+			gain.connect(audioContext.destination);
+
+			osc1.start(now);
+			osc2.start(now);
+			osc1.stop(now + 0.5);
+			osc2.stop(now + 0.5);
 		} catch (e) { console.warn('Success sound failed:', e); }
 	}
 
 	function playErrorSound() {
 		try {
 			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			const oscillator = audioContext.createOscillator();
-			const gainNode = audioContext.createGain();
-			oscillator.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-			gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-			oscillator.start(audioContext.currentTime);
-			oscillator.stop(audioContext.currentTime + 0.5);
+			const now = audioContext.currentTime;
+
+			const osc = audioContext.createOscillator();
+			const gain = audioContext.createGain();
+
+			// Low Thud effect
+			osc.frequency.setValueAtTime(150, now);
+			osc.frequency.exponentialRampToValueAtTime(40, now + 0.15); // Quick drop
+
+			osc.type = 'sine';
+
+			gain.gain.setValueAtTime(0.3, now);
+			gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+
+			osc.connect(gain);
+			gain.connect(audioContext.destination);
+
+			osc.start(now);
+			osc.stop(now + 0.2);
 		} catch (e) { console.warn('Error sound failed:', e); }
 	}
 
@@ -510,6 +690,7 @@
 		cameraState = 'stopped';
 		actionBtn.textContent = 'Start Camera';
 		capturedPhotoData = null;
+		updateStatus('Ready');
 	}
 
 	let stream = null;
@@ -534,6 +715,7 @@
 		matchPhotoPlaceholder.style.display = 'block';
 
 		playSuccessSound();
+		updateStatus('Match Found');
 		matchModal.show();
 	}
 
@@ -582,6 +764,7 @@
 			scanLine.style.display = 'none';
 			cameraState = 'started';
 			actionBtn.textContent = 'SCAN';
+			updateStatus('Ready');
 		}
 	});
 
@@ -604,6 +787,7 @@
 				scanLine.style.display = 'none';
 				cameraState = 'started';
 				actionBtn.textContent = 'SCAN';
+				updateStatus('Ready');
 			}
 		});
 	}
@@ -619,6 +803,7 @@
 				scanLine.style.display = 'none';
 				cameraState = 'started';
 				actionBtn.textContent = 'SCAN';
+				updateStatus('Ready');
 			}
 		});
 	}
@@ -669,6 +854,7 @@
 				cameraState = 'started';
 				actionBtn.textContent = 'SCAN';
 				setError('');
+				updateStatus('Ready');
 			} catch (err) {
 				console.error('Camera error:', err);
 				setError('Could not start camera: ' + err.message);
@@ -724,6 +910,7 @@
 			cameraState = 'captured';
 			actionBtn.textContent = 'Stop Camera';
 			capturedPhotoData = dataUrl;
+			updateStatus('Scanning...');
 
 			const fd = new FormData();
 			fd.append('photo_data', dataUrl);
@@ -742,6 +929,7 @@
 				} else {
 					playErrorSound();
 					setError(body.error || 'No match found');
+					updateStatus('Ready');
 					// allow retry
 					setTimeout(() => {
 						// Optional: auto reset or just let them click Stop/Start?
@@ -751,6 +939,7 @@
 			} catch (err) {
 				if (loadingBorder) loadingBorder.style.display = 'none';
 				setError('Identification failed: ' + err.message);
+				updateStatus('Ready');
 			}
 			return;
 		}
@@ -775,6 +964,7 @@
 		if (loadingBorder) loadingBorder.style.display = 'none';
 		cameraState = 'stopped';
 		actionBtn.textContent = 'Start Camera';
+		updateStatus('Ready');
 	}
 
 	actionBtn.addEventListener('click', cameraAction);
@@ -859,7 +1049,7 @@
 					<strong>${name}</strong>
 					<small class="text-muted" style="text-align: left;"><span class="text-success">In: ${timeIn}</span> | <span class="text-primary">${purpose}</span></small>
 				</div>
-				<button class="btn btn-sm btn-outline-danger" title="Logout this client" onclick="logoutClient('${r.client_id}')">Logout</button>
+				<button class="btn btn-sm btn-outline-danger" title="Logout this client" onclick="showLogoutConfirm('${r.client_id}', '${name.replace(/'/g, "\\'")}')">Logout</button>
 			`;
 				el.appendChild(item);
 			});
@@ -868,13 +1058,37 @@
 		}
 	}
 
+	let clientToLogout = null;
+
+	function showLogoutConfirm(clientId, clientName) {
+		clientToLogout = clientId;
+		logoutClientNameSpan.textContent = clientName;
+		logoutConfirmModal.show();
+	}
+
+	btnConfirmLogout.addEventListener('click', async () => {
+		if (!clientToLogout) return;
+		logoutConfirmModal.hide();
+		await logoutClient(clientToLogout);
+		clientToLogout = null;
+	});
+
 	async function logoutClient(clientId) {
 		try {
 			const res = await fetch('/logout_client/' + encodeURIComponent(clientId), { method: 'POST' });
 			const body = await res.json();
-			if (body.ok) { refreshTodayLogs(); }
-			else { alert('Failed to logout client: ' + (body.error || 'Unknown error')); }
-		} catch (err) { alert('Logout failed: ' + err.message); }
+			if (body.ok) {
+				playSuccessSound();
+				refreshTodayLogs();
+			}
+			else {
+				playErrorSound();
+				alert('Failed to logout client: ' + (body.error || 'Unknown error'));
+			}
+		} catch (err) {
+			playErrorSound();
+			alert('Logout failed: ' + err.message);
+		}
 	}
 
 	refreshTodayLogs();

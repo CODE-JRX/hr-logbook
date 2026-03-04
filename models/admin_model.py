@@ -5,6 +5,46 @@ import numpy as np
 import json
 import mysql.connector
 
+# Global cache for admin face embeddings
+# Structure: list of {'id': str, 'face_embedding': list of np.array}
+_ADMIN_FACE_CACHE = None
+
+def get_admin_face_cache(force_refresh=False):
+    global _ADMIN_FACE_CACHE
+    if _ADMIN_FACE_CACHE is None or force_refresh:
+        with get_db_cursor() as cursor:
+            cursor.execute("SELECT id, face_embedding FROM admins WHERE face_embedding IS NOT NULL")
+            rows = cursor.fetchall()
+            new_cache = []
+            for r in rows:
+                try:
+                    stored_json = r.get('face_embedding')
+                    if not stored_json: continue
+                        
+                    if isinstance(stored_json, (bytes, bytearray)):
+                        stored_data = json.loads(stored_json.decode('utf-8'))
+                    elif isinstance(stored_json, str):
+                        stored_data = json.loads(stored_json)
+                    else:
+                        stored_data = stored_json
+                        
+                    candidates = []
+                    if isinstance(stored_data, list) and len(stored_data) > 0:
+                        if isinstance(stored_data[0], list):
+                            candidates = [np.array(e) for e in stored_data]
+                        else:
+                            candidates = [np.array(stored_data)]
+                    
+                    if candidates:
+                        new_cache.append({
+                            'id': str(r['id']),
+                            'embeddings': candidates
+                        })
+                except Exception as e:
+                    print(f"Error caching admin embedding for {r.get('id')}: {e}")
+            _ADMIN_FACE_CACHE = new_cache
+    return _ADMIN_FACE_CACHE
+
 def add_admin(first_name, last_name, email, password, embedding_list=None, pin=None):
     ph = generate_password_hash(password)
     pin_hash = generate_password_hash(pin) if pin else None
@@ -25,6 +65,21 @@ def add_admin(first_name, last_name, email, password, embedding_list=None, pin=N
         with get_db_cursor(commit=True) as cursor:
             cursor.execute(query, values)
             last_id = cursor.lastrowid
+            
+            # Update cache if initialized
+            global _ADMIN_FACE_CACHE
+            if _ADMIN_FACE_CACHE is not None and embedding_list:
+                candidates = []
+                if isinstance(embedding_list[0], list):
+                    candidates = [np.array(e) for e in embedding_list]
+                else:
+                    candidates = [np.array(embedding_list)]
+                
+                _ADMIN_FACE_CACHE.append({
+                    'id': str(last_id),
+                    'embeddings': candidates
+                })
+                
             return str(last_id)
     except mysql.connector.Error as err:
         print(f"Error adding admin: {err}")
@@ -93,43 +148,25 @@ def update_admin_password(admin_id, new_password):
         return False
 
 def find_best_admin_match(embedding_list, threshold=0.6):
-    with get_db_cursor() as cursor:
-        cursor.execute("SELECT id, face_embedding FROM admins WHERE face_embedding IS NOT NULL")
-        target = np.array(embedding_list)
-        best_id = None
-        best_distance = None
+    cache = get_admin_face_cache()
+    if not cache:
+        return None, None
         
-        for r in cursor.fetchall():
-            stored_json = r.get('face_embedding')
-            if not stored_json:
-                continue
-                
-            if isinstance(stored_json, (bytes, bytearray)):
-                stored_data = json.loads(stored_json.decode('utf-8'))
-            elif isinstance(stored_json, str):
-                stored_data = json.loads(stored_json)
-            else:
-                stored_data = stored_json
-                
-            # Handle both old (single list) and new (list of lists) formats
-            # New format: [[...], [...], [...]]
-            # Old format: [...]
-            
-            candidates = []
-            if isinstance(stored_data, list) and len(stored_data) > 0:
-                if isinstance(stored_data[0], list):
-                    # Request returns list of lists
-                    candidates = [np.array(e) for e in stored_data]
-                else:
-                    # Legacy single embedding
-                    candidates = [np.array(stored_data)]
-            
-            # Check against all candidates for this admin
-            for emb in candidates:
+    target = np.array(embedding_list)
+    best_id = None
+    best_distance = None
+    
+    for item in cache:
+        # Check against all candidates for this admin
+        for emb in item['embeddings']:
+            try:
                 dist = np.linalg.norm(emb - target)
                 if best_distance is None or dist < best_distance:
                     best_distance = float(dist)
-                    best_id = str(r['id'])
+                    best_id = item['id']
+            except Exception as e:
+                print(f"Error comparing admin embedding for {item['id']}: {e}")
+                continue
     
     if best_distance is not None and best_distance <= threshold:
         return best_id, best_distance

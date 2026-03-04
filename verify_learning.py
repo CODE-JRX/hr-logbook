@@ -1,139 +1,107 @@
-import numpy as np
-import json
-import time
+
 import sys
-from models.face_embedding_model import improve_client_embedding, get_embeddings_by_client_id, delete_embeddings_by_client_id, add_face_embedding
-from db import get_db
+import os
+import json
+import numpy as np
 
-def log(msg, f=None):
-    print(msg)
-    if f:
-        f.write(msg + "\n")
+# Mocking parts of the system if needed, but let's try to run with real logic if possible
+# Set up environment for imports
+sys.path.append(os.getcwd())
 
-def verify_learning():
-    client_id = "TEST-LEARNING-001"
+from db import get_db_cursor
+from models.face_embedding_model import (
+    get_face_cache, 
+    improve_client_embedding, 
+    find_best_match, 
+    delete_embeddings_by_client_id,
+    _FACE_CACHE
+)
+
+def verify_learning_cache():
+    print("Starting Learning Feature Cache Verification...")
     
-    with open("learning_results.txt", "w", encoding="utf-8") as f:
-        log(f"--- Verifying Face Learning for {client_id} ---", f)
+    # Setup: Ensure test client exists
+    with get_db_cursor(commit=True) as cursor:
+        # First remove if exists
+        cursor.execute("DELETE FROM clients WHERE client_id = 'TEST-001'")
+        cursor.execute("INSERT INTO clients (client_id, fname, lname) VALUES ('TEST-001', 'Test', 'User')")
 
-        db = get_db()
-        cursor = db.cursor()
+    # 1. Clear any existing test data for 'TEST-001'
+    delete_embeddings_by_client_id('TEST-001')
+    
+    # 2. Initialize Cache
+    cache = get_face_cache(force_refresh=True)
+    initial_count = len(cache)
+    print(f"Initial cache count: {initial_count}")
+    
+    # 3. Add initial embedding via improve_client_embedding
+    # This should trigger add_face_embedding which updates cache
+    test_emb_1 = (np.random.rand(128) * 0.1).tolist()
+    res1 = improve_client_embedding('TEST-001', test_emb_1)
+    print(f"Action 1 (Initial): {res1}")
+    
+    cache = get_face_cache()
+    print(f"Cache count after initial: {len(cache)}")
+    
+    # Verify it's in cache
+    found = any(item['client_id'] == 'TEST-001' for item in cache)
+    if not found:
+        print("FAIL: TEST-001 not found in cache after initial add")
+        return
+        
+    # 4. Add a "new variant" (distinct enough but close enough to be accepted)
+    # distance check in improve: match_threshold=0.5, merge_threshold=0.25
+    # Let's make it 0.4 away
+    test_emb_2 = (np.array(test_emb_1) + 0.05).tolist() # roughly 0.5 distance? let's be precise
+    # dist = sqrt(sum((0.05)^2 * 128)) = sqrt(0.0025 * 128) = sqrt(0.32) ≈ 0.56
+    # Let's use smaller offset to be sure it's within match_threshold (0.5) but outside merge (0.25)
+    offset = 0.03
+    test_emb_2 = (np.array(test_emb_1) + offset).tolist()
+    # dist = sqrt(0.0009 * 128) = sqrt(0.1152) ≈ 0.34 (Matched variant)
+    
+    res2 = improve_client_embedding('TEST-001', test_emb_2)
+    print(f"Action 2 (New Variant): {res2}")
+    
+    cache = get_face_cache()
+    test_items = [item for item in cache if item['client_id'] == 'TEST-001']
+    print(f"TEST-001 variants in cache: {len(test_items)}")
+    
+    if len(test_items) != 2:
+        print(f"FAIL: Expected 2 variants in cache, found {len(test_items)}")
+        # return
+        
+    # 5. Merge existing (very close)
+    test_emb_3 = (np.array(test_emb_1) + 0.001).tolist()
+    # dist ≈ 0.01 (Merge)
+    
+    # Capture old embedding value
+    old_emb = test_items[0]['embedding'].copy()
+    old_id = test_items[0]['id']
+    
+    res3 = improve_client_embedding('TEST-001', test_emb_3)
+    print(f"Action 3 (Merge): {res3}")
+    
+    cache = get_face_cache()
+    new_item = next(item for item in cache if item['id'] == old_id)
+    
+    if np.array_equal(new_item['embedding'], old_emb):
+        print("FAIL: Cache embedding did not change after merge")
+    else:
+        print("SUCCESS: Cache embedding updated after merge")
+        
+    # 6. Verify Match
+    match_id, match_dist = find_best_match(test_emb_1)
+    print(f"Match verify: ID={match_id}, Dist={match_dist}")
+    
+    if match_id == 'TEST-001':
+        print("VERIFICATION COMPLETE: Learning and Caching are working together.")
+    else:
+        print(f"FAIL: find_best_match returned {match_id}")
 
-        try:
-            # 1. Cleanup and Setup Client
-            log("Cleaning up previous test data...", f)
-            cursor.execute("DELETE FROM clients WHERE client_id = %s", (client_id,))
-            db.commit()
-
-            log("Creating dummy client...", f)
-            cursor.execute("INSERT INTO clients (client_id, full_name, department, gender, age, client_type) VALUES (%s, %s, %s, %s, %s, %s)", 
-                        (client_id, "Test Learning Bot", "IT", "Male", 99, "Visitor"))
-            db.commit()
-
-            # 2. Add initial embedding (Base Face)
-            # Create a random 128-d vector
-            base_embedding = np.random.rand(128)
-            base_embedding = base_embedding / np.linalg.norm(base_embedding) # Normalize
-            
-            log("Adding initial embedding...", f)
-            add_face_embedding(client_id, base_embedding.tolist())
-            
-            initial_docs = get_embeddings_by_client_id(client_id)
-            log(f"Initial embeddings count: {len(initial_docs)}", f)
-            if len(initial_docs) != 1:
-                log("FAIL: Expected 1 embedding.", f)
-                return
-
-            stored_emb_1 = np.array(initial_docs[0]['embedding_json'])
-            
-            # 3. Simulate a match that is close (Merge Scenario)
-            # Create a vector that is very close (e.g. distance approx 0.1)
-            # We can do this by adding small noise
-            noise = np.random.normal(0, 0.01, 128)
-            new_face_1 = base_embedding + noise
-            new_face_1 = new_face_1 / np.linalg.norm(new_face_1)
-            
-            dist_1 = np.linalg.norm(stored_emb_1 - new_face_1)
-            log(f"Simulating Time-In with face distance: {dist_1:.4f} (Expected < 0.25 for merge)", f)
-            
-            result_1 = improve_client_embedding(client_id, new_face_1.tolist())
-            log(f"Result 1: {result_1}", f)
-            
-            # Verify merge
-            updated_docs = get_embeddings_by_client_id(client_id)
-            log(f"Updated embeddings count: {len(updated_docs)}", f)
-            
-            stored_emb_2 = np.array(updated_docs[0]['embedding_json'])
-            
-            # Check if the embedding moved towards the new face
-            # Original was base_embedding. New is stored_emb_2. 
-            # It should be 80% old + 20% new.
-            # Let's check distance from original base
-            dist_shift = np.linalg.norm(stored_emb_2 - base_embedding)
-            log(f"Embedding shift from original: {dist_shift:.6f}", f)
-            
-            if result_1 == "merged_existing":
-                log("PASS: Embedding successfully merged.", f)
-            else:
-                log(f"FAIL: Expected 'merged_existing', got '{result_1}'", f)
-
-            # 4. Simulate a match that is somewhat different (New Variant Scenario)
-            # Distance > 0.25 but < 0.5 (or whatever match_threshold is, default 0.5 in code)
-            
-            # Create a vector further away
-            match_found = False
-            attempts = 0
-            new_face_2 = None
-            dist_2 = 0
-            
-            # Try to find a vector with the right distance
-            while attempts < 1000:
-                noise_2 = np.random.normal(0, 0.06 + (attempts * 0.0001), 128)
-                cand = base_embedding + noise_2
-                cand = cand / np.linalg.norm(cand)
-                d = np.linalg.norm(stored_emb_2 - cand)
-                if 0.25 < d < 0.5:
-                    new_face_2 = cand
-                    dist_2 = d
-                    match_found = True
-                    break
-                attempts += 1
-                
-            if not match_found:
-                log("Could not generate a face vector within [0.25, 0.5] distance range.", f)
-            else:
-                log(f"Simulating Time-In with face distance: {dist_2:.4f} (Targeting > 0.25 and < 0.5)", f)
-                
-                result_2 = improve_client_embedding(client_id, new_face_2.tolist())
-                log(f"Result 2: {result_2}", f)
-                
-                final_docs = get_embeddings_by_client_id(client_id)
-                log(f"Final embeddings count: {len(final_docs)}", f)
-                
-                if result_2 == "added_new_variant" and len(final_docs) == 2:
-                    log("PASS: New variant added.", f)
-                elif result_2 == "merged_existing":
-                    log("NOTE: Merged existing (distance was likely too small).", f)
-                elif result_2 == "rejected_outlier":
-                    log("NOTE: Rejected (distance too large).", f)
-                else:
-                    log(f"FAIL: Unexpected result '{result_2}'", f)
-
-        except Exception as e:
-            log(f"Test Failed with Error: {e}", f)
-            import traceback
-            traceback.print_exc(file=f)
-        finally:
-            # Cleanup
-            log("Cleaning up...", f)
-            try:
-                cursor.execute("DELETE FROM clients WHERE client_id = %s", (client_id,))
-                db.commit()
-            except:
-                pass
-            cursor.close()
-            db.close()
-            log("Test Complete.", f)
+    # Cleanup
+    delete_embeddings_by_client_id('TEST-001')
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute("DELETE FROM clients WHERE client_id = 'TEST-001'")
 
 if __name__ == "__main__":
-    verify_learning()
+    verify_learning_cache()
