@@ -2,17 +2,18 @@ from db import get_db, get_db_cursor
 from datetime import datetime, timedelta
 import mysql.connector
 
-def add_time_in(client_id, purpose=None, additional_info=None):
+def add_time_in(client_id, purpose=None, additional_info=None, office=None):
     with get_db_cursor(commit=True) as cursor:
         now = datetime.now()
-        query = """INSERT INTO logs (client_id, time_in, time_out, purpose, additional_info)
-                   VALUES (%s, %s, %s, %s, %s)"""
+        query = """INSERT INTO logs (client_id, time_in, time_out, purpose, additional_info, office)
+                   VALUES (%s, %s, %s, %s, %s, %s)"""
         values = (
             client_id.upper() if isinstance(client_id, str) else client_id,
             now,
             None,
             purpose.upper() if isinstance(purpose, str) else purpose,
-            (additional_info or "").upper() if isinstance(additional_info, str) else (additional_info or "")
+            (additional_info or "").upper() if isinstance(additional_info, str) else (additional_info or ""),
+            office.upper() if isinstance(office, str) else office
         )
         cursor.execute(query, values)
 

@@ -834,7 +834,7 @@ html {
   --footer-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   --footer-text: #f1f5f9;
   --footer-link: #cbd5e1;
-  --border-color: rgba(255, 255, 255, 0.2);
+  --border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Dark mode form controls */
@@ -863,7 +863,7 @@ body {
   padding-top: 80px;
   background: var(--bg-color);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  height: 100vh;
+  min-height: 100vh;
   color: var(--text-color);
   display: flex;
   flex-direction: column;
@@ -905,8 +905,8 @@ nav {
   top: 0;
   left: 0;
   right: 0;
-  width: 100%;
-  z-index: 9999;
+  z-index: 1030;
+  padding: 0;
 }
 
 .site-nav::before {
@@ -928,6 +928,11 @@ nav {
   background-size: cover;
   background-position: center;
   opacity: 0.2;
+}
+
+/* Ensure the pseudo-element doesn't expand its background scaling when padding is added */
+.modal-open .site-nav::before {
+  right: var(--bs-scrollbar-width, 17px);
 }
 
 .site-nav .nav-link {
@@ -995,9 +1000,14 @@ nav {
 .modal-content {
   background: var(--card-bg);
   color: var(--text-color);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--border-color);
   border-radius: 15px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure Bootstrap border utility class also honors the theme */
+[data-theme="dark"] .border {
+  border-color: var(--border-color) !important;
 }
 
 .modal-header {

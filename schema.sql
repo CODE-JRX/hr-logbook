@@ -67,5 +67,6 @@ CREATE TABLE IF NOT EXISTS logs (
     time_out DATETIME NULL,
     purpose VARCHAR(255),
     additional_info TEXT,
+    office VARCHAR(100) NULL,
     FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE
 );

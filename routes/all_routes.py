@@ -1129,6 +1129,8 @@ def log_action():
     action = data.get('action')  # 'time_in' or 'time_out'
     purposes = data.get('purposes', [])
     additional_info = data.get('additional_info')
+    # Read office from request body, fall back to cookie
+    office = data.get('office') or request.cookies.get('selected_office')
     if not client_id or action not in ('time_in', 'time_out'):
         return jsonify({'ok': False, 'error': 'Missing or invalid parameters'}), 400
 
@@ -1136,7 +1138,7 @@ def log_action():
         if action == 'time_in':
             # Convert list of purposes to comma-separated string
             purpose_str = ', '.join(purposes) if purposes else None
-            add_time_in(client_id, purpose_str, additional_info)
+            add_time_in(client_id, purpose_str, additional_info, office=office)
 
         else:
             # Do not update purpose on time_out; purpose should come from the original time_in
@@ -1144,6 +1146,37 @@ def log_action():
         return jsonify({'ok': True}), 200
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+@client_bp.route('/get_office')
+def get_office():
+    """Return the currently selected office from the cookie."""
+    office = request.cookies.get('selected_office', '')
+    return jsonify({'office': office})
+
+
+@client_bp.route('/set_office', methods=['POST'])
+def set_office():
+    """Persist the selected office in a very long-lived cookie."""
+    data = request.json or {}
+    office = data.get('office', '').strip()
+    VALID_OFFICES = [
+        'HRMU',
+        'RECORDS OFFICE',
+        'REGISTRAR',
+        'ACCOUNTING',
+        'CASHIER',
+        'OFFICE OF THE PRESIDENT',
+        'OFFICE OF THE CHIEF ADMINISTRATIVE OFFICER',
+        'SUPPLY OFFICE',
+    ]
+    if office.upper() not in VALID_OFFICES:
+        return jsonify({'ok': False, 'error': 'Invalid office'}), 400
+    resp = make_response(jsonify({'ok': True, 'office': office.upper()}))
+    # Max age: ~20 years in seconds
+    max_age = 20 * 365 * 24 * 60 * 60
+    resp.set_cookie('selected_office', office.upper(), max_age=max_age, samesite='Lax')
+    return resp
 
 
 @client_bp.route('/learn_face', methods=['POST'])
