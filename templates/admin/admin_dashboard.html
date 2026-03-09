@@ -71,7 +71,7 @@
         </a>
 
         <form action="/admin/backup/restore" method="POST" enctype="multipart/form-data" id="restoreForm">
-          <input type="file" name="backup_file" id="backupFile" style="display: none;" accept=".zip"
+          <input type="file" name="backup_file" id="backupFile" class="upload-input-hidden" accept=".zip"
             onchange="confirmRestore()">
           <button type="button" class="btn btn-sm btn-outline-warning d-flex align-items-center"
             onclick="document.getElementById('backupFile').click()">
@@ -132,7 +132,7 @@
 
           <div class="card shadow-sm p-3">
             <h6><i class="fas fa-chart-bar"></i> Purpose Counts</h6>
-            <div style="min-height: 300px; position: relative;">
+            <div class="chart-min-panel">
               <canvas id="chartPurpose"></canvas>
             </div>
           </div>
@@ -142,7 +142,7 @@
           <div class="card shadow-sm p-3 mb-3">
             <h6><i class="fas fa-user-circle"></i> Account Information</h6>
             <div class="d-flex align-items-center justify-content-between">
-              <div style="min-width:0;">
+              <div class="minw-0">
                 <div class="small text-muted">Logged in as</div>
                 <h5 class="mt-2 mb-1">{{ admin.first_name }} {{ admin.last_name }}</h5>
                 <div class="text-muted mb-2">{{ admin.email }}</div>
@@ -155,15 +155,14 @@
               </div>
               <div class="ms-3 d-flex align-items-center">
                 <img src="{{ url_for('client.admin_profile_image', admin_id=admin.id) }}" alt="Admin photo"
-                  class="rounded-circle"
-                  style="width:100px;height:100px;object-fit:cover;border:3px solid #0d6efd;margin-top: -90px;margin-right: 25px;">
+                  class="rounded-circle dashboard-profile-photo" loading="lazy" decoding="async">
               </div>
             </div>
           </div>
 
           <div class="card shadow-sm p-3">
             <h6><i class="fas fa-users"></i> Active Clients</h6>
-            <div id="adminActiveClients" style="font-size:0.9rem; line-height:1.25;">Loading...</div>
+            <div id="adminActiveClients" class="dashboard-active-clients">Loading...</div>
           </div>
         </div>
       </div>
@@ -348,9 +347,9 @@
         const timeIn = r.time_in ? new Date(r.time_in).toLocaleTimeString() : 'Unknown';
         const purpose = r.purpose || '';
         item.innerHTML = `
-          <div class="d-flex flex-column align-items-start" style="text-align: left;">
+          <div class="d-flex flex-column align-items-start active-client-meta">
             <strong>${name}</strong>
-            <small class="text-muted" style="text-align: left;"><span class="text-success">In: ${timeIn}</span> | <span class="text-primary">${purpose}</span></small>
+            <small class="text-muted active-client-meta"><span class="text-success">In: ${timeIn}</span> | <span class="text-primary">${purpose}</span></small>
           </div>
           <button class="btn btn-sm btn-outline-danger" title="Logout this client" onclick="logoutClientAdmin('${r.client_id}')">Logout</button>
         `;
@@ -375,3 +374,4 @@
   setInterval(refreshAdminActiveClients, 10000);
 </script>
 {% endblock %}
+

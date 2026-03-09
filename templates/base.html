@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
@@ -9,6 +9,11 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase1-foundation.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase2-components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase3-ux.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase4-accessibility.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase6-cleanup.css') }}">
 
   <!-- SEO Meta Tags -->
   <meta name="description" content="HRMO e-Loglook: Fast, secure client time logging with face recognition technology.">
@@ -141,15 +146,15 @@
   {% block head_extra %}{% endblock %}
 </head>
 
-<body>
-  <nav class="navbar navbar-expand-lg site-nav fixed-top py-0">
+<body class="ui-phase1">
+  <nav class="navbar navbar-expand-lg site-nav fixed-top py-0" role="navigation" aria-label="Primary">
     <div class="container-fluid">
       <div id="navBrandWrapper" class="nav-brand-wrapper">
         <div class="nav-brand-light"></div>
         <a class="navbar-brand logo-link" href="{{ url_for('client.home') }}">
           <div class="logo-box">
             <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR e-Loglook logo"
-              class="site-logo">
+              class="site-logo" fetchpriority="high" decoding="async">
           </div>
           <span class="title"><span class="hr-mo">HRMO</span> e-Loglook</span>
         </a>
@@ -179,10 +184,10 @@
               aria-expanded="false"><i class="fas fa-chart-line"></i>Reports</a>
             <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="reportsDropdown">
               <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list"
-                    style="margin-right: 5px;"></i>Log Report</a>
+                    class="icon-gap-5"></i>Log Report</a>
               </li>
               <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature"
-                    style="margin-right: 5px;"></i>Satisfactory
+                    class="icon-gap-5"></i>Satisfactory
                   Report</a></li>
             </ul>
           </li>
@@ -191,16 +196,16 @@
               aria-expanded="false"><i class="fas fa-user-cog"></i>Admin</a>
             <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu" aria-labelledby="adminDropdown">
               <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt"
-                    style="margin-right: 5px;"></i>Dashboard</a></li>
+                    class="icon-gap-5"></i>Dashboard</a></li>
               <li><a class="dropdown-item" href="/admin/signup"><i class="fas fa-user-plus"
-                    style="margin-right: 5px;"></i>Add Admin</a></li>
+                    class="icon-gap-5"></i>Add Admin</a></li>
               <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user-circle"
-                    style="margin-right: 5px;"></i>Profile</a></li>
+                    class="icon-gap-5"></i>Profile</a></li>
               <li>
                 <hr class="dropdown-divider">
               </li>
               <li><a class="dropdown-item text-danger" href="/admin/logout"><i class="fas fa-sign-out-alt"
-                    style="margin-right: 5px;"></i>Logout</a></li>
+                    class="icon-gap-5"></i>Logout</a></li>
             </ul>
           </li>
           <li class="nav-item">
@@ -235,11 +240,11 @@
   <!-- Skip link for accessibility -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <main class="container">
+  <main id="main-content" class="container" role="main">
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer" role="contentinfo">
     <div class="container-fluid">
       <div class="row">
         <!-- Brand Section -->
@@ -247,7 +252,7 @@
           <div class="footer-brand">
             <div class="footer-logo-link">
               <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HRMO e-Loglook Logo"
-                class="footer-logo-img">
+                class="footer-logo-img" loading="lazy" decoding="async">
               <span class="footer-title">HRMO e-Loglook</span>
             </div>
             <p class="footer-description">Fast, secure client time logging with face recognition technology.</p>
@@ -312,13 +317,13 @@
               Connection Failed</h5>
           </div>
           <div class="modal-body text-center py-4">
-            <div class="text-danger mb-4" style="font-size: 4rem;">
+            <div class="text-danger mb-4 text-display-4rem">
               <i class="fas fa-database"></i>
             </div>
             <p class="lead">We couldn't connect to the MySQL database.</p>
             <p>This usually happens when MySQL stops unexpectedly in XAMPP.</p>
 
-            <div id="fixing-section" style="display: none;">
+            <div id="fixing-section" class="is-hidden-initial">
               <div class="fixing-animation">
                 <div class="fixing-dot"></div>
                 <div class="fixing-dot"></div>
@@ -332,12 +337,10 @@
             <div id="troubleshoot-result" class="troubleshoot-log"></div>
           </div>
           <div class="modal-footer border-0 justify-content-center">
-            <button type="button" id="btn-troubleshoot" class="btn btn-outline-primary w-75 rounded-pill"
-              style="padding: 10px 20px;">
+            <button type="button" id="btn-troubleshoot" class="btn btn-outline-primary w-75 rounded-pill modal-action-pad">
               <i class="fas fa-tools me-2"></i>Troubleshoot & Fix
             </button>
-            <button type="button" id="btn-refresh" class="btn btn-outline-secondary w-75 rounded-pill"
-              style="display: none; padding: 10px 20px;" onclick="location.reload()">
+            <button type="button" id="btn-refresh" class="btn btn-outline-secondary w-75 rounded-pill is-hidden-initial modal-action-pad" onclick="location.reload()">
               <i class="fas fa-sync me-2"></i>Reload Page
             </button>
           </div>
@@ -642,9 +645,50 @@
         });
       });
     });
+
+    // Phase 3 UX: active nav highlighting and mobile-collapse behavior
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname;
+      const navEl = document.getElementById('navbarNav');
+      if (!navEl) return;
+
+      const links = navEl.querySelectorAll('a.nav-link[href], a.dropdown-item[href]');
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('http')) return;
+
+        const isMatch = (href === '/' && currentPath === '/') ||
+          (href !== '/' && (currentPath === href || currentPath.startsWith(href + '/') || (currentPath.startsWith('/edit/') && href === '/clients')));
+
+        if (isMatch) {
+          link.classList.add('is-active');
+          link.setAttribute('aria-current', 'page');
+
+          const parentDropdown = link.closest('.dropdown');
+          if (parentDropdown) {
+            const toggle = parentDropdown.querySelector('.dropdown-toggle');
+            if (toggle) toggle.classList.add('is-active');
+          }
+        }
+
+        link.addEventListener('click', function () {
+          if (window.innerWidth < 992 && navEl.classList.contains('show')) {
+            const inst = bootstrap.Collapse.getInstance(navEl) || new bootstrap.Collapse(navEl, { toggle: false });
+            inst.hide();
+          }
+        });
+      });
+    });
   </script>
   {% block scripts %}{% endblock %}
   {% block body_end %}{% endblock %}
 </body>
 
 </html>
+
+
+
+
+
+
+

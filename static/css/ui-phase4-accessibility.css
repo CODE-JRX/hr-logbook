@@ -1,0 +1,54 @@
+/* Phase 4: Accessibility and interaction hardening */
+
+.ui-phase1 .site-nav .nav-link:focus-visible,
+.ui-phase1 .site-nav .dropdown-item:focus-visible,
+.ui-phase1 .btn:focus-visible,
+.ui-phase1 .form-control:focus-visible,
+.ui-phase1 .form-select:focus-visible,
+.ui-phase1 .btn-close:focus-visible,
+.ui-phase1 .navbar-toggler:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-color) 80%, #fff 5%);
+  outline-offset: 2px;
+}
+
+.ui-phase1 .site-nav .dropdown-item {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.ui-phase1 .message-overlay[aria-live] {
+  min-height: 38px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-brand-wrapper.db-checking .nav-brand-light,
+  .nav-brand-wrapper.db-error .nav-brand-light,
+  .fixing-dot {
+    animation: none !important;
+  }
+
+  .ui-phase1 .card:hover,
+  .ui-phase1 .btn:hover,
+  .ui-phase1 .site-nav .nav-link:hover {
+    transform: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .ui-phase1 .site-nav,
+  .ui-phase1 .card,
+  .ui-phase1 .modal-content,
+  .ui-phase1 .btn,
+  .ui-phase1 .form-control,
+  .ui-phase1 .form-select {
+    forced-color-adjust: auto;
+    border: 1px solid CanvasText;
+  }
+
+  .ui-phase1 .site-nav .nav-link.is-active,
+  .ui-phase1 .site-nav .dropdown-item.is-active {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+}

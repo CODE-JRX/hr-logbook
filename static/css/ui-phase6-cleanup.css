@@ -1,0 +1,61 @@
+/* Phase 6: Consolidation and inline-style cleanup */
+
+.icon-gap-5 {
+  margin-right: 5px;
+}
+
+.text-display-4rem {
+  font-size: 4rem;
+}
+
+.is-hidden-initial {
+  display: none;
+}
+
+.modal-action-pad {
+  padding: 10px 20px;
+}
+
+.clean-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.upload-input-hidden {
+  display: none;
+}
+
+.chart-min-panel {
+  min-height: 300px;
+  position: relative;
+}
+
+.minw-0 {
+  min-width: 0;
+}
+
+.dashboard-profile-photo {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 3px solid #0d6efd;
+  margin-top: -90px;
+  margin-right: 25px;
+}
+
+.dashboard-active-clients {
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.active-client-meta {
+  text-align: left;
+}
+
+.capture-controls-initial {
+  display: none;
+}
+
+.input-force-lowercase {
+  text-transform: lowercase;
+}

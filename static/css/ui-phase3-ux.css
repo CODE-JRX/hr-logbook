@@ -1,0 +1,92 @@
+/* Phase 3: UX flow + accessibility polish */
+
+.ui-phase1 .site-nav .nav-link.is-active,
+.ui-phase1 .site-nav .dropdown-item.is-active {
+  color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+  font-weight: 700;
+}
+
+.ui-phase1 .site-nav .dropdown-item.is-active {
+  border-radius: 8px;
+}
+
+.ui-phase1 .navbar-toggler {
+  border-radius: 10px;
+  border-color: color-mix(in srgb, var(--border-color) 75%, transparent);
+  padding: 0.45rem 0.65rem;
+}
+
+.ui-phase1 .navbar-toggler:focus,
+.ui-phase1 .navbar-toggler:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 28%, transparent);
+}
+
+.ui-phase1 main#main-content > .card,
+.ui-phase1 main#main-content > header,
+.ui-phase1 main#main-content > .container,
+.ui-phase1 main#main-content > .container-fluid {
+  animation: ux-fade-up 360ms ease both;
+}
+
+@keyframes ux-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-phase1 .form-text {
+  color: color-mix(in srgb, var(--text-color) 68%, #8ca0bf);
+}
+
+.ui-phase1 .message-overlay {
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.ui-phase1 .message-overlay.success {
+  background: rgba(28, 154, 95, 0.12);
+  border: 1px solid rgba(28, 154, 95, 0.35);
+}
+
+.ui-phase1 .message-overlay.error {
+  background: rgba(201, 58, 58, 0.12);
+  border: 1px solid rgba(201, 58, 58, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-phase1 *,
+  .ui-phase1 *::before,
+  .ui-phase1 *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ui-phase1 main#main-content > .card,
+  .ui-phase1 main#main-content > header,
+  .ui-phase1 main#main-content > .container,
+  .ui-phase1 main#main-content > .container-fluid {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .ui-phase1 .site-nav .navbar-nav {
+    padding: 0.55rem 0 0.3rem;
+  }
+
+  .ui-phase1 .site-nav .nav-link {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+  }
+}

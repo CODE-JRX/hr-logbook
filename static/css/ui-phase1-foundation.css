@@ -1,0 +1,210 @@
+/* Phase 1: UI Foundation Layer
+   Safe global polish for premium look without changing behavior selectors. */
+
+.ui-phase1 {
+  --primary-color: #1463ff;
+  --secondary-color: #0d4fd8;
+  --accent-color: #14b8a6;
+  --success-color: #1c9a5f;
+  --warning-color: #c88911;
+  --danger-color: #c93a3a;
+  --neutral-color: #5c667a;
+
+  --font-family: "Segoe UI Variable", "Segoe UI", "Helvetica Neue", Tahoma, sans-serif;
+  --font-size-h1: clamp(2rem, 2.8vw, 2.8rem);
+  --font-size-h2: clamp(1.6rem, 2.1vw, 2.2rem);
+  --font-size-h3: clamp(1.35rem, 1.5vw, 1.7rem);
+  --font-size-h4: 1.25rem;
+  --font-size-h5: 1.05rem;
+  --font-size-h6: 0.95rem;
+  --font-size-body: 0.97rem;
+  --font-size-caption: 0.82rem;
+
+  --border-radius-sm: 6px;
+  --border-radius: 10px;
+  --border-radius-lg: 14px;
+  --border-radius-xl: 18px;
+
+  --shadow-sm: 0 1px 2px rgba(12, 19, 35, 0.08);
+  --shadow: 0 8px 24px rgba(12, 19, 35, 0.08);
+  --shadow-lg: 0 14px 34px rgba(12, 19, 35, 0.12);
+
+  --bg-color: radial-gradient(circle at 10% 0%, #f6f9ff 0%, #eef4ff 35%, #e9f0ff 100%);
+  --text-color: #1d2636;
+  --nav-bg: rgba(255, 255, 255, 0.86);
+  --card-bg: rgba(255, 255, 255, 0.92);
+  --footer-bg: linear-gradient(120deg, #0f2241 0%, #12376d 52%, #0f2241 100%);
+  --footer-text: #eef3ff;
+  --footer-link: #cdd9f4;
+  --border-color: rgba(23, 44, 80, 0.14);
+}
+
+[data-theme="dark"] .ui-phase1,
+.ui-phase1[data-theme="dark"] {
+  --primary-color: #5fa8ff;
+  --secondary-color: #3d8bff;
+  --accent-color: #3ad1bd;
+  --success-color: #40be82;
+  --warning-color: #d49a2e;
+  --danger-color: #e35d5d;
+  --neutral-color: #97a5bf;
+
+  --bg-color: radial-gradient(circle at 20% 0%, #101c31 0%, #0b1526 42%, #060d19 100%);
+  --text-color: #e9f0ff;
+  --nav-bg: rgba(8, 18, 34, 0.9);
+  --card-bg: rgba(12, 25, 45, 0.86);
+  --footer-bg: linear-gradient(120deg, #071225 0%, #10294e 52%, #071225 100%);
+  --footer-text: #e8f0ff;
+  --footer-link: #bdd2f8;
+  --border-color: rgba(191, 215, 255, 0.16);
+}
+
+.ui-phase1 body,
+body.ui-phase1 {
+  font-family: var(--font-family);
+  color: var(--text-color);
+  letter-spacing: 0.01em;
+  text-rendering: optimizeLegibility;
+}
+
+.ui-phase1 h1,
+.ui-phase1 .h1,
+.ui-phase1 h2,
+.ui-phase1 .h2,
+.ui-phase1 h3,
+.ui-phase1 .h3,
+.ui-phase1 h4,
+.ui-phase1 .h4,
+.ui-phase1 h5,
+.ui-phase1 .h5,
+.ui-phase1 h6,
+.ui-phase1 .h6 {
+  font-family: var(--font-family);
+  letter-spacing: 0.015em;
+}
+
+.ui-phase1 a {
+  text-underline-offset: 0.18em;
+}
+
+.ui-phase1 .site-nav {
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 6px 26px rgba(10, 22, 40, 0.14);
+}
+
+.ui-phase1 .site-nav .nav-link {
+  border: 1px solid transparent;
+}
+
+.ui-phase1 .site-nav .nav-link:hover,
+.ui-phase1 .site-nav .nav-link:focus-visible {
+  border-color: color-mix(in srgb, var(--primary-color) 34%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  transform: translateY(-1px);
+}
+
+.ui-phase1 .site-nav .dropdown-menu,
+.ui-phase1 .custom-dropdown-menu {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+
+.ui-phase1 .card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-phase1 .card:hover {
+  box-shadow: var(--shadow);
+}
+
+.ui-phase1 .btn {
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.ui-phase1 .btn:hover {
+  transform: translateY(-1px);
+}
+
+.ui-phase1 .btn-outline-primary {
+  border-color: color-mix(in srgb, var(--primary-color) 45%, #fff 10%);
+  color: var(--primary-color);
+}
+
+.ui-phase1 .btn-outline-primary:hover,
+.ui-phase1 .btn-outline-primary:focus {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(20, 99, 255, 0.24);
+}
+
+.ui-phase1 .btn-outline-secondary {
+  border-color: color-mix(in srgb, var(--neutral-color) 45%, #fff 10%);
+  color: var(--neutral-color);
+}
+
+.ui-phase1 .form-control,
+.ui-phase1 .form-select,
+.ui-phase1 .input-group-text {
+  border-radius: var(--border-radius-sm);
+  border-color: color-mix(in srgb, var(--border-color) 80%, #fff);
+}
+
+.ui-phase1 .form-control:focus,
+.ui-phase1 .form-select:focus,
+.ui-phase1 .btn:focus,
+.ui-phase1 .btn:focus-visible,
+.ui-phase1 a:focus,
+.ui-phase1 a:focus-visible,
+.ui-phase1 button:focus,
+.ui-phase1 button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 28%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color) 68%, #fff 10%);
+}
+
+.ui-phase1 .site-footer {
+  border-top: 1px solid color-mix(in srgb, var(--footer-link) 20%, transparent);
+}
+
+.ui-phase1 .site-footer .footer-title,
+.ui-phase1 .site-footer .footer-description,
+.ui-phase1 .site-footer .footer-links a,
+.ui-phase1 .site-footer .footer-contact,
+.ui-phase1 .site-footer .copyright,
+.ui-phase1 .site-footer .developer {
+  color: var(--footer-text);
+}
+
+.ui-phase1 .site-footer .footer-links a,
+.ui-phase1 .site-footer .footer-contact a,
+.ui-phase1 .site-footer .developer-link {
+  color: var(--footer-link);
+}
+
+.ui-phase1 .site-footer .footer-links a:hover,
+.ui-phase1 .site-footer .footer-contact a:hover,
+.ui-phase1 .site-footer .developer-link:hover {
+  color: #ffffff;
+}
+
+.ui-phase1 .skip-link:focus {
+  border: 2px solid #fff;
+}
+
+@media (max-width: 768px) {
+  .ui-phase1 .site-nav .nav-link {
+    margin: 0.2rem 0;
+  }
+
+  .ui-phase1 .card {
+    border-radius: var(--border-radius);
+  }
+}
