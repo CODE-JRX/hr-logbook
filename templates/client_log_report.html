@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Logs Report — HR Logbook{% endblock %}
+{% block title %}Logs Report — ASIST/UA Logbook{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -376,7 +376,7 @@
       <h2 style="margin: 0;">ABRA STATE INSTITUTE OF SCIENCES AND TECHNOLOGY</h2>
       <h3 style="margin: 0; margin-top: 10px;">Main Campus, Lagangliang, Abra</h3>
     </div>
-    <img src="{{ url_for('static', filename='resources/HRMO-LOGO.png') }}" alt="HRMO Logo"
+    <img src="{{ url_for('static', filename='resources/HRMO-LOGO.png') }}" alt="ASIST/UA Logo"
       style="height: 150px; margin-left: 20px;">
   </div><br>
 
@@ -417,6 +417,15 @@
           <option value="">All</option>
           {% for d in departments %}
           <option value="{{ d }}" {% if filters.department==d %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 col-6">
+        <label class="form-label"><i class="fas fa-map-marker-alt"></i> Office</label>
+        <select class="form-select" name="office">
+          <option value="">All</option>
+          {% for o in offices %}
+          <option value="{{ o }}" {% if filters.office==o %}selected{% endif %}>{{ o }}</option>
           {% endfor %}
         </select>
       </div>
@@ -464,6 +473,7 @@
               <th>GENDER</th>
               <th>AGE</th>
               <th>DEPARTMENT</th>
+              <th>OFFICE</th>
               <th>PURPOSE</th>
               <th>ADDITIONAL INFO</th>
               <th>TIME IN</th>
@@ -478,6 +488,7 @@
               <td>{{ l.gender or '' }}</td>
               <td>{{ l.age or '' }}</td>
               <td>{{ l.department or '' }}</td>
+              <td>{{ l.office or '' }}</td>
               <td>{{ l.purpose or '' }}</td>
               <td>{{ l.additional_info or '' }}</td>
               <td>{{ l.time_in }}</td>

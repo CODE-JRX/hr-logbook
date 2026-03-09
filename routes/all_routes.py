@@ -7,7 +7,7 @@ from models.client_model import search_clients
 from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding, improve_client_embedding, delete_embeddings_by_client_id
 from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
-from models.csm_form_model import insert_csm_form, get_csm_forms_filtered
+from models.csm_form_model import insert_csm_form, get_csm_forms_filtered, get_agencies
 from db import get_db_cursor
 from models.client_model import get_departments
 from models.log_model import get_logs_by_day, get_department_counts, get_purpose_counts, get_total_logs
@@ -438,7 +438,8 @@ def csm_form():
             return redirect(url_for('client.csm_form'))
 
     # GET: render template
-    return render_template('CSM-form.html')
+    office = request.cookies.get('selected_office', 'Human Resources Management Unit')
+    return render_template('CSM-form.html', office=office)
 
 
 @client_bp.route('/search_client')
@@ -489,12 +490,13 @@ def client_log_report():
     # read filters from query string
     purpose = request.args.get('purpose')
     department = request.args.get('department')
+    office = request.args.get('office')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     limit = request.args.get('limit', '25')
     print_mode = request.args.get('print') == '1'
 
-    logs = get_logs(purpose=purpose, department=department, start_date=start_date, end_date=end_date, limit=limit)
+    logs = get_logs(purpose=purpose, department=department, office=office, start_date=start_date, end_date=end_date, limit=limit)
 
     # Check if this is an AJAX request
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -508,6 +510,7 @@ def client_log_report():
               <td>{{ l.gender or '' }}</td>
               <td>{{ l.age or '' }}</td>
               <td>{{ l.department or '' }}</td>
+              <td>{{ l.office or '' }}</td>
               <td>{{ l.purpose or '' }}</td>
               <td>{{ l.additional_info or '' }}</td>
               <td>{{ l.time_in }}</td>
@@ -516,7 +519,7 @@ def client_log_report():
             {% endfor %}
             {% if not logs %}
             <tr>
-              <td colspan="9" class="text-center">No records found</td>
+              <td colspan="10" class="text-center">No records found</td>
             </tr>
             {% endif %}
         ''', logs=logs)
@@ -524,11 +527,17 @@ def client_log_report():
 
     # If print mode, render the print template
     if print_mode:
-        return render_template('client_log_report_print.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date, 'limit': limit})
+        return render_template('client_log_report_print.html', logs=logs, filters={'purpose': purpose, 'department': department, 'office': office, 'start_date': start_date, 'end_date': end_date, 'limit': limit})
 
     departments = get_departments()
     purposes = ["Receive Document/s Requested", "Submit Document/s", "Request Form/s", "Process Appointment", "Inquire", "OTHERS"]
-    return render_template('client_log_report.html', logs=logs, filters={'purpose': purpose, 'department': department, 'start_date': start_date, 'end_date': end_date, 'limit': limit}, departments=departments, purposes=purposes)
+
+    # Build distinct office list from all logs (preserves real-world values already in DB)
+    all_logs_for_offices = get_logs(limit='all')
+    offices = sorted({r['office'] for r in all_logs_for_offices if r.get('office')})
+
+    filters = {'purpose': purpose, 'department': department, 'office': office, 'start_date': start_date, 'end_date': end_date, 'limit': limit}
+    return render_template('client_log_report.html', logs=logs, filters=filters, departments=departments, purposes=purposes, offices=offices)
 
 
 @client_bp.route('/csm-report', methods=['GET', 'POST'])
@@ -547,6 +556,8 @@ def csm_report():
             age_min = data.get('age_min')
             age_max = data.get('age_max')
             service = data.get('service')
+            agency = data.get('agency')
+
             q = data.get('q', '')  # search query
 
             # Convert age_min/max to int if provided
@@ -565,13 +576,14 @@ def csm_report():
                 age_min=age_min,
                 age_max=age_max,
                 service=service,
-                limit=limit
+                limit=limit,
+                agency=agency
             )
 
             # If search query, filter further
             if q:
                 q_lower = q.lower()
-                csm_forms = [f for f in csm_forms if any(q_lower in str(f.get(field, '')).lower() for field in ['control_no', 'date', 'client_type', 'sex', 'age', 'region_of_residence', 'email', 'service_availed'])]
+                csm_forms = [f for f in csm_forms if any(q_lower in str(f.get(field, '')).lower() for field in ['control_no', 'date', 'agency_visited', 'client_type', 'sex', 'age', 'region_of_residence', 'email', 'service_availed'])]
 
             # Render both partials
             html = render_template('partials/csm_report_rows.html', csm_forms=csm_forms)
@@ -651,6 +663,8 @@ def csm_report():
     age_min = request.args.get('age_min')
     age_max = request.args.get('age_max')
     service = request.args.get('service')
+    agency = request.args.get('agency')
+
 
     # Convert age_min/max to int if provided
     try:
@@ -668,46 +682,52 @@ def csm_report():
         age_min=age_min,
         age_max=age_max,
         service=service,
-        limit=limit
+        limit=limit,
+        agency=agency
     )
 
-    # Prepare filters dict for template
-    filters = {
-        'start_date': start_date,
-        'end_date': end_date,
-        'gender': gender,
-        'region': region,
-        'age_min': age_min,
-        'age_max': age_max,
-        'service': service,
-        'limit': limit
-    }
-
+    # Get distinct values for filters
+    all_forms_for_filters = get_csm_forms_filtered(limit='all')
+    
     # Get list of unique services for dropdown (parse from all records)
-    all_forms = get_csm_forms_filtered()
     services_set = set()
-    for form in all_forms:
+    for form in all_forms_for_filters:
         if form.get('service_availed'):
-            # service_availed is comma-separated; split and add each
             for svc in form['service_availed'].split(','):
                 services_set.add(svc.strip())
     services_list = sorted(list(services_set))
 
     # Get list of unique regions for dropdown
     regions_set = set()
-    for form in all_forms:
+    for form in all_forms_for_filters:
         if form.get('region_of_residence'):
             regions_set.add(form['region_of_residence'])
     regions_list = sorted(list(regions_set))
 
     # Get list of unique genders for dropdown
     genders_set = set()
-    for form in all_forms:
+    for form in all_forms_for_filters:
         if form.get('sex'):
             genders_set.add(form['sex'])
     genders_list = sorted(list(genders_set))
+    
+    agencies = get_agencies()
 
-    return render_template('csm_report.html', csm_forms=csm_forms, filters=filters, services=services_list, regions=regions_list, genders=genders_list)
+    filters = {
+        'limit': limit, 'start_date': start_date, 'end_date': end_date,
+        'gender': gender, 'region': region, 'age_min': age_min, 'age_max': age_max,
+        'service': service, 'agency': agency
+    }
+
+    return render_template(
+        'csm_report.html',
+        csm_forms=csm_forms,
+        filters=filters,
+        services=services_list,
+        regions=regions_list,
+        genders=genders_list,
+        agencies=agencies
+    )
 
 
 @client_bp.route('/admin/dashboard')
@@ -1091,14 +1111,14 @@ def verify_face():
 
 @client_bp.route('/generate_control_no')
 def generate_control_no():
-    """Generate a new control number in the format HR-S<YY>-<NextID>"""
+    """Generate a new control number in the format ASIST/UA-S<YY>-<NextID>"""
     try:
         with get_db_cursor() as cursor:
             # Find the latest control_no to increment
-            # Format: HR-S<YY>-<NNN>
+            # Format: ASIST/UA-S<YY>-<NNN>
             year = datetime.now().year
             yy = str(year)[-2:]
-            prefix = f"HR-S{yy}-"
+            prefix = f"ASIST/UA-S{yy}-"
             
             # Find the latest one using MySQL pattern matching
             query = "SELECT control_no FROM csm_form WHERE control_no LIKE %s ORDER BY control_no DESC LIMIT 1"

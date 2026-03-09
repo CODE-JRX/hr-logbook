@@ -47,7 +47,7 @@ def insert_csm_form(
         print(f"Error inserting CSM form: {err}")
         return None
 
-def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=None, age_min=None, age_max=None, service=None, limit=None):
+def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=None, age_min=None, age_max=None, service=None, limit=None, agency=None):
     with get_db_cursor() as cursor:
         sql = "SELECT * FROM csm_form"
         where_clauses = []
@@ -74,6 +74,9 @@ def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=N
         if service:
             where_clauses.append("service_availed LIKE %s")
             params.append(f"%{service}%")
+        if agency:
+            where_clauses.append("agency_visited = %s")
+            params.append(agency)
             
         if where_clauses:
             sql += " WHERE " + " AND ".join(where_clauses)
@@ -92,10 +95,16 @@ def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=N
             
         return rows
 
+def get_agencies():
+    """Return a list of distinct agencies/offices visited in the CSM forms."""
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT DISTINCT agency_visited FROM csm_form WHERE agency_visited IS NOT NULL")
+        rows = cursor.fetchall()
+        return sorted([row['agency_visited'] for row in rows])
 
-    def get_csm_form_count():
-        """Return total number of rows in csm_form table."""
-        with get_db_cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) as cnt FROM csm_form")
-            row = cursor.fetchone()
-            return row['cnt'] if row else 0
+def get_csm_form_count():
+    """Return total number of rows in csm_form table."""
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) as cnt FROM csm_form")
+        row = cursor.fetchone()
+        return row['cnt'] if row else 0

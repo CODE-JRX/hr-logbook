@@ -29,7 +29,7 @@ def add_time_out(client_id, purpose=None):
         if log:
             cursor.execute("UPDATE logs SET time_out = %s WHERE id = %s", (now, log['id']))
 
-def get_logs(purpose=None, department=None, start_date=None, end_date=None, limit=None):
+def get_logs(purpose=None, department=None, office=None, start_date=None, end_date=None, limit=None):
     with get_db_cursor() as cursor:
         sql = """SELECT l.*, c.full_name, c.department, c.gender, c.age 
                  FROM logs l 
@@ -55,6 +55,10 @@ def get_logs(purpose=None, department=None, start_date=None, end_date=None, limi
         if department:
             where_clauses.append("c.department = %s")
             params.append(department)
+
+        if office:
+            where_clauses.append("l.office = %s")
+            params.append(office)
             
         if where_clauses:
             sql += " WHERE " + " AND ".join(where_clauses)

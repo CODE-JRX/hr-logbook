@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Client Satisfactory Report — HR Logbook{% endblock %}
+{% block title %}Client Satisfactory Report — ASIST/UA Logbook{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -843,6 +843,15 @@
                     </div>
                     <!-- other filter groups above remain unchanged -->
                     <div style="flex: 1 1 100%;"></div>
+                    <div class="filter-group" style="min-width:200px;">
+                        <label for="agency"><i class="fas fa-building"></i> Office:</label>
+                        <select id="agency" name="agency">
+                            <option value="">All Offices</option>
+                            {% for ag in agencies %}
+                            <option value="{{ ag }}" {% if filters.agency==ag %}selected{% endif %}>{{ ag }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="filter-group" style="min-width:220px; margin-left: auto;">
                         <label for="service"><i class="fas fa-concierge-bell"></i> Service:</label>
                         <select id="service" name="service"
@@ -895,6 +904,7 @@
                             <tr>
                                 <th>CONTROL #</th>
                                 <th>DATE</th>
+                                <th>OFFICE</th>
                                 <th>CLIENT TYPE</th>
                                 <th>GENDER</th>
                                 <th>AGE</th>
