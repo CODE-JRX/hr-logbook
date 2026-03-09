@@ -45,18 +45,19 @@ def get_admin_face_cache(force_refresh=False):
             _ADMIN_FACE_CACHE = new_cache
     return _ADMIN_FACE_CACHE
 
-def add_admin(first_name, last_name, email, password, embedding_list=None, pin=None):
+def add_admin(first_name, last_name, email, password, embedding_list=None, pin=None, office=None):
     ph = generate_password_hash(password)
     pin_hash = generate_password_hash(pin) if pin else None
     
-    query = """INSERT INTO admins (first_name, last_name, email, password_hash, pin_hash, face_embedding, created_at)
-               VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+    query = """INSERT INTO admins (first_name, last_name, email, password_hash, pin_hash, office, face_embedding, created_at)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
     values = (
         first_name.upper() if isinstance(first_name, str) else first_name,
         last_name.upper() if isinstance(last_name, str) else last_name,
         email.lower() if isinstance(email, str) else email,
         ph,
         pin_hash,
+        office,
         json.dumps(embedding_list) if embedding_list else None,
         datetime.now()
     )

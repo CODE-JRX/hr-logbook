@@ -354,7 +354,7 @@
 			<div class="office-select-wrap" id="office-select-wrap">
 				<select id="office-dropdown" class="office-dropdown">
 					<option value="">-- Select Office --</option>
-					<option value="HRMU">HRMU</option>
+					<option value="HUMAN RESOURCE MANAGEMENT UNIT">HUMAN RESOURCE MANAGEMENT UNIT</option>
 					<option value="RECORDS OFFICE">Records Office</option>
 					<option value="REGISTRAR">Registrar</option>
 					<option value="ACCOUNTING">Accounting</option>
@@ -583,30 +583,28 @@
 		<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel"
 			aria-hidden="true">
 			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-					<div class="modal-header bg-danger text-white border-0">
-						<h5 class="modal-title fw-bold" id="logoutConfirmModalLabel"><i
-								class="fas fa-sign-out-alt me-2"></i> Client Logout</h5>
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-							aria-label="Close"></button>
+				<div class="modal-content">
+					<div class="modal-header border-0">
+						<h5 class="modal-title text-danger" id="logoutConfirmModalLabel"><i
+								class="fas fa-sign-out-alt me-2"></i>Client Logout</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
-					<div class="modal-body p-4 text-center">
-						<p class="mb-1 text-muted small text-uppercase fw-bold letter-spacing-1">Confirmation Required
-						</p>
-						<h5 class="mb-3">Are you sure you want to log out <br><span id="logout_client_name"
-								class="text-danger fw-bold"></span>?</h5>
-						<p class="text-muted small mb-0">This will record their exit time and end the current session.
+					<div class="modal-body text-center">
+						<p class="mb-0">Are you sure you want to log out <strong id="logout_client_name"
+								class="text-danger"></strong>?</p>
+						<p class="small text-muted mt-2 mb-0">This will record their exit time and end the current session.
 						</p>
 					</div>
-					<div class="modal-footer border-0 justify-content-center pb-4">
-						<button type="button" class="btn btn-outline-secondary px-4 h-auto" data-bs-dismiss="modal">Keep
+					<div class="modal-footer border-0">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep
 							Logged In</button>
-						<button id="btn_confirm_logout" type="button" class="btn btn-danger px-4 h-auto fw-bold">Yes,
+						<button id="btn_confirm_logout" type="button" class="btn btn-outline-danger">Yes,
 							Log Out</button>
 					</div>
 				</div>
 			</div>
 		</div>
+	</div>
 
 	</div>
 </div>
@@ -705,6 +703,7 @@
 	// Manual search elements
 	const manualSearch = document.getElementById('manual_search');
 	const suggestionsBox = document.getElementById('search_suggestions');
+	let currentOffice = ''; 
 
 	// Debounce helper
 	function debounce(fn, wait) {
@@ -1179,7 +1178,8 @@
 		const el = document.getElementById('systemLog');
 		if (!el) return;
 		try {
-			const res = await fetch('/today_logs');
+			const officeParam = currentOffice ? ('?office=' + encodeURIComponent(currentOffice)) : '';
+			const res = await fetch('/today_logs' + officeParam);
 			const data = await res.json();
 			if (!Array.isArray(data)) {
 				el.innerHTML = '<div class="text-muted">Error loading logs</div>';
@@ -1252,7 +1252,6 @@
 	});
 
 	// ─── Office Selector Logic ───────────────────────────────────────────────
-	let currentOffice = '';
 
 	const officeBadge      = document.getElementById('office-badge');
 	const officeBadgeText  = document.getElementById('office-badge-text');
@@ -1282,6 +1281,7 @@
 		.then(d => {
 			applyOffice(d.office || '');
 			if (d.office) officeDropdown.value = d.office;
+			refreshTodayLogs();
 		})
 		.catch(() => applyOffice(''));
 
@@ -1309,6 +1309,7 @@
 			if (data.ok) {
 				applyOffice(data.office);
 				officeSelectWrap.classList.remove('visible');
+				refreshTodayLogs();
 			} else {
 				alert('Could not save office: ' + (data.error || 'Unknown error'));
 			}
@@ -1318,3 +1319,7 @@
 	});
 </script>
 {% endblock %}
+
+
+
+

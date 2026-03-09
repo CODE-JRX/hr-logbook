@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}HR e-Loglook{% endblock %}</title>
+  <title>{% block title %}e-Loglook{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase1-foundation.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase2-components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase3-ux.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase4-accessibility.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-phase6-cleanup.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ui-theme-parity.css') }}">
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="HRMO e-Loglook: Fast, secure client time logging with face recognition technology.">
-  <meta name="keywords" content="HR e-Loglook, client logging, face recognition, time tracking, HRMO">
+  <meta name="description"
+    content="ASIST/UA e-Loglook: Fast, secure client time logging with face recognition technology.">
+  <meta name="keywords" content="e-Loglook, client logging, face recognition, time tracking, ASIST/UA">
   <meta name="author" content="code:jrx">
   <!-- Favicon -->
   <link rel="icon" href="{{ url_for('static', filename='resources/school-LOGO.png') }}" type="image/png">
@@ -141,17 +148,17 @@
   {% block head_extra %}{% endblock %}
 </head>
 
-<body>
-  <nav class="navbar navbar-expand-lg site-nav fixed-top py-0">
+<body class="ui-phase1">
+  <nav class="navbar navbar-expand-lg site-nav fixed-top py-0" role="navigation" aria-label="Primary">
     <div class="container-fluid">
       <div id="navBrandWrapper" class="nav-brand-wrapper">
         <div class="nav-brand-light"></div>
         <a class="navbar-brand logo-link" href="{{ url_for('client.home') }}">
           <div class="logo-box">
-            <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HR e-Loglook logo"
-              class="site-logo">
+            <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="ASIST/UA e-Loglook logo"
+              class="site-logo" fetchpriority="high" decoding="async">
           </div>
-          <span class="title"><span class="hr-mo">HRMO</span> e-Loglook</span>
+          <span class="title"><span class="hr-mo">ASIST/UA</span> e-Logbook</span>
         </a>
       </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -178,11 +185,9 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" id="reportsDropdown" data-bs-toggle="dropdown"
               aria-expanded="false"><i class="fas fa-chart-line"></i>Reports</a>
             <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="reportsDropdown">
-              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list"
-                    style="margin-right: 5px;"></i>Log Report</a>
+              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list icon-gap-5"></i>Log Report</a>
               </li>
-              <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature"
-                    style="margin-right: 5px;"></i>Satisfactory
+              <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature icon-gap-5"></i>Satisfactory
                   Report</a></li>
             </ul>
           </li>
@@ -190,17 +195,13 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" id="adminDropdown" data-bs-toggle="dropdown"
               aria-expanded="false"><i class="fas fa-user-cog"></i>Admin</a>
             <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu" aria-labelledby="adminDropdown">
-              <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt"
-                    style="margin-right: 5px;"></i>Dashboard</a></li>
-              <li><a class="dropdown-item" href="/admin/signup"><i class="fas fa-user-plus"
-                    style="margin-right: 5px;"></i>Add Admin</a></li>
-              <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user-circle"
-                    style="margin-right: 5px;"></i>Profile</a></li>
+              <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt icon-gap-5"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="/admin/signup"><i class="fas fa-user-plus icon-gap-5"></i>Add Admin</a></li>
+              <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user-circle icon-gap-5"></i>Profile</a></li>
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item text-danger" href="/admin/logout"><i class="fas fa-sign-out-alt"
-                    style="margin-right: 5px;"></i>Logout</a></li>
+              <li><a class="dropdown-item text-danger" href="/admin/logout"><i class="fas fa-sign-out-alt icon-gap-5"></i>Logout</a></li>
             </ul>
           </li>
           <li class="nav-item">
@@ -235,20 +236,20 @@
   <!-- Skip link for accessibility -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <main class="container">
+  <main id="main-content" class="container" role="main">
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer" role="contentinfo">
     <div class="container-fluid">
       <div class="row">
         <!-- Brand Section -->
         <div class="col-lg-4 col-md-6 mb-4">
           <div class="footer-brand">
             <div class="footer-logo-link">
-              <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="HRMO e-Loglook Logo"
-                class="footer-logo-img">
-              <span class="footer-title">HRMO e-Loglook</span>
+              <img src="{{ url_for('static', filename='resources/school-LOGO.png') }}" alt="ASIST/UA e-Loglook Logo"
+                class="footer-logo-img" loading="lazy" decoding="async">
+              <span class="footer-title">ASIST/UA e-Loglook</span>
             </div>
             <p class="footer-description">Fast, secure client time logging with face recognition technology.</p>
           </div>
@@ -274,7 +275,8 @@
           <div class="footer-section">
             <h5 class="footer-title">Contact</h5>
             <ul class="footer-contact">
-              <li><i class="fas fa-envelope"></i> <a href="mailto:support@hrmologbook.com">support@hrmologbook.com</a>
+              <li><i class="fas fa-envelope"></i> <a
+                  href="mailto:support@ASIST/UAlogbook.com">support@ASIST/UAlogbook.com</a>
               </li>
               <li><i class="fas fa-phone"></i> <a href="tel:##########">## ### ### ###</a></li>
               <li><i class="fas fa-map-marker-alt"></i> Poblacion, Laganiglang, Abra</li>
@@ -287,7 +289,7 @@
       <div class="footer-bottom">
         <div class="row align-items-center">
           <div class="col-md-6">
-            <p class="copyright">&copy; {{ year }} HRMO e-Loglook. All rights reserved.</p>
+            <p class="copyright">&copy; {{ year }} ASIST/UA e-Loglook. All rights reserved.</p>
           </div>
           <div class="col-md-6 text-md-end">
             <p class="developer">Developed by <a href="#" class="developer-link">code:jrx</a></p>
@@ -312,13 +314,13 @@
               Connection Failed</h5>
           </div>
           <div class="modal-body text-center py-4">
-            <div class="text-danger mb-4" style="font-size: 4rem;">
+            <div class="text-danger mb-4 db-modal-icon">
               <i class="fas fa-database"></i>
             </div>
             <p class="lead">We couldn't connect to the MySQL database.</p>
             <p>This usually happens when MySQL stops unexpectedly in XAMPP.</p>
 
-            <div id="fixing-section" style="display: none;">
+            <div id="fixing-section" class="is-hidden-initial">
               <div class="fixing-animation">
                 <div class="fixing-dot"></div>
                 <div class="fixing-dot"></div>
@@ -332,12 +334,10 @@
             <div id="troubleshoot-result" class="troubleshoot-log"></div>
           </div>
           <div class="modal-footer border-0 justify-content-center">
-            <button type="button" id="btn-troubleshoot" class="btn btn-outline-primary w-75 rounded-pill"
-              style="padding: 10px 20px;">
+            <button type="button" id="btn-troubleshoot" class="btn btn-outline-primary w-75 rounded-pill modal-action-pad">
               <i class="fas fa-tools me-2"></i>Troubleshoot & Fix
             </button>
-            <button type="button" id="btn-refresh" class="btn btn-outline-secondary w-75 rounded-pill"
-              style="display: none; padding: 10px 20px;" onclick="location.reload()">
+            <button type="button" id="btn-refresh" class="btn btn-outline-secondary w-75 rounded-pill is-hidden-initial modal-action-pad" onclick="location.reload()">
               <i class="fas fa-sync me-2"></i>Reload Page
             </button>
           </div>
@@ -616,7 +616,38 @@
         }
       }
     });
+    document.addEventListener('DOMContentLoaded', function () {
+  const currentPath = window.location.pathname;
+  const navEl = document.getElementById('navbarNav');
+  if (!navEl) return;
 
+  const links = navEl.querySelectorAll('a.nav-link[href], a.dropdown-item[href]');
+  links.forEach(link => {
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('http')) return;
+
+    const isMatch =
+      (href === '/' && currentPath === '/') ||
+      (href !== '/' && (currentPath === href || currentPath.startsWith(href + '/')));
+
+    if (isMatch) {
+      link.classList.add('is-active');
+      link.setAttribute('aria-current', 'page');
+      const parentDropdown = link.closest('.dropdown');
+      if (parentDropdown) {
+        const toggle = parentDropdown.querySelector('.dropdown-toggle');
+        if (toggle) toggle.classList.add('is-active');
+      }
+    }
+
+    link.addEventListener('click', function () {
+      if (window.innerWidth < 992 && navEl.classList.contains('show')) {
+        const inst = bootstrap.Collapse.getInstance(navEl) || new bootstrap.Collapse(navEl, { toggle: false });
+        inst.hide();
+      }
+    });
+  });
+});
     // Global Modal Focus Management to fix aria-hidden conflict
     document.addEventListener('DOMContentLoaded', function () {
       const modals = document.querySelectorAll('.modal');
@@ -648,3 +679,7 @@
 </body>
 
 </html>
+
+
+
+

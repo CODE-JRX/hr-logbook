@@ -27,15 +27,14 @@
 
 {% block content %}
 <!-- Loading Overlay -->
-<div id="loadingOverlay"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(3px);">
-    <div class="spinner-border text-primary" role="status" style="width: 3.5rem; height: 3.5rem;">
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner-border text-primary loading-spinner" role="status">
         <span class="visually-hidden">Loading...</span>
     </div>
     <h5 class="mt-3 text-primary fw-bold">Updating Client...</h5>
 </div>
 
-<div class="card shadow-sm mx-auto" style="max-width:760px;">
+<div class="card shadow-sm mx-auto form-shell-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-edit"></i> Edit Client</h5>
         <small class="text-muted">All fields marked <span class="text-danger">*</span> are required</small>
@@ -125,8 +124,7 @@
                         <div class="col-md-7">
                             <div class="camera-card mx-auto shadow-sm rounded" id="cameraCanvas">
                                 <!-- video preview (fills card) -->
-                                <video id="video" width="420" height="420" autoplay playsinline muted
-                                    style="object-fit:cover; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px; display:none;"></video>
+                                <video id="video" width="420" height="420" autoplay playsinline muted class="camera-video-layer"></video>
 
                                 <!-- face position guide (subtle broken square corners) -->
                                 <div id="face-guide" aria-hidden="true">
@@ -137,39 +135,33 @@
                                 </div>
 
                                 <!-- placeholder when camera not active -->
-                                <div id="camera-placeholder" class="text-center text-muted" style="color:#9aa6bc">
-                                    <div style="font-size:44px; opacity:0.5">📷</div>
-                                    <div style="margin-top:8px;">Camera Preview</div>
+                                <div id="camera-placeholder" class="text-center text-muted camera-placeholder">
+                                    <div class="camera-placeholder-icon">📷</div>
+                                    <div class="camera-placeholder-text">Camera Preview</div>
                                 </div>
 
                                 <!-- captured preview overlay -->
-                                <canvas id="canvas" width="420" height="420"
-                                    style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px;"></canvas>
-                                <img id="preview" src="" alt="Preview"
-                                    style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:6px; background:#0f1720;" />
+                                <canvas id="canvas" width="420" height="420" class="camera-canvas-layer"></canvas>
+                                <img id="preview" src="" alt="Preview" class="camera-preview-layer" />
 
                                 <!-- camera action button placed inside the camera container -->
-                                <button id="camera-action" type="button" title="Start camera for registration"
-                                    class="btn btn-lg"
-                                    style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); z-index:10; min-width:140px; background:rgba(0,0,0,0.7); color:white; border:none; border-radius:6px; padding:8px 16px;">
+                                <button id="camera-action" type="button" title="Start camera for registration" class="btn btn-lg camera-action-btn">
                                     <i class="fas fa-play me-2"></i>Start Camera
                                 </button>
 
                                 <!-- retake button placed inside the camera container -->
-                                <button id="retake-btn" type="button" title="Retake all photos" class="btn btn-sm"
-                                    style="position:absolute; top:12px; right:12px; z-index:20; display:none; background:rgba(220, 53, 69, 0.9); color:white; border:none; border-radius:6px; padding:6px 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); backdrop-filter: blur(4px);">
+                                <button id="retake-btn" type="button" title="Retake all photos" class="btn btn-sm camera-retake-btn">
                                     <i class="fas fa-redo me-1"></i>Retake All
                                 </button>
 
                                 <!-- capture button placed inside the camera container -->
-                                <button id="capture-btn" type="button" title="Capture photo" class="btn btn-sm" disabled
-                                    style="position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:20; display:none; background:rgba(13, 110, 253, 0.9); color:white; border:none; border-radius:6px; padding:6px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); backdrop-filter: blur(4px); font-weight: 500;">
+                                <button id="capture-btn" type="button" title="Capture photo" class="btn btn-sm camera-capture-btn" disabled>
                                     <i class="fas fa-camera me-1"></i>Capture <span id="capture-target">Center</span>
                                 </button>
                             </div>
 
                             <div class="mt-3 text-center">
-                                <div id="capture-controls" style="display:none !important;">
+                                <div id="capture-controls" class="capture-controls-initial">
                                     <p id="instruction-text" class="mb-2 fw-bold text-primary">Please look at the camera
                                         (Center).</p>
                                 </div>
@@ -183,38 +175,28 @@
 
                             <div class="d-flex flex-column gap-2">
                                 <!-- Center Preview -->
-                                <div class="border rounded p-1 position-relative"
-                                    style="background:#f8fafc; height: 100px; display: flex; align-items: center; justify-content: center;">
-                                    <img id="preview-center"
-                                        style="max-height: 100%; max-width: 100%; display: none;" />
-                                    <span class="text-muted small position-absolute" id="label-center"
-                                        style="opacity: 0.5;">Center View</span>
-                                    <div class="position-absolute top-0 end-0 p-1" id="tick-center"
-                                        style="display:none;"><i class="fas fa-check-circle text-success"></i></div>
+                                <div class="border rounded p-1 position-relative capture-thumb">
+                                    <img id="preview-center" class="capture-thumb-img" />
+                                    <span id="label-center" class="text-muted small position-absolute capture-thumb-label">Center View</span>
+                                    <div id="tick-center" class="position-absolute top-0 end-0 p-1 capture-thumb-tick"><i class="fas fa-check-circle text-success"></i></div>
                                 </div>
                                 <!-- Left Preview -->
-                                <div class="border rounded p-1 position-relative"
-                                    style="background:#f8fafc; height: 100px; display: flex; align-items: center; justify-content: center;">
-                                    <img id="preview-left" style="max-height: 100%; max-width: 100%; display: none;" />
-                                    <span class="text-muted small position-absolute" id="label-left"
-                                        style="opacity: 0.5;">Left Side View</span>
-                                    <div class="position-absolute top-0 end-0 p-1" id="tick-left" style="display:none;">
+                                <div class="border rounded p-1 position-relative capture-thumb">
+                                    <img id="preview-left" class="capture-thumb-img" />
+                                    <span id="label-left" class="text-muted small position-absolute capture-thumb-label">Left Side View</span>
+                                    <div id="tick-left" class="position-absolute top-0 end-0 p-1 capture-thumb-tick">
                                         <i class="fas fa-check-circle text-success"></i>
                                     </div>
                                 </div>
                                 <!-- Right Preview -->
-                                <div class="border rounded p-1 position-relative"
-                                    style="background:#f8fafc; height: 100px; display: flex; align-items: center; justify-content: center;">
-                                    <img id="preview-right" style="max-height: 100%; max-width: 100%; display: none;" />
-                                    <span class="text-muted small position-absolute" id="label-right"
-                                        style="opacity: 0.5;">Right Side View</span>
-                                    <div class="position-absolute top-0 end-0 p-1" id="tick-right"
-                                        style="display:none;"><i class="fas fa-check-circle text-success"></i></div>
+                                <div class="border rounded p-1 position-relative capture-thumb">
+                                    <img id="preview-right" class="capture-thumb-img" />
+                                    <span id="label-right" class="text-muted small position-absolute capture-thumb-label">Right Side View</span>
+                                    <div id="tick-right" class="position-absolute top-0 end-0 p-1 capture-thumb-tick"><i class="fas fa-check-circle text-success"></i></div>
                                 </div>
                             </div>
 
-                            <div id="message-overlay" class="message-overlay mt-2 position-relative"
-                                style="display:none;">
+                            <div id="message-overlay" class="message-overlay mt-2 position-relative message-overlay-hidden" aria-live="polite" aria-atomic="true">
                             </div>
 
                             <div class="mt-3">
@@ -478,3 +460,6 @@
 
 </script>
 {% endblock %}
+
+
+

@@ -1,0 +1,207 @@
+:root {
+  --primary-color: #1463ff;
+  --secondary-color: #0d4fd8;
+  --accent-color: #14b8a6;
+  --neutral-color: #5c667a;
+
+  --bg-color: radial-gradient(circle at 10% 0%, #f6f9ff 0%, #eef4ff 35%, #e9f0ff 100%);
+  --text-color: #1d2636;
+  --nav-bg: rgba(255, 255, 255, 0.86);
+  --card-bg: rgba(255, 255, 255, 0.92);
+
+  --footer-bg: linear-gradient(120deg, #0f2241 0%, #12376d 52%, #0f2241 100%);
+  --footer-text: #eef3ff;
+  --footer-link: #cdd9f4;
+  --border-color: rgba(23, 44, 80, 0.14);
+
+  --shadow-sm: 0 1px 2px rgba(12, 19, 35, 0.08);
+  --shadow: 0 8px 24px rgba(12, 19, 35, 0.08);
+}
+
+[data-theme="dark"] {
+  --primary-color: #5fa8ff;
+  --secondary-color: #3d8bff;
+  --accent-color: #3ad1bd;
+  --neutral-color: #97a5bf;
+
+  --bg-color: radial-gradient(circle at 20% 0%, #101c31 0%, #0b1526 42%, #060d19 100%);
+  --text-color: #e9f0ff;
+  --nav-bg: rgba(8, 18, 34, 0.9);
+  --card-bg: rgba(12, 25, 45, 0.86);
+
+  --footer-bg: linear-gradient(120deg, #071225 0%, #10294e 52%, #071225 100%);
+  --footer-text: #e8f0ff;
+  --footer-link: #bdd2f8;
+  --border-color: rgba(191, 215, 255, 0.16);
+}
+
+/* Page color adjustment */
+html,
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Navbar style */
+.site-nav {
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 6px 26px rgba(10, 22, 40, 0.14);
+}
+
+.site-nav .nav-link {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all .2s ease;
+}
+
+.ui-phase1 .site-nav .nav-link:hover,
+.ui-phase1 .site-nav .nav-link:focus-visible,
+.ui-phase1 .site-nav .dropdown-item:hover,
+.ui-phase1 .site-nav .dropdown-item:focus-visible,
+.ui-phase1 .site-nav .nav-link.is-active,
+.ui-phase1 .site-nav .dropdown-item.is-active,
+.ui-phase1 .site-nav .dropdown-toggle.is-active {
+  border-color: color-mix(in srgb, var(--primary-color) 34%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  transform: translateY(-1px);
+  color: var(--text-color) !important;
+}
+
+.ui-phase1 .site-nav .dropdown-item.is-active,
+.ui-phase1 .site-nav .dropdown-toggle.is-active {
+  border-radius: 8px;
+  font-weight: inherit;
+}
+
+/* Standard button style */
+.ui-phase1 .btn {
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  transition-property: transform, box-shadow, background-color, border-color, color;
+  transition-duration: .2s;
+  transition-timing-function: ease;
+}
+
+.ui-phase1 .btn:hover {
+  transform: translateY(-1px);
+}
+
+.ui-phase1 .btn-outline-primary,
+.ui-phase1 .btn-outline-secondary,
+.ui-phase1 .btn-outline-success,
+.ui-phase1 .btn-outline-warning,
+.ui-phase1 .btn-outline-danger {
+  background-image: none !important;
+  transition-property: transform, box-shadow, background-color, border-color, color;
+}
+
+.ui-phase1 .btn-outline-primary {
+  border-color: color-mix(in srgb, var(--primary-color) 45%, #fff 10%) !important;
+  color: var(--primary-color) !important;
+}
+
+.ui-phase1 .btn-outline-primary:hover,
+.ui-phase1 .btn-outline-primary:focus,
+.ui-phase1 .btn-outline-primary:focus-visible,
+.ui-phase1 .btn-outline-primary:active {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(20, 99, 255, 0.24);
+}
+
+.ui-phase1 .btn-outline-secondary {
+  border-color: color-mix(in srgb, var(--neutral-color) 45%, #fff 10%) !important;
+  color: var(--neutral-color) !important;
+}
+
+.ui-phase1 .btn-outline-secondary:hover,
+.ui-phase1 .btn-outline-secondary:focus,
+.ui-phase1 .btn-outline-secondary:focus-visible,
+.ui-phase1 .btn-outline-secondary:active {
+  background-color: var(--neutral-color) !important;
+  border-color: var(--neutral-color) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--neutral-color) 35%, transparent);
+}
+
+.ui-phase1 .btn-outline-success {
+  border-color: color-mix(in srgb, #198754 45%, #fff 10%) !important;
+  color: #198754 !important;
+}
+
+.ui-phase1 .btn-outline-success:hover,
+.ui-phase1 .btn-outline-success:focus,
+.ui-phase1 .btn-outline-success:focus-visible,
+.ui-phase1 .btn-outline-success:active {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(25, 135, 84, 0.24);
+}
+
+.ui-phase1 .btn-outline-warning {
+  border-color: color-mix(in srgb, #ffc107 55%, #000 8%) !important;
+  color: #d39a00 !important;
+}
+
+.ui-phase1 .btn-outline-warning:hover,
+.ui-phase1 .btn-outline-warning:focus,
+.ui-phase1 .btn-outline-warning:focus-visible,
+.ui-phase1 .btn-outline-warning:active {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #1d2636 !important;
+  box-shadow: 0 8px 18px rgba(255, 193, 7, 0.28);
+}
+
+.ui-phase1 .btn-outline-danger {
+  border-color: color-mix(in srgb, #dc3545 45%, #fff 10%) !important;
+  color: #dc3545 !important;
+}
+
+.ui-phase1 .btn-outline-danger:hover,
+.ui-phase1 .btn-outline-danger:focus,
+.ui-phase1 .btn-outline-danger:focus-visible,
+.ui-phase1 .btn-outline-danger:active {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(220, 53, 69, 0.24);
+}
+
+/* Footer style */
+.site-footer {
+  background: var(--footer-bg);
+  border-top: 1px solid color-mix(in srgb, var(--footer-link) 20%, transparent);
+}
+
+.site-footer .footer-title,
+.site-footer .footer-description,
+.site-footer .footer-contact,
+.site-footer .copyright,
+.site-footer .developer {
+  color: var(--footer-text);
+}
+
+.site-footer .footer-links a,
+.site-footer .footer-contact a,
+.site-footer .developer-link {
+  color: var(--footer-link);
+}
+
+.site-footer .footer-links a:hover,
+.site-footer .footer-contact a:hover,
+.site-footer .developer-link:hover {
+  color: #ffffff;
+}
+
+
+.ui-phase1 .site-nav .nav-link.is-active,
+.ui-phase1 .site-nav .dropdown-item.is-active,
+.ui-phase1 .site-nav .dropdown-toggle.is-active {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 18%, transparent), 0 4px 12px rgba(20, 99, 255, 0.14);
+}

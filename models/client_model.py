@@ -178,19 +178,36 @@ def get_next_client_id():
         max_id = result['max_id'] if result and result['max_id'] is not None else 0
         return str(max_id + 1)
 
-def search_clients(query, limit=10):
+def search_clients(query, limit=10, office=None, active_only=False):
     with get_db_cursor() as cursor:
         search_val = f"%{query}%"
-        sql = """SELECT id, client_id, full_name, department, client_type 
-                 FROM clients 
-                 WHERE client_id LIKE %s OR full_name LIKE %s 
-                 ORDER BY full_name ASC LIMIT %s"""
-        cursor.execute(sql, (search_val, search_val, limit))
+
+        if active_only:
+            sql = """SELECT DISTINCT c.id, c.client_id, c.full_name, c.department, c.client_type
+                     FROM clients c
+                     JOIN logs l ON l.client_id = c.client_id
+                     WHERE (c.client_id LIKE %s OR c.full_name LIKE %s)
+                       AND l.time_out IS NULL
+                       AND DATE(l.time_in) = CURDATE()"""
+            params = [search_val, search_val]
+            if office:
+                sql += " AND l.office = %s"
+                params.append(office)
+            sql += " ORDER BY c.full_name ASC LIMIT %s"
+            params.append(int(limit))
+            cursor.execute(sql, params)
+        else:
+            sql = """SELECT id, client_id, full_name, department, client_type
+                     FROM clients
+                     WHERE client_id LIKE %s OR full_name LIKE %s
+                     ORDER BY full_name ASC LIMIT %s"""
+            cursor.execute(sql, (search_val, search_val, int(limit)))
+
         rows = cursor.fetchall()
-        
+
         for row in rows:
             row['id'] = str(row['id'])
-            
+
         return rows
 
 def get_clients_filtered(search=None, limit=None):

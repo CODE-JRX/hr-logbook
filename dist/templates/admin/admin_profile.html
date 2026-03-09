@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Admin Profile  HR Logbook{% endblock %}
+{% block title %}Admin Profile — ASIST/UA Logbook{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -70,6 +70,10 @@
             <div class="info-item">
                 <span class="info-label">Email Address</span>
                 <span class="info-value">{{ admin.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Assigned Office</span>
+                <span class="info-value">{{ admin.office or 'ASIST/UA' }}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Account Created</span>

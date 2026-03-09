@@ -438,7 +438,7 @@ def csm_form():
             return redirect(url_for('client.csm_form'))
 
     # GET: render template
-    office = request.cookies.get('selected_office', 'Human Resources Management Unit')
+    office = request.cookies.get('selected_office', 'HUMAN RESOURCE MANAGEMENT UNIT')
     return render_template('CSM-form.html', office=office)
 
 
@@ -456,17 +456,26 @@ def search_client():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 @client_bp.route('/today_logs')
 def today_logs():
     # return only logs for the current day where clients are still logged in (time_out IS NULL)
     try:
         today = datetime.now().strftime('%Y-%m-%d')
-        
-        # Admin Office Restriction
-        admin_office = session.get('admin_office')
-        office_filter = admin_office if (admin_office and admin_office != 'ASIST/UA') else None
-        
+
+        is_admin = bool(session.get('admin_id'))
+        selected_office = (request.args.get('office') or '').strip().upper()
+        if selected_office in ('HRMU', 'HRMO'):
+            selected_office = 'HUMAN RESOURCE MANAGEMENT UNIT'
+
+        if is_admin:
+            # Requested behavior: admins see active clients across all offices.
+            office_filter = None
+        elif selected_office:
+            office_filter = selected_office
+        else:
+            # For non-admin users, office must be selected.
+            return jsonify([])
+
         rows = get_logs(start_date=today, end_date=today, office=office_filter)
         # keep only needed fields and filter out logged-out clients
         results = []
@@ -487,7 +496,6 @@ def today_logs():
         return jsonify(results)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 @client_bp.route('/client-log-report')
 @admin_required
@@ -1201,8 +1209,9 @@ def set_office():
     """Persist the selected office in a very long-lived cookie."""
     data = request.json or {}
     office = data.get('office', '').strip()
-    VALID_OFFICES = [
-        'HRMU',
+    hrm_unit = 'HUMAN RESOURCE MANAGEMENT UNIT'
+    valid_offices = [
+        hrm_unit,
         'RECORDS OFFICE',
         'REGISTRAR',
         'ACCOUNTING',
@@ -1211,14 +1220,16 @@ def set_office():
         'OFFICE OF THE CHIEF ADMINISTRATIVE OFFICER',
         'SUPPLY OFFICE',
     ]
-    if office.upper() not in VALID_OFFICES:
+    office_upper = office.upper()
+    if office_upper in ('HRMU', 'HRMO'):
+        office_upper = hrm_unit
+    if office_upper not in valid_offices:
         return jsonify({'ok': False, 'error': 'Invalid office'}), 400
-    resp = make_response(jsonify({'ok': True, 'office': office.upper()}))
+    resp = make_response(jsonify({'ok': True, 'office': office_upper}))
     # Max age: ~20 years in seconds
     max_age = 20 * 365 * 24 * 60 * 60
-    resp.set_cookie('selected_office', office.upper(), max_age=max_age, samesite='Lax')
+    resp.set_cookie('selected_office', office_upper, max_age=max_age, samesite='Lax')
     return resp
-
 
 @client_bp.route('/learn_face', methods=['POST'])
 def learn_face():
@@ -1286,3 +1297,5 @@ def term_of_use():
 @client_bp.route('/privacy-policy')
 def privacy_policy():
     return render_template('privacy-policy.html')
+
+

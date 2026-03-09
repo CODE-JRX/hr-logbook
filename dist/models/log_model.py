@@ -2,17 +2,18 @@ from db import get_db, get_db_cursor
 from datetime import datetime, timedelta
 import mysql.connector
 
-def add_time_in(client_id, purpose=None, additional_info=None):
+def add_time_in(client_id, purpose=None, additional_info=None, office=None):
     with get_db_cursor(commit=True) as cursor:
         now = datetime.now()
-        query = """INSERT INTO logs (client_id, time_in, time_out, purpose, additional_info)
-                   VALUES (%s, %s, %s, %s, %s)"""
+        query = """INSERT INTO logs (client_id, time_in, time_out, purpose, additional_info, office)
+                   VALUES (%s, %s, %s, %s, %s, %s)"""
         values = (
             client_id.upper() if isinstance(client_id, str) else client_id,
             now,
             None,
             purpose.upper() if isinstance(purpose, str) else purpose,
-            (additional_info or "").upper() if isinstance(additional_info, str) else (additional_info or "")
+            (additional_info or "").upper() if isinstance(additional_info, str) else (additional_info or ""),
+            office.upper() if isinstance(office, str) else office
         )
         cursor.execute(query, values)
 
@@ -28,7 +29,7 @@ def add_time_out(client_id, purpose=None):
         if log:
             cursor.execute("UPDATE logs SET time_out = %s WHERE id = %s", (now, log['id']))
 
-def get_logs(purpose=None, department=None, start_date=None, end_date=None, limit=None):
+def get_logs(purpose=None, department=None, office=None, start_date=None, end_date=None, limit=None):
     with get_db_cursor() as cursor:
         sql = """SELECT l.*, c.full_name, c.department, c.gender, c.age 
                  FROM logs l 
@@ -54,6 +55,10 @@ def get_logs(purpose=None, department=None, start_date=None, end_date=None, limi
         if department:
             where_clauses.append("c.department = %s")
             params.append(department)
+
+        if office:
+            where_clauses.append("l.office = %s")
+            params.append(office)
             
         if where_clauses:
             sql += " WHERE " + " AND ".join(where_clauses)
@@ -125,8 +130,13 @@ def get_purpose_counts():
         
         return rows_reformatted
 
-def get_total_logs():
+def get_total_logs(office=None):
     with get_db_cursor() as cursor:
-        cursor.execute("SELECT COUNT(*) as cnt FROM logs")
+        sql = "SELECT COUNT(*) as cnt FROM logs"
+        params = []
+        if office:
+            sql += " WHERE office = %s"
+            params.append(office)
+        cursor.execute(sql, params)
         result = cursor.fetchone()
         return result['cnt']

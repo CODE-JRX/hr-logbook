@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Client Log — HR Logbook{% endblock %}
+{% block title %}Client Log — ASIST/UA Logbook{% endblock %}
 
 {% block content %}
 <style>
@@ -205,23 +205,175 @@
 			opacity: 0;
 		}
 	}
+	@keyframes fadeIn {
+		from { opacity: 0; transform: translateY(-6px); }
+		to   { opacity: 1; transform: translateY(0); }
+	}
+
+	.office-bar {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 8px 16px 6px;
+		border-top: 1px solid rgba(0,0,0,0.07);
+		background: rgba(0,0,0,0.01);
+		flex-wrap: wrap;
+	}
+
+	[data-theme="dark"] .office-bar {
+		border-top-color: rgba(255,255,255,0.07);
+		background: rgba(255,255,255,0.02);
+	}
+
+	.office-label {
+		font-size: 0.78rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--text-color);
+		opacity: 0.55;
+	}
+
+	.office-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 12px;
+		border-radius: 20px;
+		font-size: 0.82rem;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+		background: linear-gradient(135deg, #0d6efd22, #6610f222);
+		color: #0d6efd;
+		border: 1.5px solid #0d6efd55;
+		transition: all 0.2s ease;
+	}
+
+	[data-theme="dark"] .office-badge {
+		background: linear-gradient(135deg, #0d6efd33, #6610f233);
+		color: #5ca8ff;
+		border-color: #5ca8ff55;
+	}
+
+	.office-badge.unset {
+		background: rgba(220,53,69,0.08);
+		color: #dc3545;
+		border-color: rgba(220,53,69,0.35);
+	}
+
+	.office-change-btn {
+		font-size: 0.75rem;
+		padding: 3px 10px;
+		border-radius: 20px;
+		border: 1px solid #0d6efd;
+		color: #0d6efd;
+		background: transparent;
+		cursor: pointer;
+		transition: all 0.18s ease;
+	}
+
+	.office-change-btn:hover {
+		background: rgba(13,110,253,0.10);
+	}
+
+	.office-select-wrap {
+		display: none;
+		animation: fadeIn 0.2s ease;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.office-select-wrap.visible {
+		display: flex;
+	}
+
+	.office-dropdown {
+		border-radius: 8px;
+		border: 1.5px solid #0d6efd66;
+		padding: 4px 10px;
+		font-size: 0.82rem;
+		outline: none;
+		background: var(--bg-color, #fff);
+		color: var(--text-color);
+		transition: border-color 0.2s;
+	}
+
+	.office-dropdown:focus {
+		border-color: #0d6efd;
+		box-shadow: 0 0 0 3px rgba(13,110,253,0.15);
+	}
+
+	.office-no-banner {
+		display: none;
+		margin: 0 0 10px;
+		padding: 10px 16px;
+		border-radius: 8px;
+		background: rgba(255,193,7,0.12);
+		border: 1.5px solid rgba(255,193,7,0.4);
+		color: #856404;
+		font-size: 0.87rem;
+		text-align: center;
+	}
+
+	[data-theme="dark"] .office-no-banner {
+		background: rgba(255,193,7,0.07);
+		color: #ffc107;
+		border-color: rgba(255,193,7,0.3);
+	}
 </style>
 <div class="card shadow-lg">
-	<div class="card-header d-flex justify-content-between align-items-center">
-		<h5 class="mb-0" style="color: var(--text-color);"><i class="fas fa-camera"></i> Client Log (Face Recognition)
-		</h5>
-		<div class="d-flex gap-2">
-			<button type="button" title="Use override if you are not identified correctly!"
-				class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#overrideModal">
-				<i class="fas fa-edit"></i> Override
+	<div class="card-header d-flex flex-column gap-0 p-0" style="border-bottom: none;">
+		<div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+			<h5 class="mb-0" style="color: var(--text-color);"><i class="fas fa-camera"></i> Client Log (Face Recognition)
+			</h5>
+			<div class="d-flex gap-2">
+				<button type="button" title="Use override if you are not identified correctly!"
+					class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#overrideModal">
+					<i class="fas fa-edit"></i> Override
+				</button>
+				<a href="{{ url_for('client.client_log_help') }}" class="btn btn-outline-primary btn-sm"
+					title="How to use Client Log">
+					<i class="fas fa-question-circle"></i> Help
+				</a>
+			</div>
+		</div>
+		<!-- Office Selector Bar -->
+		<div class="office-bar">
+			<span class="office-label"><i class="fas fa-building me-1"></i>Office:</span>
+
+			<!-- Badge showing current office -->
+			<span id="office-badge" class="office-badge unset">
+				<i class="fas fa-map-marker-alt" style="font-size:0.7rem;"></i>
+				<span id="office-badge-text">Not Set</span>
+			</span>
+			<button id="office-change-btn" class="office-change-btn">
+				<i class="fas fa-pencil-alt me-1" style="font-size:0.7rem;"></i>Change
 			</button>
-			<a href="{{ url_for('client.client_log_help') }}" class="btn btn-outline-primary btn-sm"
-				title="How to use Client Log">
-				<i class="fas fa-question-circle"></i> Help
-			</a>
+
+			<!-- Inline dropdown (hidden until Change is clicked) -->
+			<div class="office-select-wrap" id="office-select-wrap">
+				<select id="office-dropdown" class="office-dropdown">
+					<option value="">-- Select Office --</option>
+					<option value="HUMAN RESOURCE MANAGEMENT UNIT">HUMAN RESOURCE MANAGEMENT UNIT</option>
+					<option value="RECORDS OFFICE">Records Office</option>
+					<option value="REGISTRAR">Registrar</option>
+					<option value="ACCOUNTING">Accounting</option>
+					<option value="CASHIER">Cashier</option>
+					<option value="OFFICE OF THE PRESIDENT">Office of the President</option>
+					<option value="OFFICE OF THE CHIEF ADMINISTRATIVE OFFICER">Office of the Chief Administrative Officer</option>
+					<option value="SUPPLY OFFICE">Supply Office</option>
+				</select>
+				<button id="office-save-btn" class="btn btn-primary btn-sm" style="border-radius:20px; padding:3px 14px;">Save</button>
+				<button id="office-cancel-btn" class="btn btn-outline-secondary btn-sm" style="border-radius:20px; padding:3px 12px;">Cancel</button>
+			</div>
 		</div>
 	</div>
 	<div class="card-body text-center">
+		<!-- No-office warning banner -->
+		<div id="office-no-banner" class="office-no-banner">
+			<i class="fas fa-exclamation-triangle me-1"></i>
+			<strong>No office selected.</strong> Please select an office above before logging clients.
+		</div>
 		<div class="client-log-container">
 			<div class="camera-card shadow-lg rounded">
 				<!-- video preview (fills card) -->
@@ -431,30 +583,28 @@
 		<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel"
 			aria-hidden="true">
 			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
-					<div class="modal-header bg-danger text-white border-0">
-						<h5 class="modal-title fw-bold" id="logoutConfirmModalLabel"><i
-								class="fas fa-sign-out-alt me-2"></i> Client Logout</h5>
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-							aria-label="Close"></button>
+				<div class="modal-content">
+					<div class="modal-header border-0">
+						<h5 class="modal-title text-danger" id="logoutConfirmModalLabel"><i
+								class="fas fa-sign-out-alt me-2"></i>Client Logout</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
-					<div class="modal-body p-4 text-center">
-						<p class="mb-1 text-muted small text-uppercase fw-bold letter-spacing-1">Confirmation Required
-						</p>
-						<h5 class="mb-3">Are you sure you want to log out <br><span id="logout_client_name"
-								class="text-danger fw-bold"></span>?</h5>
-						<p class="text-muted small mb-0">This will record their exit time and end the current session.
+					<div class="modal-body text-center">
+						<p class="mb-0">Are you sure you want to log out <strong id="logout_client_name"
+								class="text-danger"></strong>?</p>
+						<p class="small text-muted mt-2 mb-0">This will record their exit time and end the current session.
 						</p>
 					</div>
-					<div class="modal-footer border-0 justify-content-center pb-4">
-						<button type="button" class="btn btn-outline-secondary px-4 h-auto" data-bs-dismiss="modal">Keep
+					<div class="modal-footer border-0">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep
 							Logged In</button>
-						<button id="btn_confirm_logout" type="button" class="btn btn-danger px-4 h-auto fw-bold">Yes,
+						<button id="btn_confirm_logout" type="button" class="btn btn-outline-danger">Yes,
 							Log Out</button>
 					</div>
 				</div>
 			</div>
 		</div>
+	</div>
 
 	</div>
 </div>
@@ -553,6 +703,7 @@
 	// Manual search elements
 	const manualSearch = document.getElementById('manual_search');
 	const suggestionsBox = document.getElementById('search_suggestions');
+	let currentOffice = ''; 
 
 	// Debounce helper
 	function debounce(fn, wait) {
@@ -993,7 +1144,8 @@
 					client_id: currentClientId,
 					action,
 					purposes,
-					additional_info: additionalInfoInput.value || null
+					additional_info: additionalInfoInput.value || null,
+					office: currentOffice || null
 					// photo_data removed; learning now happens on "That's me" click
 				})
 			});
@@ -1026,7 +1178,8 @@
 		const el = document.getElementById('systemLog');
 		if (!el) return;
 		try {
-			const res = await fetch('/today_logs');
+			const officeParam = currentOffice ? ('?office=' + encodeURIComponent(currentOffice)) : '';
+			const res = await fetch('/today_logs' + officeParam);
 			const data = await res.json();
 			if (!Array.isArray(data)) {
 				el.innerHTML = '<div class="text-muted">Error loading logs</div>';
@@ -1097,5 +1250,76 @@
 	document.getElementById('overrideModal').addEventListener('shown.bs.modal', function () {
 		document.getElementById('manual_search').focus();
 	});
+
+	// ─── Office Selector Logic ───────────────────────────────────────────────
+
+	const officeBadge      = document.getElementById('office-badge');
+	const officeBadgeText  = document.getElementById('office-badge-text');
+	const officeChangeBtn  = document.getElementById('office-change-btn');
+	const officeSelectWrap = document.getElementById('office-select-wrap');
+	const officeDropdown   = document.getElementById('office-dropdown');
+	const officeSaveBtn    = document.getElementById('office-save-btn');
+	const officeCancelBtn  = document.getElementById('office-cancel-btn');
+	const officeNoBanner   = document.getElementById('office-no-banner');
+
+	function applyOffice(office) {
+		currentOffice = office || '';
+		if (currentOffice) {
+			officeBadgeText.textContent = currentOffice;
+			officeBadge.classList.remove('unset');
+			officeNoBanner.style.display = 'none';
+		} else {
+			officeBadgeText.textContent = 'Not Set';
+			officeBadge.classList.add('unset');
+			officeNoBanner.style.display = 'block';
+		}
+	}
+
+	// Load saved office from server (reads the long-lived cookie)
+	fetch('/get_office')
+		.then(r => r.json())
+		.then(d => {
+			applyOffice(d.office || '');
+			if (d.office) officeDropdown.value = d.office;
+			refreshTodayLogs();
+		})
+		.catch(() => applyOffice(''));
+
+	// Toggle dropdown panel
+	officeChangeBtn.addEventListener('click', () => {
+		officeDropdown.value = currentOffice;
+		officeSelectWrap.classList.toggle('visible');
+	});
+
+	officeCancelBtn.addEventListener('click', () => {
+		officeSelectWrap.classList.remove('visible');
+	});
+
+	// Save selection to server (sets cookie)
+	officeSaveBtn.addEventListener('click', async () => {
+		const chosen = officeDropdown.value.trim();
+		if (!chosen) { officeDropdown.focus(); return; }
+		try {
+			const res = await fetch('/set_office', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ office: chosen })
+			});
+			const data = await res.json();
+			if (data.ok) {
+				applyOffice(data.office);
+				officeSelectWrap.classList.remove('visible');
+				refreshTodayLogs();
+			} else {
+				alert('Could not save office: ' + (data.error || 'Unknown error'));
+			}
+		} catch (err) {
+			alert('Failed to contact server: ' + err.message);
+		}
+	});
 </script>
 {% endblock %}
+
+
+
+

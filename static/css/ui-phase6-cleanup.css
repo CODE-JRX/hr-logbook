@@ -1,0 +1,94 @@
+.icon-gap-5 {
+  margin-right: 5px;
+}
+
+.is-hidden-initial {
+  display: none;
+}
+
+.modal-action-pad {
+  padding: 10px 20px;
+}
+
+.clean-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.capture-controls-initial {
+  display: none !important;
+}
+
+.input-force-lowercase {
+  text-transform: lowercase;
+}
+
+.upload-input-hidden {
+  display: none;
+}
+
+.chart-min-panel {
+  min-height: 300px;
+  position: relative;
+}
+
+.minw-0 {
+  min-width: 0;
+}
+
+
+.account-info-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.account-info-meta {
+  min-width: 0;
+}
+
+.account-email {
+  overflow-wrap: anywhere;
+}
+
+.account-photo-wrap {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 576px) {
+  .account-info-panel {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+
+  .account-photo-wrap {
+    margin-left: 0 !important;
+    margin-bottom: .25rem;
+  }
+
+  .account-info-actions .btn {
+    width: 100%;
+  }
+
+  .dashboard-profile-photo {
+    width: 76px;
+    height: 76px;
+    margin-top: 0;
+    margin-right: 0;
+  }
+}
+.dashboard-active-clients {
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.active-client-meta {
+  text-align: left;
+}
+
+.db-modal-icon {
+  font-size: 4rem;
+}
+
+
