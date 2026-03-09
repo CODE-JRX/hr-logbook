@@ -72,6 +72,10 @@
                 <span class="info-value">{{ admin.email }}</span>
             </div>
             <div class="info-item">
+                <span class="info-label">Assigned Office</span>
+                <span class="info-value">{{ admin.office or 'ASIST/UA' }}</span>
+            </div>
+            <div class="info-item">
                 <span class="info-label">Account Created</span>
                 <span class="info-value">{{ admin.created_at.strftime('%B %d, %Y') if admin.created_at else 'N/A' }}</span>
             </div>

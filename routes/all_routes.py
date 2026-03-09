@@ -462,7 +462,12 @@ def today_logs():
     # return only logs for the current day where clients are still logged in (time_out IS NULL)
     try:
         today = datetime.now().strftime('%Y-%m-%d')
-        rows = get_logs(start_date=today, end_date=today)
+        
+        # Admin Office Restriction
+        admin_office = session.get('admin_office')
+        office_filter = admin_office if (admin_office and admin_office != 'ASIST/UA') else None
+        
+        rows = get_logs(start_date=today, end_date=today, office=office_filter)
         # keep only needed fields and filter out logged-out clients
         results = []
         for r in rows:
@@ -494,7 +499,13 @@ def client_log_report():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     limit = request.args.get('limit', '25')
-    print_mode = request.args.get('print') == '1'
+    print_mode = request.args.get('print') == 'true'
+
+    # Admin Office Restriction
+    admin_office = session.get('admin_office')
+    # If admin has a specific office, override the filter and force their office
+    if admin_office and admin_office != 'ASIST/UA':
+        office = admin_office
 
     logs = get_logs(purpose=purpose, department=department, office=office, start_date=start_date, end_date=end_date, limit=limit)
 
@@ -557,6 +568,11 @@ def csm_report():
             age_max = data.get('age_max')
             service = data.get('service')
             agency = data.get('agency')
+
+            # Admin Office Restriction
+            admin_office = session.get('admin_office')
+            if admin_office and admin_office != 'ASIST/UA':
+                agency = admin_office
 
             q = data.get('q', '')  # search query
 
@@ -665,6 +681,11 @@ def csm_report():
     service = request.args.get('service')
     agency = request.args.get('agency')
 
+    # Admin Office Restriction
+    admin_office = session.get('admin_office')
+    if admin_office and admin_office != 'ASIST/UA':
+        agency = admin_office
+
 
     # Convert age_min/max to int if provided
     try:
@@ -738,22 +759,18 @@ def admin_dashboard():
         return redirect(url_for('client.admin_login'))
 
     # Serve dashboard page (stats/empty) - chart data comes from /admin/chart_data
+    admin_office = session.get('admin_office')
+    office_filter = admin_office if (admin_office and admin_office != 'ASIST/UA') else None
+
     total_clients = get_client_count()
-    total_logs = get_total_logs()
-    # Safely compute total satisfactory surveys. Prefer model helper if available,
-    # but fall back to a direct COUNT query if the helper cannot be imported or fails.
+    total_logs = get_total_logs(office=office_filter)
+    
+    # Safely compute total satisfactory surveys.
     try:
-        # local import to avoid import-time issues
         from models.csm_form_model import get_csm_form_count
-        total_satisfactory_surveys = get_csm_form_count()
+        total_satisfactory_surveys = get_csm_form_count(office=office_filter)
     except Exception:
-        try:
-            with get_db_cursor() as cursor:
-                cursor.execute("SELECT COUNT(*) as cnt FROM csm_form")
-                row = cursor.fetchone()
-                total_satisfactory_surveys = row['cnt'] if row else 0
-        except Exception:
-            total_satisfactory_surveys = 0
+        total_satisfactory_surveys = 0
     admin = get_admin_by_id(session.get('admin_id'))
     stats = {'total_clients': total_clients, 'total_logs': total_logs, 'total_satisfactory_surveys': total_satisfactory_surveys}
     return render_template('admin/admin_dashboard.html', stats=stats, admin=admin)
@@ -781,6 +798,7 @@ def admin_signup():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm = request.form.get('confirm_password') or request.form.get('confirm')
+        office = request.form.get("office", "ASIST/UA").strip()
         photo_data = request.form.get('photo_data')
 
         # Validate key fields
@@ -843,7 +861,7 @@ def admin_signup():
             flash("No face detected in any photo. Please try again.")
             return redirect(url_for('client.admin_signup'))
             
-        new_id = add_admin(first_name, last_name, email, password, embeddings, pin)
+        new_id = add_admin(first_name, last_name, email, password, embeddings, pin, office)
 
         if new_id:
              # Save center image as profile pic
@@ -883,6 +901,7 @@ def admin_login():
         if admin:
             session['admin_id'] = admin['id']
             session['admin_email'] = admin['email']
+            session['admin_office'] = admin.get('office', 'ASIST/UA')
             flash('Signed in successfully')
             return redirect(url_for('client.admin_dashboard'))
         else:
@@ -948,8 +967,10 @@ def admin_verify_pin():
         if verify_admin_pin(admin, pin):
             # 2FA Success
             session.pop('2fa_pending_admin_id', None)
-            session['admin_id'] = str(admin['id'])
-            session['admin_email'] = admin.get('email')
+            session['admin_id'] = admin['id']
+            session['admin_email'] = admin['email']
+            session['admin_office'] = admin.get('office', 'ASIST/UA')
+            flash('Face match and PIN verified')
             return jsonify({'ok': True, 'redirect': url_for('client.admin_dashboard')})
         else:
             return jsonify({'ok': False, 'error': 'Invalid PIN'}), 200

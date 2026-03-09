@@ -102,9 +102,14 @@ def get_agencies():
         rows = cursor.fetchall()
         return sorted([row['agency_visited'] for row in rows])
 
-def get_csm_form_count():
-    """Return total number of rows in csm_form table."""
+def get_csm_form_count(office=None):
+    """Return total number of rows in csm_form table, optionally filtered by office."""
     with get_db_cursor() as cursor:
-        cursor.execute("SELECT COUNT(*) as cnt FROM csm_form")
+        sql = "SELECT COUNT(*) as cnt FROM csm_form"
+        params = []
+        if office:
+            sql += " WHERE agency_visited = %s"
+            params.append(office)
+        cursor.execute(sql, params)
         row = cursor.fetchone()
         return row['cnt'] if row else 0

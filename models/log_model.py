@@ -130,8 +130,13 @@ def get_purpose_counts():
         
         return rows_reformatted
 
-def get_total_logs():
+def get_total_logs(office=None):
     with get_db_cursor() as cursor:
-        cursor.execute("SELECT COUNT(*) as cnt FROM logs")
+        sql = "SELECT COUNT(*) as cnt FROM logs"
+        params = []
+        if office:
+            sql += " WHERE office = %s"
+            params.append(office)
+        cursor.execute(sql, params)
         result = cursor.fetchone()
         return result['cnt']
