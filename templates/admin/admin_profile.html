@@ -73,11 +73,12 @@
             </div>
             <div class="info-item">
                 <span class="info-label">Assigned Office</span>
-                <span class="info-value">{{ admin.office or 'ASIST/UA' }}</span>
+                <span class="info-value">{{ admin.office_name or admin.office or 'ASIST/UA' }}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Account Created</span>
-                <span class="info-value">{{ admin.created_at.strftime('%B %d, %Y') if admin.created_at else 'N/A' }}</span>
+                <span class="info-value">{{ admin.created_at.strftime('%B %d, %Y') if admin.created_at else 'N/A'
+                    }}</span>
             </div>
         </div>
 
@@ -86,20 +87,24 @@
             <form action="{{ url_for('client.change_password') }}" method="POST">
                 <div class="mb-3">
                     <label for="old_password" class="form-label">Old Password</label>
-                    <input type="password" class="form-control" id="old_password" name="old_password" required>
+                    <input type="password" class="form-control" id="old_password" name="old_password" required
+                        autocapitalize="none" autocorrect="off" spellcheck="false">
                 </div>
                 <hr>
                 <div class="mb-3">
                     <label for="new_password" class="form-label">New Password</label>
-                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                    <input type="password" class="form-control" id="new_password" name="new_password" required
+                        autocapitalize="none" autocorrect="off" spellcheck="false">
                 </div>
                 <div class="mb-3">
                     <label for="confirm_password" class="form-label">Confirm New Password</label>
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required
+                        autocapitalize="none" autocorrect="off" spellcheck="false">
                 </div>
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" class="btn btn-outline-primary">Update Password</button>
-                    <a href="{{ url_for('client.admin_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                    <a href="{{ url_for('client.admin_dashboard') }}" class="btn btn-outline-secondary">Back to
+                        Dashboard</a>
                 </div>
             </form>
         </div>
@@ -117,8 +122,10 @@
         var modal = new bootstrap.Modal(document.getElementById('passwordModal'));
         var modalLabel = document.getElementById('passwordModalLabel');
         var modalMessage = document.getElementById('passwordModalMessage');
-        modalMessage.textContent = {{ message | tojson }};
-        
+        // Use JSON.parse to prevent IDE formatter from breaking Jinja syntax onto subsequent lines
+        var escapedMessage = JSON.parse('{{ message | tojson | forceescape }}');
+        modalMessage.textContent = escapedMessage;
+
         {% if 'successfully' in message.lower() %}
         modalLabel.innerHTML = '<i class="fas fa-check-circle me-2 text-success"></i>Password Updated Successfully';
         modalLabel.className = 'modal-title text-success';
@@ -126,7 +133,7 @@
         modalLabel.innerHTML = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>Password Update Failed';
         modalLabel.className = 'modal-title text-danger';
         {% endif %}
-        
+
         modal.show();
     });
 </script>

@@ -1,10 +1,17 @@
 from db import get_db, get_db_cursor
 from datetime import datetime, timedelta
 import mysql.connector
+from models.office_model import get_office_id_by_name
 
 def add_time_in(client_id, purpose=None, additional_info=None, office=None):
     with get_db_cursor(commit=True) as cursor:
         now = datetime.now()
+        
+        # Convert office name to ID if it's a string
+        office_id = office
+        if office and isinstance(office, str):
+            office_id = get_office_id_by_name(office)
+            
         query = """INSERT INTO logs (client_id, time_in, time_out, purpose, additional_info, office)
                    VALUES (%s, %s, %s, %s, %s, %s)"""
         values = (
@@ -13,7 +20,7 @@ def add_time_in(client_id, purpose=None, additional_info=None, office=None):
             None,
             purpose.upper() if isinstance(purpose, str) else purpose,
             (additional_info or "").upper() if isinstance(additional_info, str) else (additional_info or ""),
-            office.upper() if isinstance(office, str) else office
+            office_id
         )
         cursor.execute(query, values)
 
@@ -31,9 +38,11 @@ def add_time_out(client_id, purpose=None):
 
 def get_logs(purpose=None, department=None, office=None, start_date=None, end_date=None, limit=None):
     with get_db_cursor() as cursor:
-        sql = """SELECT l.*, c.full_name, c.department, c.gender, c.age 
+        # Join with offices table to get the office name
+        sql = """SELECT l.*, c.full_name, c.department, c.gender, c.age, o.name as office_name
                  FROM logs l 
-                 LEFT JOIN clients c ON l.client_id = c.client_id"""
+                 LEFT JOIN clients c ON l.client_id = c.client_id
+                 LEFT JOIN offices o ON l.office = o.id"""
         
         where_clauses = []
         params = []
@@ -57,8 +66,14 @@ def get_logs(purpose=None, department=None, office=None, start_date=None, end_da
             params.append(department)
 
         if office:
-            where_clauses.append("l.office = %s")
-            params.append(office)
+            # If office is passed as string, we need to handle it or expect ID
+            if isinstance(office, str) and not office.isdigit():
+                oid = get_office_id_by_name(office)
+                where_clauses.append("l.office = %s")
+                params.append(oid)
+            else:
+                where_clauses.append("l.office = %s")
+                params.append(office)
             
         if where_clauses:
             sql += " WHERE " + " AND ".join(where_clauses)
@@ -135,8 +150,13 @@ def get_total_logs(office=None):
         sql = "SELECT COUNT(*) as cnt FROM logs"
         params = []
         if office:
-            sql += " WHERE office = %s"
-            params.append(office)
+            if isinstance(office, str) and not office.isdigit():
+                oid = get_office_id_by_name(office)
+                sql += " WHERE office = %s"
+                params.append(oid)
+            else:
+                sql += " WHERE office = %s"
+                params.append(office)
         cursor.execute(sql, params)
         result = cursor.fetchone()
         return result['cnt']

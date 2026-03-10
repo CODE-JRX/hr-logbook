@@ -205,3 +205,20 @@ body {
 .ui-phase1 .site-nav .dropdown-toggle.is-active {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 18%, transparent), 0 4px 12px rgba(20, 99, 255, 0.14);
 }
+
+/* Table Header Accessibility Fix */
+.table thead.table-light th {
+  background-color: #f8f9fa !important;
+  color: #1d2636 !important;
+}
+
+[data-theme="dark"] .table thead.table-light th {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #e9f0ff !important;
+}
+
+
+/* Global Table Body Opacity */
+.table tbody {
+  opacity: 0.9;
+}
