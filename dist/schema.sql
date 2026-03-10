@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS csm_form (
     id INT AUTO_INCREMENT PRIMARY KEY,
     control_no VARCHAR(50) UNIQUE NOT NULL,
     date DATE NOT NULL,
-    agency_visited VARCHAR(255),
+    office VARCHAR(255),
     client_type VARCHAR(50),
     sex VARCHAR(20),
     age INT,

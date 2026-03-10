@@ -7,7 +7,7 @@ from models.client_model import search_clients
 from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding, improve_client_embedding, delete_embeddings_by_client_id
 from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
-from models.csm_form_model import insert_csm_form, get_csm_forms_filtered, get_agencies
+from models.csm_form_model import insert_csm_form, get_csm_forms_filtered, get_offices
 from db import get_db_cursor
 from models.client_model import get_departments
 from models.log_model import get_logs_by_day, get_department_counts, get_purpose_counts, get_total_logs
@@ -389,7 +389,7 @@ def csm_form():
                 except ValueError:
                     flash('Invalid date format. Please use MM/DD/YYYY.')
                     return redirect(url_for('client.csm_form'))
-            agency_visited = request.form.get('agency_visited')
+            office = request.form.get('office')
             client_type = request.form.get('client_type')
             sex = request.form.get('sex')
             region_of_residence = request.form.get('region_of_residence')
@@ -422,7 +422,7 @@ def csm_form():
             suggestion = request.form.get('suggestion')
 
             new_id = insert_csm_form(
-                control_no, date_val, agency_visited, client_type, sex, age, region_of_residence,
+                control_no, date_val, office, client_type, sex, age, region_of_residence,
                 email, service_availed, awareness_of_cc, cc_of_this_office_was, cc_help_you,
                 sdq_vals, suggestion
             )
@@ -601,13 +601,13 @@ def csm_report():
                 age_max=age_max,
                 service=service,
                 limit=limit,
-                agency=agency
+                office=agency
             )
 
             # If search query, filter further
             if q:
                 q_lower = q.lower()
-                csm_forms = [f for f in csm_forms if any(q_lower in str(f.get(field, '')).lower() for field in ['control_no', 'date', 'agency_visited', 'client_type', 'sex', 'age', 'region_of_residence', 'email', 'service_availed'])]
+                csm_forms = [f for f in csm_forms if any(q_lower in str(f.get(field, '')).lower() for field in ['control_no', 'date', 'office', 'client_type', 'sex', 'age', 'region_of_residence', 'email', 'service_availed'])]
 
             # Render both partials
             html = render_template('partials/csm_report_rows.html', csm_forms=csm_forms)
@@ -632,7 +632,7 @@ def csm_report():
 
         # Write header
         header = [
-            'ID', 'Control #', 'Date', 'Agency Visited', 'Client Type', 'Sex', 'Age',
+            'ID', 'Control #', 'Date', 'Office', 'Client Type', 'Sex', 'Age',
             'Region of Residence', 'Email', 'Service Availed', 'Awareness of CC',
             'CC of This Office Was', 'CC Help You', 'SDQ0', 'SDQ1', 'SDQ2', 'SDQ3',
             'SDQ4', 'SDQ5', 'SDQ6', 'SDQ7', 'SDQ8', 'Suggestion', 'Created At'
@@ -645,7 +645,7 @@ def csm_report():
                 form.get('id', ''),
                 form.get('control_no', ''),
                 form.get('date', ''),
-                form.get('agency_visited', ''),
+                form.get('office', ''),
                 form.get('client_type', ''),
                 form.get('sex', ''),
                 form.get('age', ''),
@@ -712,7 +712,7 @@ def csm_report():
         age_max=age_max,
         service=service,
         limit=limit,
-        agency=agency
+        office=agency
     )
 
     # Get distinct values for filters
@@ -740,7 +740,7 @@ def csm_report():
             genders_set.add(form['sex'])
     genders_list = sorted(list(genders_set))
     
-    agencies = get_agencies()
+    offices = get_offices()
 
     filters = {
         'limit': limit, 'start_date': start_date, 'end_date': end_date,
@@ -755,7 +755,7 @@ def csm_report():
         services=services_list,
         regions=regions_list,
         genders=genders_list,
-        agencies=agencies
+        agencies=offices
     )
 
 

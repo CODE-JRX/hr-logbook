@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS admins (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     pin_hash VARCHAR(255) NULL,
+    office VARCHAR(255) NULL,
     face_embedding JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS csm_form (
     id INT AUTO_INCREMENT PRIMARY KEY,
     control_no VARCHAR(50) UNIQUE NOT NULL,
     date DATE NOT NULL,
-    agency_visited VARCHAR(255),
+    office VARCHAR(255),
     client_type VARCHAR(50),
     sex VARCHAR(20),
     age INT,

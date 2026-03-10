@@ -4,6 +4,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+
+def ensure_csm_form_office_column(cursor):
+    """Rename the legacy `agency_visited` column to `office` if needed."""
+    cursor.execute("SHOW COLUMNS FROM csm_form LIKE 'office'")
+    office_exists = cursor.fetchone() is not None
+    cursor.execute("SHOW COLUMNS FROM csm_form LIKE 'agency_visited'")
+    legacy_exists = cursor.fetchone() is not None
+
+    if not office_exists and legacy_exists:
+        cursor.execute("ALTER TABLE csm_form RENAME COLUMN agency_visited TO office")
+        print("Renamed csm_form.agency_visited to office.")
+
 def init_mysql():
     host = os.getenv("MYSQL_HOST", "localhost")
     user = os.getenv("MYSQL_USER", "root")
@@ -45,7 +58,9 @@ def init_mysql():
                         print(f"Executed: {cmd[:50]}...")
                     except mysql.connector.Error as err:
                         print(f"Error executing command: {err}")
-        
+
+            ensure_csm_form_office_column(cursor)
+
         conn.commit()
         cursor.close()
         conn.close()

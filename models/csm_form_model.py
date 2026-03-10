@@ -3,7 +3,7 @@ from datetime import datetime
 import mysql.connector
 
 def insert_csm_form(
-    control_no, date_val, agency_visited, client_type, sex, age, region_of_residence,
+    control_no, date_val, office, client_type, sex, age, region_of_residence,
     email, service_availed, awareness_of_cc, cc_of_this_office_was, cc_help_you,
     sdq_vals, suggestion
 ):
@@ -14,7 +14,7 @@ def insert_csm_form(
             sdqs[i] = sdq_vals[i]
 
     query = """INSERT INTO csm_form (
-        control_no, date, agency_visited, client_type, sex, age, region_of_residence,
+        control_no, date, office, client_type, sex, age, region_of_residence,
         email, service_availed, awareness_of_cc, cc_of_this_office_was, cc_help_you,
         sdq0, sdq1, sdq2, sdq3, sdq4, sdq5, sdq6, sdq7, sdq8, suggestion, created_at
     ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
@@ -22,7 +22,7 @@ def insert_csm_form(
     values = (
         control_no.upper() if isinstance(control_no, str) else control_no,
         date_val,
-        agency_visited.upper() if isinstance(agency_visited, str) else agency_visited,
+        office.upper() if isinstance(office, str) else office,
         client_type.upper() if isinstance(client_type, str) else client_type,
         sex.upper() if isinstance(sex, str) else sex,
         age,
@@ -47,7 +47,7 @@ def insert_csm_form(
         print(f"Error inserting CSM form: {err}")
         return None
 
-def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=None, age_min=None, age_max=None, service=None, limit=None, agency=None):
+def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=None, age_min=None, age_max=None, service=None, limit=None, office=None):
     with get_db_cursor() as cursor:
         sql = "SELECT * FROM csm_form"
         where_clauses = []
@@ -74,9 +74,9 @@ def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=N
         if service:
             where_clauses.append("service_availed LIKE %s")
             params.append(f"%{service}%")
-        if agency:
-            where_clauses.append("agency_visited = %s")
-            params.append(agency)
+        if office:
+            where_clauses.append("office = %s")
+            params.append(office)
             
         if where_clauses:
             sql += " WHERE " + " AND ".join(where_clauses)
@@ -95,12 +95,12 @@ def get_csm_forms_filtered(start_date=None, end_date=None, gender=None, region=N
             
         return rows
 
-def get_agencies():
-    """Return a list of distinct agencies/offices visited in the CSM forms."""
+def get_offices():
+    """Return a list of distinct offices in the CSM forms."""
     with get_db_cursor() as cursor:
-        cursor.execute("SELECT DISTINCT agency_visited FROM csm_form WHERE agency_visited IS NOT NULL")
+        cursor.execute("SELECT DISTINCT office FROM csm_form WHERE office IS NOT NULL")
         rows = cursor.fetchall()
-        return sorted([row['agency_visited'] for row in rows])
+        return sorted([row['office'] for row in rows])
 
 def get_csm_form_count(office=None):
     """Return total number of rows in csm_form table, optionally filtered by office."""
@@ -108,7 +108,7 @@ def get_csm_form_count(office=None):
         sql = "SELECT COUNT(*) as cnt FROM csm_form"
         params = []
         if office:
-            sql += " WHERE agency_visited = %s"
+            sql += " WHERE office = %s"
             params.append(office)
         cursor.execute(sql, params)
         row = cursor.fetchone()
