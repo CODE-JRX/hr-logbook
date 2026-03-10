@@ -8,18 +8,18 @@ from db import get_db_cursor
 
 def populate_office_column():
     """
-    Populates the 'office' column in the 'logs' table with 'HUMAN RESOURCE MANAGEMENT UNIT' 
+    Populates the 'office' column in the 'logs' table with 'HUMAN RESOURCE MANAGEMENT OFFICE' 
     wherever the current value is NULL, an empty string, or legacy HRMU/HRMO labels.
     """
     print("--- Office Column Population Script ---")
     print("Targeting: 'logs' table")
-    print("Action: Setting office = 'HUMAN RESOURCE MANAGEMENT UNIT' for empty or legacy records")
+    print("Action: Setting office = 'HUMAN RESOURCE MANAGEMENT OFFICE' for empty or legacy records")
     
     try:
         with get_db_cursor(commit=True) as cursor:
             # SQL query to update empty or null office entries
             # Also normalizes legacy values (HRMU/HRMO and older plural naming)
-            query = "UPDATE logs SET office = 'HUMAN RESOURCE MANAGEMENT UNIT' WHERE office IS NULL OR office = '' OR office IN ('HRMU', 'HRMO', 'HUMAN RESOURCES MANAGEMENT UNIT')"
+            query = "UPDATE logs SET office = 'HUMAN RESOURCE MANAGEMENT OFFICE' WHERE office IS NULL OR office = '' OR office IN ('HRMU', 'HRMO', 'HUMAN RESOURCES MANAGEMENT UNIT', 'HUMAN RESOURCE MANAGEMENT UNIT')"
             
             cursor.execute(query)
             affected_rows = cursor.rowcount

@@ -1,5 +1,6 @@
 import mysql.connector
 import os
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -23,28 +24,37 @@ def init_mysql():
         cursor.close()
         conn.close()
 
-        # Connect with database to create tables
+        # Connect with database to create/update tables
         conn = mysql.connector.connect(
             host=host,
             user=user,
             password=password,
             database=database
         )
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
-        with open('schema.sql', 'r') as f:
-            sql_script = f.read()
-            # Split script into individual commands - simple split by semicolon
-            # (Works for our current simple DDL)
-            commands = sql_script.split(';')
-            for command in commands:
-                cmd = command.strip()
-                if cmd and not cmd.startswith('USE') and not cmd.startswith('CREATE DATABASE'):
-                    try:
-                        cursor.execute(cmd)
-                        print(f"Executed: {cmd[:50]}...")
-                    except mysql.connector.Error as err:
-                        print(f"Error executing command: {err}")
+        # Read and execute schema.sql (should be in root)
+        schema_path = 'schema.sql'
+        if not os.path.exists(schema_path):
+            schema_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'schema.sql')
+        
+        if os.path.exists(schema_path):
+            with open(schema_path, 'r') as f:
+                sql_script = f.read()
+                
+                commands = sql_script.split(';')
+                for command in commands:
+                    cmd = command.strip()
+                    if cmd and not cmd.startswith('USE') and not cmd.startswith('CREATE DATABASE'):
+                        try:
+                            # Remove comments
+                            cmd_clean = re.sub(r'--.*', '', cmd)
+                            if cmd_clean.strip():
+                                cursor.execute(cmd_clean)
+                                print(f"Executed: {cmd_clean.strip()[:60]}...")
+                        except mysql.connector.Error as err:
+                            if "already exists" not in str(err).lower() and "Duplicate entry" not in str(err).lower():
+                                print(f"Warning/Error executing command: {err}")
         
         conn.commit()
         cursor.close()

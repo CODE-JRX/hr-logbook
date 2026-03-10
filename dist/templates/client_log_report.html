@@ -13,18 +13,6 @@
     }
   }
 
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-
-  th,
-  td {
-    border: 1px solid #dee2e6;
-    padding: 8px;
-    text-align: left;
-  }
-
   /* Print-friendly layout */
   @media print {
 
@@ -131,64 +119,10 @@
       color: #000 !important;
       border: 1px solid #000 !important;
     }
-
-    /* Table cells */
-    .results-table tbody td {
-      color: #000 !important;
-      background: #fff !important;
-      background-color: #fff !important;
-      border: 1px solid #000 !important;
-    }
-  }
-
-  .results-card {
-    background: var(--card-bg);
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .table-responsive {
-    overflow-x: auto;
-    margin-bottom: 20px;
-  }
-
-  .results-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    font-family: var(--font-family);
-    table-layout: auto;
-    min-width: 1000px;
-    /* Prevent collapse on search */
-  }
-
-  .results-table thead {
-    background-color: var(--primary-color);
-    color: white !important;
-  }
-
-  .results-table th,
-  .results-table td {
-    padding: 5px;
-    border: 1px solid var(--border-color);
-    text-align: center;
-    font-family: inherit;
-  }
-
-  /* Use class for striping to maintain consistency during filtering */
-  .results-table tbody tr.striped-row {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-
-  .results-table tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    transition: background-color 0.2s ease;
   }
 
   .print-only {
+
     display: none !important;
   }
 
@@ -212,13 +146,13 @@
 
   /* Small screen adjustments for better table rendering */
   @media (max-width: 768px) {
-    .results-table {
+    .table {
       font-size: 10px;
       min-width: 1000px;
     }
 
-    .results-table th,
-    .results-table td {
+    .table th,
+    .table td {
       padding: 8px;
       white-space: nowrap;
       overflow: hidden;
@@ -226,10 +160,6 @@
     }
 
     .table-responsive {
-      overflow-x: visible;
-    }
-
-    .results-card {
       overflow-x: auto;
     }
 
@@ -387,7 +317,9 @@
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0"><i class="fas fa-file-alt"></i> Client Log Report</h5>
     <div class="d-flex gap-2 no-print" role="group" aria-label="actions">
-      <button class="btn btn-sm btn-outline-success" type="button" onclick="window.open(window.location.href + (window.location.search ? '&' : '?') + 'print=1', '_blank')"><i class="fas fa-print"></i>
+      <button class="btn btn-sm btn-outline-success" type="button"
+        onclick="window.open(window.location.href + (window.location.search && window.location.search !== '?' ? '&' : '?') + 'print=true', '_blank')"><i
+          class="fas fa-print"></i>
         <span class="d-none d-md-inline">Print</span></button>
       <button class="btn btn-sm btn-outline-primary" type="button" id="exportCsvBtn"><i class="fas fa-download"></i>
         <span class="d-none d-md-inline">Export CSV</span></button>
@@ -425,7 +357,7 @@
         <select class="form-select" name="office">
           <option value="">All</option>
           {% for o in offices %}
-          <option value="{{ o }}" {% if filters.office==o %}selected{% endif %}>{{ o }}</option>
+          <option value="{{ o.name }}" {% if filters.office==o.name %}selected{% endif %}>{{ o.name }}</option>
           {% endfor %}
         </select>
       </div>
@@ -463,41 +395,39 @@
   </div>
 
   <div class="card-body p-0">
-    <div class="results-card">
-      <div class="table-responsive">
-        <table id="logsTable" class="results-table">
-          <thead>
-            <tr>
-              <th>NO.</th>
-              <th>FULL NAME</th>
-              <th>GENDER</th>
-              <th>AGE</th>
-              <th>DEPARTMENT</th>
-              <th>OFFICE</th>
-              <th>PURPOSE</th>
-              <th>ADDITIONAL INFO</th>
-              <th>TIME IN</th>
-              <th>TIME OUT</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for l in logs %}
-            <tr>
-              <td>{{ loop.index }}</td>
-              <td>{{ l.full_name or '' }}</td>
-              <td>{{ l.gender or '' }}</td>
-              <td>{{ l.age or '' }}</td>
-              <td>{{ l.department or '' }}</td>
-              <td>{{ l.office or '' }}</td>
-              <td>{{ l.purpose or '' }}</td>
-              <td>{{ l.additional_info or '' }}</td>
-              <td>{{ l.time_in }}</td>
-              <td>{{ l.time_out or '' }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <div class="table-responsive">
+      <table id="logsTable" class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>NO.</th>
+            <th>FULL NAME</th>
+            <th>GENDER</th>
+            <th>AGE</th>
+            <th>DEPARTMENT</th>
+            <th>OFFICE</th>
+            <th>PURPOSE</th>
+            <th>ADDITIONAL INFO</th>
+            <th>TIME IN</th>
+            <th>TIME OUT</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in logs %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ l.full_name or '' }}</td>
+            <td>{{ l.gender or '' }}</td>
+            <td>{{ l.age or '' }}</td>
+            <td>{{ l.department or '' }}</td>
+            <td>{{ l.office_name or l.office or '' }}</td>
+            <td>{{ l.purpose or '' }}</td>
+            <td>{{ l.additional_info or '' }}</td>
+            <td>{{ l.time_in }}</td>
+            <td>{{ l.time_out or '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

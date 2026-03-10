@@ -63,26 +63,30 @@
 				<div class="col-12">
 					<label for="email" class="form-label"><i class="fas fa-envelope"></i> Email <span
 							class="text-danger">*</span></label>
-					<input type="email" class="form-control input-force-lowercase" id="email" name="email" required oninput="this.value = this.value.toLowerCase()">
+					<input type="email" class="form-control input-force-lowercase" id="email" name="email" required
+						oninput="this.value = this.value.toLowerCase()">
 				</div>
 
 				<div class="col-12 col-md-6">
 					<label for="password" class="form-label"><i class="fas fa-lock"></i> Password <span
 							class="text-danger">*</span></label>
-					<input type="password" class="form-control" id="password" name="password" required>
+					<input type="password" class="form-control" id="password" name="password" required
+						autocapitalize="none" autocorrect="off" spellcheck="false">
 				</div>
 
 				<div class="col-12 col-md-6">
 					<label for="confirm_password" class="form-label"><i class="fas fa-lock"></i> Confirm Password <span
 							class="text-danger">*</span></label>
-					<input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+					<input type="password" class="form-control" id="confirm_password" name="confirm_password" required
+						autocapitalize="none" autocorrect="off" spellcheck="false">
 				</div>
 
 				<div class="col-12 col-md-6">
 					<label for="pin" class="form-label"><i class="fas fa-key"></i> 4-Digit PIN (for Face Login) <span
 							class="text-danger">*</span></label>
 					<input type="password" class="form-control" id="pin" name="pin" maxlength="4" pattern="[0-9]{4}"
-						inputmode="numeric" required placeholder="####">
+						inputmode="numeric" required placeholder="####" autocapitalize="none" autocorrect="off"
+						spellcheck="false">
 					<div class="form-text">Used for 2FA during face login.</div>
 				</div>
 
@@ -90,15 +94,15 @@
 					<label for="office" class="form-label"><i class="fas fa-building"></i> Assigned Office <span
 							class="text-danger">*</span></label>
 					<select class="form-select" id="office" name="office" required>
-						<option value="ASIST/UA">ASIST/UA (Universal Admin)</option>
-						<option value="HUMAN RESOURCE MANAGEMENT UNIT">HUMAN RESOURCE MANAGEMENT UNIT</option>
-						<option value="Records Office">Records Office</option>
-						<option value="Registrar">Registrar</option>
-						<option value="Accounting">Accounting</option>
-						<option value="Cashier">Cashier</option>
-						<option value="Office of the President">Office of the President</option>
-						<option value="Office of the Chief Administrative Officer">Office of the Chief Administrative Officer</option>
-						<option value="Supply Office">Supply Office</option>
+						<option value="" disabled selected>Select Office...</option>
+						{% if can_create_sa %}
+						<option value="SUPER ADMIN">SUPER ADMIN (Universal Admin)</option>
+						{% endif %}
+						{% for o in offices %}
+						{% if o.name not in ['ASIST/UA', 'SUPER ADMIN'] %}
+						<option value="{{ o.id }}">{{ o.name }}</option>
+						{% endif %}
+						{% endfor %}
 					</select>
 					<div class="form-text">Admin can only see records for this office.</div>
 				</div>
@@ -110,7 +114,8 @@
 						<div class="col-md-7">
 							<div class="camera-card mx-auto shadow-sm rounded" id="cameraCanvas">
 								<!-- video preview (fills card) -->
-								<video id="video" width="420" height="420" autoplay playsinline muted class="camera-video-layer"></video>
+								<video id="video" width="420" height="420" autoplay playsinline muted
+									class="camera-video-layer"></video>
 
 								<!-- face position guide (subtle broken square corners) -->
 								<div id="face-guide" aria-hidden="true">
@@ -131,17 +136,20 @@
 								<img id="preview" src="" alt="Preview" class="camera-preview-layer" />
 
 								<!-- camera action button placed inside the camera container -->
-								<button id="camera-action" type="button" title="Start camera for registration" class="btn btn-lg camera-action-btn">
+								<button id="camera-action" type="button" title="Start camera for registration"
+									class="btn btn-lg camera-action-btn">
 									<i class="fas fa-play me-2"></i>Start Camera
 								</button>
 
 								<!-- retake button placed inside the camera container -->
-								<button id="retake-btn" type="button" title="Retake all photos" class="btn btn-sm camera-retake-btn">
+								<button id="retake-btn" type="button" title="Retake all photos"
+									class="btn btn-sm camera-retake-btn">
 									<i class="fas fa-redo me-1"></i>Retake All
 								</button>
 
 								<!-- capture button placed inside the camera container -->
-								<button id="capture-btn" type="button" title="Capture photo" class="btn btn-sm camera-capture-btn" disabled>
+								<button id="capture-btn" type="button" title="Capture photo"
+									class="btn btn-sm camera-capture-btn" disabled>
 									<i class="fas fa-camera me-1"></i>Capture <span id="capture-target">Center</span>
 								</button>
 							</div>
@@ -157,35 +165,42 @@
 						<div class="col-md-5">
 							<div class="d-flex flex-column gap-2">
 								<!-- Preview: Center angle -->
-								<div class="border rounded p-1 position-relative capture-thumb"
-									id="previewBox-center">
+								<div class="border rounded p-1 position-relative capture-thumb" id="previewBox-center">
 									<img id="preview-center" class="capture-thumb-img">
-									<span id="placeholder-center" class="text-muted small position-absolute capture-thumb-label">Center View</span>
-									<div id="tick-center" class="position-absolute top-0 end-0 p-1 capture-thumb-tick"><i class="fas fa-check-circle text-success"></i>
+									<span id="placeholder-center"
+										class="text-muted small position-absolute capture-thumb-label">Center
+										View</span>
+									<div id="tick-center" class="position-absolute top-0 end-0 p-1 capture-thumb-tick">
+										<i class="fas fa-check-circle text-success"></i>
 									</div>
 								</div>
 
 								<!-- Preview: Left angle -->
-								<div class="border rounded p-1 position-relative capture-thumb"
-									id="previewBox-left">
+								<div class="border rounded p-1 position-relative capture-thumb" id="previewBox-left">
 									<img id="preview-left" class="capture-thumb-img">
-									<span id="placeholder-left" class="text-muted small position-absolute capture-thumb-label">Left Side View</span>
+									<span id="placeholder-left"
+										class="text-muted small position-absolute capture-thumb-label">Left Side
+										View</span>
 									<div id="tick-left" class="position-absolute top-0 end-0 p-1 capture-thumb-tick">
 										<i class="fas fa-check-circle text-success"></i>
 									</div>
 								</div>
 
 								<!-- Preview: Right angle -->
-								<div class="border rounded p-1 position-relative capture-thumb"
-									id="previewBox-right">
+								<div class="border rounded p-1 position-relative capture-thumb" id="previewBox-right">
 									<img id="preview-right" class="capture-thumb-img">
-									<span id="placeholder-right" class="text-muted small position-absolute capture-thumb-label">Right Side View</span>
-									<div id="tick-right" class="position-absolute top-0 end-0 p-1 capture-thumb-tick"><i class="fas fa-check-circle text-success"></i>
+									<span id="placeholder-right"
+										class="text-muted small position-absolute capture-thumb-label">Right Side
+										View</span>
+									<div id="tick-right" class="position-absolute top-0 end-0 p-1 capture-thumb-tick"><i
+											class="fas fa-check-circle text-success"></i>
 									</div>
 								</div>
 							</div>
 
-							<div id="message-overlay" class="message-overlay mt-2 position-relative message-overlay-hidden" aria-live="polite" aria-atomic="true"></div>
+							<div id="message-overlay"
+								class="message-overlay mt-2 position-relative message-overlay-hidden" aria-live="polite"
+								aria-atomic="true"></div>
 
 							<div class="mt-3">
 								<button id="signupBtn" type="submit" class="btn btn-outline-primary w-100" disabled><i
@@ -460,4 +475,3 @@
 	});
 </script>
 {% endblock %}
-

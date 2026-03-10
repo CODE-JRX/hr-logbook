@@ -153,9 +153,6 @@
                     Profile</a>
                 </div>
               </div>
-              <div class="ms-3 d-flex align-items-center account-photo-wrap">
-                <img src="{{ url_for('client.admin_profile_image', admin_id=admin.id) }}" alt="Admin photo" class="rounded-circle dashboard-profile-photo" loading="lazy" decoding="async">
-              </div>
             </div>
           </div>
 
@@ -373,4 +370,3 @@
   setInterval(refreshAdminActiveClients, 10000);
 </script>
 {% endblock %}
-

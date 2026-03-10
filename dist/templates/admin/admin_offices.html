@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Manage Offices — ASIST/UA Logbook{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-building"></i> Manage Offices</h5>
+            <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center"
+                data-bs-toggle="modal" data-bs-target="#addOfficeModal" title="Add Office">
+                <i class="fas fa-plus me-1"></i>
+                <span class="d-none d-md-inline">Add Office</span>
+            </button>
+        </div>
+        <div class="card-body">
+
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Office Name</th>
+                            <th>Status</th>
+                            <th>Date Created</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for office in offices %}
+                        <tr>
+                            <td>{{ office.id }}</td>
+                            <td><strong>{{ office.name }}</strong></td>
+                            <td>
+                                {% if office.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ office.created_at.strftime('%Y-%m-%d %H:%M') if office.created_at else 'N/A' }}</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Office Actions">
+                                    <form action="{{ url_for('client.admin_toggle_office', office_id=office.id) }}"
+                                        method="POST" class="d-inline">
+                                        <input type="hidden" name="is_active"
+                                            value="{% if office.is_active %}0{% else %}1{% endif %}">
+                                        <button type="submit"
+                                            class="btn btn-outline-info btn-sm d-inline-flex align-items-center"
+                                            title="{% if office.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                            <i
+                                                class="fas {% if office.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %} me-1"></i>
+                                            <span class="d-none d-md-inline">{% if office.is_active %}Deactivate{% else
+                                                %}Activate{% endif %}</span>
+                                        </button>
+                                    </form>
+                                    <button type="button"
+                                        class="btn btn-outline-primary btn-sm d-inline-flex align-items-center"
+                                        data-bs-toggle="modal" data-bs-target="#editOfficeModal"
+                                        onclick='window.populateEditOffice({{ office.id | tojson }}, {{ office.name | tojson }})'
+                                        title="Edit">
+                                        <i class="fas fa-pencil-alt me-1"></i> <span
+                                            class="d-none d-md-inline">Edit</span>
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-outline-danger btn-sm d-inline-flex align-items-center"
+                                        onclick='window.confirmDeleteOffice({{ office.id | tojson }}, {{ office.name | tojson }})'
+                                        {% if office.name in ['ASIST/UA', 'SUPER ADMIN'
+                                        , 'HUMAN RESOURCE MANAGEMENT OFFICE' ] or office.id==20 %}disabled{% endif %}
+                                        title="Delete">
+                                        <i class="fas fa-trash me-1"></i> <span class="d-none d-md-inline">Delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}

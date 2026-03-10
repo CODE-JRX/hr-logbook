@@ -12,7 +12,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 
-# Files and directories to include (relative to repo root)
 INCLUDE_FILES = [
     "app.py",
     "wsgi.py",
@@ -20,13 +19,19 @@ INCLUDE_FILES = [
     "init_mysql.py",
     "schema.sql",
     "run.bat",
+    "run_tests.bat",
     "requirements.txt",
     "README_PACKAGE.md",
     "DEPLOYMENT.md",
+    "AI_GUIDE.md",
     ".env.example",
     "run_run.vbs",
     "open-app-link.bat",
     "environment.yml",
+    "test_admin_2fa_flow.py",
+    "test_backup_script.py",
+    "test_multi_angle_flow.py",
+    "test_restore_script.py"
 ]
 
 INCLUDE_DIRS = [
@@ -35,6 +40,7 @@ INCLUDE_DIRS = [
     "templates",
     "static",
     "scripts",
+    "nginx-1.24.0"
 ]
 
 IGNORE_DIRS = {"__pycache__", "backup", "logs", ".git", ".venv", "venv"}

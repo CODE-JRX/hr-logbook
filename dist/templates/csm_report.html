@@ -547,20 +547,7 @@
             gap: 10px;
         }
 
-        /* Table responsive adjustments */
-        .results-table {
-            font-size: 11px;
-            min-width: 1200px;
-        }
 
-        .results-table th,
-        .results-table td {
-            padding: 6px;
-        }
-
-        .results-card {
-            overflow-x: auto;
-        }
 
         .filter-form input,
         .filter-form select {
@@ -848,7 +835,8 @@
                         <select id="agency" name="agency">
                             <option value="">All Offices</option>
                             {% for ag in agencies %}
-                            <option value="{{ ag }}" {% if filters.agency==ag %}selected{% endif %}>{{ ag }}</option>
+                            <option value="{{ ag.name }}" {% if filters.agency==ag.name %}selected{% endif %}>{{ ag.name
+                                }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -895,31 +883,25 @@
     </div>
 
     <div class="card-body p-0">
-        <div class="screen-view">
-
-            <div class="results-card">
-                <div class="table-responsive">
-                    <table id="csm-report" class="results-table">
-                        <thead>
-                            <tr>
-                                <th>CONTROL #</th>
-                                <th>DATE</th>
-                                <th>OFFICE</th>
-                                <th>CLIENT TYPE</th>
-                                <th>GENDER</th>
-                                <th>AGE</th>
-                                <th>REGION</th>
-                                <th>EMAIL</th>
-                                <th>SERVICES</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% include 'partials/csm_report_rows.html' %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
+        <div class="table-responsive">
+            <table id="csm-report" class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>CONTROL #</th>
+                        <th>DATE</th>
+                        <th>OFFICE</th>
+                        <th>CLIENT TYPE</th>
+                        <th>GENDER</th>
+                        <th>AGE</th>
+                        <th>REGION</th>
+                        <th>EMAIL</th>
+                        <th>SERVICES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% include 'partials/csm_report_rows.html' %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

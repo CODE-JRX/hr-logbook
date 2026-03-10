@@ -64,7 +64,7 @@
         <div class="col-md-4">
           <label for="name_ext" class="form-label">Name Extension</label>
           <select class="form-select" name="name_ext" id="name_ext">
-            <option value="">— None —</option>
+            <option value="">None</option>
             <option value="JR">JR</option>
             <option value="SR">SR</option>
             <option value="II">II</option>
@@ -106,8 +106,8 @@
         </div>
 
         <div class="col-12">
-          <label for="department" class="form-label"><i class="fas fa-building"></i> Department(Optional)</label>
-          <input class="form-control" type="text" name="department" id="department" placeholder="HUMAN RESOURCE MANAGEMENT UNIT">
+          <label for="department" class="form-label"><i class="fas fa-building"></i> Department (Optional)</label>
+          <input type="text" class="form-control" name="department" id="department" placeholder="Enter department name">
         </div>
 
         <div class="col-12">
@@ -118,7 +118,8 @@
             <div class="col-md-7">
               <div class="camera-card mx-auto shadow-sm rounded" id="cameraCanvas">
                 <!-- video preview (fills card) -->
-                <video id="video" width="420" height="420" autoplay playsinline muted class="camera-video-layer"></video>
+                <video id="video" width="420" height="420" autoplay playsinline muted
+                  class="camera-video-layer"></video>
 
                 <!-- face position guide (subtle broken square corners) -->
                 <div id="face-guide" aria-hidden="true">
@@ -139,7 +140,8 @@
                 <img id="preview" src="" alt="Preview" class="camera-preview-layer" />
 
                 <!-- camera action button placed inside the camera container -->
-                <button id="camera-action" type="button" title="Start camera for registration" class="btn btn-lg camera-action-btn">
+                <button id="camera-action" type="button" title="Start camera for registration"
+                  class="btn btn-lg camera-action-btn">
                   <i class="fas fa-play me-2"></i>Start Camera
                 </button>
 
@@ -149,7 +151,8 @@
                 </button>
 
                 <!-- capture button placed inside the camera container -->
-                <button id="capture-btn" type="button" title="Capture photo" class="btn btn-sm camera-capture-btn" disabled>
+                <button id="capture-btn" type="button" title="Capture photo" class="btn btn-sm camera-capture-btn"
+                  disabled>
                   <i class="fas fa-camera me-1"></i>Capture <span id="capture-target">Center</span>
                 </button>
               </div>
@@ -190,7 +193,8 @@
                 </div>
               </div>
 
-              <div id="message-overlay" class="message-overlay mt-2 position-relative message-overlay-hidden" aria-live="polite" aria-atomic="true"></div>
+              <div id="message-overlay" class="message-overlay mt-2 position-relative message-overlay-hidden"
+                aria-live="polite" aria-atomic="true"></div>
 
               <div class="mt-3">
                 <button id="saveBtn" type="submit" class="btn btn-outline-primary w-100" disabled><i
@@ -462,4 +466,3 @@
   });
 </script>
 {% endblock %}
-

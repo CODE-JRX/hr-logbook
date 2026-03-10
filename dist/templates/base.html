@@ -185,23 +185,32 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" id="reportsDropdown" data-bs-toggle="dropdown"
               aria-expanded="false"><i class="fas fa-chart-line"></i>Reports</a>
             <ul class="dropdown-menu custom-dropdown-menu" aria-labelledby="reportsDropdown">
-              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list icon-gap-5"></i>Log Report</a>
+              <li><a class="dropdown-item" href="/client-log-report"><i class="fas fa-clipboard-list icon-gap-5"></i>Log
+                  Report</a>
               </li>
-              <li><a class="dropdown-item" href="/csm-report"><i class="fas fa-file-signature icon-gap-5"></i>Satisfactory
+              <li><a class="dropdown-item" href="/csm-report"><i
+                    class="fas fa-file-signature icon-gap-5"></i>Satisfactory
                   Report</a></li>
             </ul>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" id="adminDropdown" data-bs-toggle="dropdown"
               aria-expanded="false"><i class="fas fa-user-cog"></i>Admin</a>
             <ul class="dropdown-menu dropdown-menu-end custom-dropdown-menu" aria-labelledby="adminDropdown">
-              <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt icon-gap-5"></i>Dashboard</a></li>
-              <li><a class="dropdown-item" href="/admin/signup"><i class="fas fa-user-plus icon-gap-5"></i>Add Admin</a></li>
-              <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user-circle icon-gap-5"></i>Profile</a></li>
+              <li><a class="dropdown-item" href="/admin/dashboard"><i
+                    class="fas fa-tachometer-alt icon-gap-5"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="/admin/signup"><i class="fas fa-user-plus icon-gap-5"></i>Add Admin</a>
+              </li>
+              <li><a class="dropdown-item" href="/admin/profile"><i
+                    class="fas fa-user-circle icon-gap-5"></i>Profile</a></li>
+              {% if session.admin_office in ['SUPER ADMIN', '1', 1] %}
+              <li><a class="dropdown-item" href="/admin/offices"><i class="fas fa-building icon-gap-5"></i>Manage
+                  Offices</a></li>
+              {% endif %}
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item text-danger" href="/admin/logout"><i class="fas fa-sign-out-alt icon-gap-5"></i>Logout</a></li>
+              <li><a class="dropdown-item text-danger" href="/admin/logout"><i
+                    class="fas fa-sign-out-alt icon-gap-5"></i>Logout</a></li>
             </ul>
           </li>
           <li class="nav-item">
@@ -334,10 +343,13 @@
             <div id="troubleshoot-result" class="troubleshoot-log"></div>
           </div>
           <div class="modal-footer border-0 justify-content-center">
-            <button type="button" id="btn-troubleshoot" class="btn btn-outline-primary w-75 rounded-pill modal-action-pad">
+            <button type="button" id="btn-troubleshoot"
+              class="btn btn-outline-primary w-75 rounded-pill modal-action-pad">
               <i class="fas fa-tools me-2"></i>Troubleshoot & Fix
             </button>
-            <button type="button" id="btn-refresh" class="btn btn-outline-secondary w-75 rounded-pill is-hidden-initial modal-action-pad" onclick="location.reload()">
+            <button type="button" id="btn-refresh"
+              class="btn btn-outline-secondary w-75 rounded-pill is-hidden-initial modal-action-pad"
+              onclick="location.reload()">
               <i class="fas fa-sync me-2"></i>Reload Page
             </button>
           </div>
@@ -421,6 +433,86 @@
           <div class="modal-footer border-0">
             <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">OK</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Office Modal -->
+    <div class="modal fade" id="addOfficeModal" tabindex="-1" aria-labelledby="addOfficeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form action="{{ url_for('client.admin_add_office') }}" method="POST">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addOfficeModalLabel">Add New Office</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="officeName" class="form-label">Office Name</label>
+                <input type="text" class="form-control text-uppercase" id="officeName" name="name" required
+                  placeholder="E.G. REGISTRAR'S OFFICE">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Add Office</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Office Confirmation Modal -->
+    <div class="modal fade" id="deleteOfficeModal" tabindex="-1" aria-labelledby="deleteOfficeModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title text-danger" id="deleteOfficeModalLabel">
+              <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="deleteOfficeName"></strong>?</p>
+            <p class="small text-muted">Warning: This might affect existing logs and reports associated with this
+              office.</p>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form id="deleteOfficeForm" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-outline-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Office Modal -->
+    <div class="modal fade" id="editOfficeModal" tabindex="-1" aria-labelledby="editOfficeModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <form id="editOfficeForm" method="POST">
+            <div class="modal-header border-0 bg-primary text-white">
+              <h5 class="modal-title" id="editOfficeModalLabel">
+                <i class="fas fa-edit me-2"></i>Edit Office
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+              <div class="mb-3">
+                <label for="editOfficeName" class="form-label fw-bold">Office Name</label>
+                <input type="text" class="form-control form-control-lg text-uppercase" id="editOfficeName" name="name"
+                  required placeholder="E.G. REGISTRAR'S OFFICE">
+              </div>
+            </div>
+            <div class="modal-footer border-0 pb-4 pe-4">
+              <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -530,6 +622,20 @@
         deleteModal.show();
       };
 
+      // Office Modals
+      window.confirmDeleteOffice = function (id, name) {
+        document.getElementById('deleteOfficeName').textContent = name;
+        document.getElementById('deleteOfficeForm').action = '/admin/offices/delete/' + id;
+        var modal = new bootstrap.Modal(document.getElementById('deleteOfficeModal'));
+        modal.show();
+      };
+
+      window.populateEditOffice = function (id, name) {
+        const form = document.getElementById('editOfficeForm');
+        form.action = '/admin/offices/edit/' + id;
+        document.getElementById('editOfficeName').value = name;
+      };
+
       // Handle confirm delete
       const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
       if (confirmDeleteBtn) {
@@ -617,37 +723,37 @@
       }
     });
     document.addEventListener('DOMContentLoaded', function () {
-  const currentPath = window.location.pathname;
-  const navEl = document.getElementById('navbarNav');
-  if (!navEl) return;
+      const currentPath = window.location.pathname;
+      const navEl = document.getElementById('navbarNav');
+      if (!navEl) return;
 
-  const links = navEl.querySelectorAll('a.nav-link[href], a.dropdown-item[href]');
-  links.forEach(link => {
-    const href = link.getAttribute('href');
-    if (!href || href.startsWith('#') || href.startsWith('http')) return;
+      const links = navEl.querySelectorAll('a.nav-link[href], a.dropdown-item[href]');
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('http')) return;
 
-    const isMatch =
-      (href === '/' && currentPath === '/') ||
-      (href !== '/' && (currentPath === href || currentPath.startsWith(href + '/')));
+        const isMatch =
+          (href === '/' && currentPath === '/') ||
+          (href !== '/' && (currentPath === href || currentPath.startsWith(href + '/')));
 
-    if (isMatch) {
-      link.classList.add('is-active');
-      link.setAttribute('aria-current', 'page');
-      const parentDropdown = link.closest('.dropdown');
-      if (parentDropdown) {
-        const toggle = parentDropdown.querySelector('.dropdown-toggle');
-        if (toggle) toggle.classList.add('is-active');
-      }
-    }
+        if (isMatch) {
+          link.classList.add('is-active');
+          link.setAttribute('aria-current', 'page');
+          const parentDropdown = link.closest('.dropdown');
+          if (parentDropdown) {
+            const toggle = parentDropdown.querySelector('.dropdown-toggle');
+            if (toggle) toggle.classList.add('is-active');
+          }
+        }
 
-    link.addEventListener('click', function () {
-      if (window.innerWidth < 992 && navEl.classList.contains('show')) {
-        const inst = bootstrap.Collapse.getInstance(navEl) || new bootstrap.Collapse(navEl, { toggle: false });
-        inst.hide();
-      }
+        link.addEventListener('click', function () {
+          if (window.innerWidth < 992 && navEl.classList.contains('show')) {
+            const inst = bootstrap.Collapse.getInstance(navEl) || new bootstrap.Collapse(navEl, { toggle: false });
+            inst.hide();
+          }
+        });
+      });
     });
-  });
-});
     // Global Modal Focus Management to fix aria-hidden conflict
     document.addEventListener('DOMContentLoaded', function () {
       const modals = document.querySelectorAll('.modal');
@@ -672,6 +778,22 @@
           this.setAttribute('inert', '');
         });
       });
+
+      // Unified Flash Message Handling via Modal
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      const successModalEl = document.getElementById('successModal');
+      const successMsgEl = document.getElementById('successMessage');
+      if (successModalEl && successMsgEl) {
+        // Use JSON.parse with escaped JSON string to avoid Prettier formatting issues
+        const allMessages = JSON.parse('{{ messages | tojson | forceescape }}');
+        successMsgEl.textContent = allMessages.join('\n');
+
+        const successModal = new bootstrap.Modal(successModalEl);
+        successModal.show();
+      }
+      {% endif %}
+      {% endwith %}
     });
   </script>
   {% block scripts %}{% endblock %}
@@ -679,7 +801,3 @@
 </body>
 
 </html>
-
-
-
-

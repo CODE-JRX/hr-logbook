@@ -7,11 +7,11 @@ from models.client_model import search_clients
 from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding, improve_client_embedding, delete_embeddings_by_client_id
 from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
-from models.csm_form_model import insert_csm_form, get_csm_forms_filtered, get_offices
+from models.csm_form_model import insert_csm_form, get_csm_forms_filtered
 from db import get_db_cursor
 from models.client_model import get_departments
 from models.log_model import get_logs_by_day, get_department_counts, get_purpose_counts, get_total_logs
-from models.client_model import get_client_count
+from models.office_model import get_offices as get_all_offices, get_active_offices, add_office, delete_office, update_office_status, update_office
 import os
 import base64
 import re
@@ -247,7 +247,8 @@ def add():
     # Consume any existing flashed messages so previous system messages (login/logout)
     # do not unexpectedly appear on the registration form page.
     get_flashed_messages()
-    return render_template("clients/add.html")
+    offices = get_active_offices()
+    return render_template("clients/add.html", offices=offices)
 
 
 @client_bp.route("/edit/<id>", methods=["GET", "POST"])
@@ -352,7 +353,8 @@ def edit(id):
 
     client = get_client_by_id(id)
     success = request.args.get('success') == '1'
-    return render_template("clients/edit.html", client=client, success=success)
+    offices = get_active_offices()
+    return render_template("clients/edit.html", client=client, success=success, offices=offices)
 
 
 @client_bp.route("/delete/<id>")
@@ -364,7 +366,8 @@ def delete(id):
 
 @client_bp.route('/client-log')
 def client_log():
-    return render_template('client_log.html')
+    offices = [o for o in get_active_offices() if o['name'] not in ('SUPER ADMIN', 'ASIST/UA') and o['id'] not in (1, '1')]
+    return render_template('client_log.html', offices=offices)
 
 @client_bp.route('/client-log-help')
 def client_log_help():
@@ -438,8 +441,22 @@ def csm_form():
             return redirect(url_for('client.csm_form'))
 
     # GET: render template
-    office = request.cookies.get('selected_office', 'HUMAN RESOURCE MANAGEMENT UNIT')
-    return render_template('CSM-form.html', office=office)
+    office_ref = request.cookies.get('selected_office', 'HUMAN RESOURCE MANAGEMENT OFFICE')
+    office_name = office_ref
+    office_id = office_ref
+    
+    if office_ref.isdigit():
+        from models.office_model import get_office_name_by_id
+        office_name = get_office_name_by_id(int(office_ref))
+        office_id = office_ref
+    else:
+        # Legacy Name in cookie: try to get ID
+        from models.office_model import get_office_id_by_name
+        found_id = get_office_id_by_name(office_ref)
+        if found_id:
+            office_id = str(found_id)
+            
+    return render_template('CSM-form.html', office=office_name, office_id=office_id)
 
 
 @client_bp.route('/search_client')
@@ -507,12 +524,12 @@ def client_log_report():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     limit = request.args.get('limit', '25')
-    print_mode = request.args.get('print') == 'true'
+    print_mode = request.args.get('print') in ['true', '1']
 
     # Admin Office Restriction
     admin_office = session.get('admin_office')
     # If admin has a specific office, override the filter and force their office
-    if admin_office and admin_office != 'ASIST/UA':
+    if admin_office and admin_office not in ('SUPER ADMIN', '1', 1, 'ASIST/UA'):
         office = admin_office
 
     logs = get_logs(purpose=purpose, department=department, office=office, start_date=start_date, end_date=end_date, limit=limit)
@@ -529,7 +546,7 @@ def client_log_report():
               <td>{{ l.gender or '' }}</td>
               <td>{{ l.age or '' }}</td>
               <td>{{ l.department or '' }}</td>
-              <td>{{ l.office or '' }}</td>
+              <td>{{ l.office_name or l.office or '' }}</td>
               <td>{{ l.purpose or '' }}</td>
               <td>{{ l.additional_info or '' }}</td>
               <td>{{ l.time_in }}</td>
@@ -551,9 +568,8 @@ def client_log_report():
     departments = get_departments()
     purposes = ["Receive Document/s Requested", "Submit Document/s", "Request Form/s", "Process Appointment", "Inquire", "OTHERS"]
 
-    # Build distinct office list from all logs (preserves real-world values already in DB)
-    all_logs_for_offices = get_logs(limit='all')
-    offices = sorted({r['office'] for r in all_logs_for_offices if r.get('office')})
+    # Fetch offices from the offices table
+    offices = get_active_offices()
 
     filters = {'purpose': purpose, 'department': department, 'office': office, 'start_date': start_date, 'end_date': end_date, 'limit': limit}
     return render_template('client_log_report.html', logs=logs, filters=filters, departments=departments, purposes=purposes, offices=offices)
@@ -579,7 +595,7 @@ def csm_report():
 
             # Admin Office Restriction
             admin_office = session.get('admin_office')
-            if admin_office and admin_office != 'ASIST/UA':
+            if admin_office and admin_office not in ('SUPER ADMIN', '1', 1, 'ASIST/UA'):
                 agency = admin_office
 
             q = data.get('q', '')  # search query
@@ -607,7 +623,7 @@ def csm_report():
             # If search query, filter further
             if q:
                 q_lower = q.lower()
-                csm_forms = [f for f in csm_forms if any(q_lower in str(f.get(field, '')).lower() for field in ['control_no', 'date', 'office', 'client_type', 'sex', 'age', 'region_of_residence', 'email', 'service_availed'])]
+                csm_forms = [f for f in csm_forms if any(q_lower in str(f.get(field, '')).lower() for field in ['control_no', 'date', 'office', 'office_name', 'client_type', 'sex', 'age', 'region_of_residence', 'email', 'service_availed'])]
 
             # Render both partials
             html = render_template('partials/csm_report_rows.html', csm_forms=csm_forms)
@@ -645,7 +661,7 @@ def csm_report():
                 form.get('id', ''),
                 form.get('control_no', ''),
                 form.get('date', ''),
-                form.get('office', ''),
+                form.get('office_name') or form.get('office', ''),
                 form.get('client_type', ''),
                 form.get('sex', ''),
                 form.get('age', ''),
@@ -691,7 +707,7 @@ def csm_report():
 
     # Admin Office Restriction
     admin_office = session.get('admin_office')
-    if admin_office and admin_office != 'ASIST/UA':
+    if admin_office and admin_office not in ('SUPER ADMIN', '1', 1, 'ASIST/UA'):
         agency = admin_office
 
 
@@ -740,7 +756,7 @@ def csm_report():
             genders_set.add(form['sex'])
     genders_list = sorted(list(genders_set))
     
-    offices = get_offices()
+    offices = get_active_offices()
 
     filters = {
         'limit': limit, 'start_date': start_date, 'end_date': end_date,
@@ -767,8 +783,12 @@ def admin_dashboard():
         return redirect(url_for('client.admin_login'))
 
     # Serve dashboard page (stats/empty) - chart data comes from /admin/chart_data
-    admin_office = session.get('admin_office')
-    office_filter = admin_office if (admin_office and admin_office != 'ASIST/UA') else None
+    # Use office ID if possible for standardized logic
+    admin_office = session.get('admin_office_id') or session.get('admin_office')
+    # If the current admin is a SU (ID 1), they see all records (= None filter)
+    # Otherwise, they see records filtered by their office ID
+    is_super_admin = str(admin_office) in ('1', 'SUPER ADMIN', 'ASIST/UA')
+    office_filter = admin_office if not is_super_admin else None
 
     total_clients = get_client_count()
     total_logs = get_total_logs(office=office_filter)
@@ -806,8 +826,32 @@ def admin_signup():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm = request.form.get('confirm_password') or request.form.get('confirm')
-        office = request.form.get("office", "ASIST/UA").strip()
+        office = request.form.get("office", "SUPER ADMIN").strip()
         photo_data = request.form.get('photo_data')
+
+        # Control SUPER ADMIN creation
+        if office == "SUPER ADMIN":
+            with get_db_cursor() as cursor:
+                # Count current SUPER ADMINS
+                cursor.execute("""
+                    SELECT COUNT(*) as count 
+                    FROM admins a 
+                    JOIN offices o ON a.office = o.id 
+                    WHERE o.name = 'SUPER ADMIN'
+                """)
+                sa_count = cursor.fetchone()['count']
+                
+                # If there are already super admins, REQUIRE current user to be one
+                if sa_count > 0:
+                    current_admin_id = session.get('admin_id')
+                    if not current_admin_id:
+                        flash('Only an existing SUPER ADMIN can create another SUPER ADMIN account.')
+                        return redirect(url_for('client.admin_signup'))
+                    
+                    current_admin = get_admin_by_id(current_admin_id)
+                    if not current_admin or current_admin.get('office_name') != 'SUPER ADMIN':
+                        flash('Unauthorized: Only SUPER ADMINs can create SUPER ADMIN accounts.')
+                        return redirect(url_for('client.admin_signup'))
 
         # Validate key fields
         if not (first_name and last_name and email and password and confirm):
@@ -897,7 +941,22 @@ def admin_signup():
              flash("Failed to create account")
              return redirect(url_for('client.admin_signup'))
 
-    return render_template('admin/admin_signup.html')
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) as count FROM admins a JOIN offices o ON a.office = o.id WHERE o.name = 'SUPER ADMIN'")
+        sa_count = cursor.fetchone()['count']
+    
+    can_create_sa = False
+    if sa_count == 0:
+        can_create_sa = True
+    else:
+        current_admin_id = session.get('admin_id')
+        if current_admin_id:
+            current_admin = get_admin_by_id(current_admin_id)
+            if current_admin and current_admin.get('office_name') == 'SUPER ADMIN':
+                can_create_sa = True
+
+    offices = get_active_offices()
+    return render_template('admin/admin_signup.html', offices=offices, can_create_sa=can_create_sa)
 
 
 @client_bp.route('/admin/login', methods=['GET', 'POST'])
@@ -909,7 +968,7 @@ def admin_login():
         if admin:
             session['admin_id'] = admin['id']
             session['admin_email'] = admin['email']
-            session['admin_office'] = admin.get('office', 'ASIST/UA')
+            session['admin_office'] = admin.get('office_name') or admin.get('office', 'SUPER ADMIN')
             flash('Signed in successfully')
             return redirect(url_for('client.admin_dashboard'))
         else:
@@ -951,7 +1010,9 @@ def admin_face_login():
         if admin_id:
             # 2FA: Store temp ID and ask for PIN
             session['2fa_pending_admin_id'] = admin_id
-            return jsonify({'ok': True, 'status': 'pin_required'}), 200
+            admin_data = get_admin_by_id(admin_id)
+            admin_email = admin_data.get('email') if admin_data else 'Unknown Admin'
+            return jsonify({'ok': True, 'status': 'pin_required', 'email': admin_email}), 200
             
         return jsonify({'ok': False, 'error': 'Face not recognized'}), 200
     except Exception as e:
@@ -977,7 +1038,11 @@ def admin_verify_pin():
             session.pop('2fa_pending_admin_id', None)
             session['admin_id'] = admin['id']
             session['admin_email'] = admin['email']
-            session['admin_office'] = admin.get('office', 'ASIST/UA')
+            # Store office ID in session for standardized access
+            session['admin_office_id'] = admin.get('office')
+            session['admin_office_name'] = admin.get('office_name') or admin.get('office') or 'SUPER ADMIN'
+            # Legacy support
+            session['admin_office'] = str(admin.get('office')) if admin.get('office') else (admin.get('office_name') or 'SUPER ADMIN')
             flash('Face match and PIN verified')
             return jsonify({'ok': True, 'redirect': url_for('client.admin_dashboard')})
         else:
@@ -1147,7 +1212,7 @@ def generate_control_no():
             # Format: ASIST/UA-S<YY>-<NNN>
             year = datetime.now().year
             yy = str(year)[-2:]
-            prefix = f"ASIST/UA-S{yy}-"
+            prefix = f"SUPER ADMIN-S{yy}-"
             
             # Find the latest one using MySQL pattern matching
             query = "SELECT control_no FROM csm_form WHERE control_no LIKE %s ORDER BY control_no DESC LIMIT 1"
@@ -1200,35 +1265,51 @@ def log_action():
 @client_bp.route('/get_office')
 def get_office():
     """Return the currently selected office from the cookie."""
-    office = request.cookies.get('selected_office', '')
-    return jsonify({'office': office})
+    office_ref = request.cookies.get('selected_office', '')
+    if not office_ref:
+        return jsonify({'office': ''})
+        
+    # If the ref is an ID, resolve to Name for the UI
+    if office_ref.isdigit():
+        from models.office_model import get_office_name_by_id
+        name = get_office_name_by_id(int(office_ref))
+        return jsonify({'id': office_ref, 'office': name})
+    
+    # Legacy support: if it's a name, just return it
+    return jsonify({'office': office_ref})
 
 
 @client_bp.route('/set_office', methods=['POST'])
 def set_office():
-    """Persist the selected office in a very long-lived cookie."""
+    """Persist the selected office ID in a very long-lived cookie."""
     data = request.json or {}
-    office = data.get('office', '').strip()
-    hrm_unit = 'HUMAN RESOURCE MANAGEMENT UNIT'
-    valid_offices = [
-        hrm_unit,
-        'RECORDS OFFICE',
-        'REGISTRAR',
-        'ACCOUNTING',
-        'CASHIER',
-        'OFFICE OF THE PRESIDENT',
-        'OFFICE OF THE CHIEF ADMINISTRATIVE OFFICER',
-        'SUPPLY OFFICE',
-    ]
-    office_upper = office.upper()
-    if office_upper in ('HRMU', 'HRMO'):
-        office_upper = hrm_unit
-    if office_upper not in valid_offices:
+    office_input = data.get('office', '').strip()
+    if not office_input:
+        return jsonify({'ok': False, 'error': 'No office specified'}), 400
+        
+    from models.office_model import get_office_name_by_id, get_office_id_by_name, get_active_offices
+    
+    office_id = None
+    office_name = None
+    
+    if office_input.isdigit():
+        office_id = int(office_input)
+        office_name = get_office_name_by_id(office_id)
+    else:
+        # Check if it matches a known alias or name
+        up = office_input.upper()
+        if up in ('HRMU', 'HRMO'):
+            up = 'HUMAN RESOURCE MANAGEMENT OFFICE'
+        office_id = get_office_id_by_name(up)
+        office_name = up if office_id else None
+        
+    if not office_id or not office_name:
         return jsonify({'ok': False, 'error': 'Invalid office'}), 400
-    resp = make_response(jsonify({'ok': True, 'office': office_upper}))
+        
+    resp = make_response(jsonify({'ok': True, 'office': office_name, 'id': str(office_id)}))
     # Max age: ~20 years in seconds
     max_age = 20 * 365 * 24 * 60 * 60
-    resp.set_cookie('selected_office', office_upper, max_age=max_age, samesite='Lax')
+    resp.set_cookie('selected_office', str(office_id), max_age=max_age, samesite='Lax')
     return resp
 
 @client_bp.route('/learn_face', methods=['POST'])
@@ -1299,3 +1380,82 @@ def privacy_policy():
     return render_template('privacy-policy.html')
 
 
+@client_bp.route('/admin/offices')
+@admin_required
+def admin_offices():
+    # Only SUPER ADMIN (Universal Admin) can manage offices
+    allow_ids = ('1', 1, 'SUPER ADMIN', 'ASIST/UA')
+    if session.get('admin_office_id') not in allow_ids and session.get('admin_office') not in allow_ids:
+        flash('Unauthorized: Only Universal Admins can manage offices.')
+        return redirect(url_for('client.admin_dashboard'))
+    
+    offices = get_all_offices()
+    return render_template('admin/admin_offices.html', offices=offices)
+
+@client_bp.route('/admin/offices/add', methods=['POST'])
+@admin_required
+def admin_add_office():
+    allow_ids = ('1', 1, 'SUPER ADMIN', 'ASIST/UA')
+    if session.get('admin_office_id') not in allow_ids and session.get('admin_office') not in allow_ids:
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 403
+        
+    name = request.form.get('name')
+    if not name:
+        flash('Office name is required')
+        return redirect(url_for('client.admin_offices'))
+        
+    new_id = add_office(name)
+    if new_id:
+        flash(f'Office "{name}" added successfully')
+    else:
+        flash('Failed to add office')
+        
+    return redirect(url_for('client.admin_offices'))
+
+@client_bp.route('/admin/offices/delete/<int:office_id>', methods=['POST'])
+@admin_required
+def admin_delete_office(office_id):
+    allow_ids = ('1', 1, 'SUPER ADMIN', 'ASIST/UA')
+    if session.get('admin_office_id') not in allow_ids and session.get('admin_office') not in allow_ids:
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 403
+        
+    if delete_office(office_id):
+        flash('Office deleted successfully')
+    else:
+        flash('Failed to delete office')
+        
+    return redirect(url_for('client.admin_offices'))
+
+@client_bp.route('/admin/offices/toggle/<int:office_id>', methods=['POST'])
+@admin_required
+def admin_toggle_office(office_id):
+    allow_ids = ('1', 1, 'SUPER ADMIN', 'ASIST/UA')
+    if session.get('admin_office_id') not in allow_ids and session.get('admin_office') not in allow_ids:
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 403
+        
+    is_active = request.form.get('is_active') == '1'
+    if update_office_status(office_id, is_active):
+        flash('Office status updated')
+    else:
+        flash('Failed to update office status')
+        
+    return redirect(url_for('client.admin_offices'))
+
+@client_bp.route('/admin/offices/edit/<int:office_id>', methods=['POST'])
+@admin_required
+def admin_edit_office(office_id):
+    allow_ids = ('1', 1, 'SUPER ADMIN', 'ASIST/UA')
+    if session.get('admin_office_id') not in allow_ids and session.get('admin_office') not in allow_ids:
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 403
+        
+    name = request.form.get('name')
+    if not name:
+        flash('Office name is required')
+        return redirect(url_for('client.admin_offices'))
+        
+    if update_office(office_id, name):
+        flash('Office updated successfully')
+    else:
+        flash('Failed to update office')
+        
+    return redirect(url_for('client.admin_offices'))

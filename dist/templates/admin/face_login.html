@@ -136,10 +136,12 @@
 			</div>
 			<div class="modal-body">
 				<div class="form-group text-center">
+					<div id="detectedAdminEmail" class="mb-3 p-2 bg-light rounded border small text-primary fw-bold">
+					</div>
 					<label for="pinInput" class="mb-2">Please enter your 4-digit PIN</label>
 					<input type="password" id="pinInput" class="form-control text-center text-primary fw-bold"
-						maxlength="4" pattern="[0-9]*" inputmode="numeric"
-						style="letter-spacing: 4px; font-size: 24px;">
+						maxlength="4" pattern="[0-9]*" inputmode="numeric" autocapitalize="none" autocorrect="off"
+						spellcheck="false" style="letter-spacing: 4px; font-size: 24px;">
 					<div id="pinError" class="text-danger small mt-2" style="display:none;"></div>
 				</div>
 			</div>
@@ -290,6 +292,8 @@
 					if (body.status === 'pin_required') {
 						// Show PIN modal
 						if (!pinModal) pinModal = new bootstrap.Modal(pinModalEl);
+						const emailEl = document.getElementById('detectedAdminEmail');
+						if (emailEl) emailEl.textContent = body.email || 'Admin Detected';
 						document.getElementById('pinInput').value = '';
 						document.getElementById('pinError').style.display = 'none';
 						pinModal.show();

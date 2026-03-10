@@ -4,6 +4,7 @@ from datetime import datetime
 import numpy as np
 import json
 import mysql.connector
+from models.office_model import get_office_id_by_name
 
 # Global cache for admin face embeddings
 # Structure: list of {'id': str, 'face_embedding': list of np.array}
@@ -49,6 +50,12 @@ def add_admin(first_name, last_name, email, password, embedding_list=None, pin=N
     ph = generate_password_hash(password)
     pin_hash = generate_password_hash(pin) if pin else None
     
+    # Convert office name to ID if it's a string (e.g. "REGISTRAR" -> 5)
+    office_id = office
+    if office and isinstance(office, str) and not office.isdigit():
+        from models.office_model import get_office_id_by_name
+        office_id = get_office_id_by_name(office)
+
     query = """INSERT INTO admins (first_name, last_name, email, password_hash, pin_hash, office, face_embedding, created_at)
                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
     values = (
@@ -57,7 +64,7 @@ def add_admin(first_name, last_name, email, password, embedding_list=None, pin=N
         email.lower() if isinstance(email, str) else email,
         ph,
         pin_hash,
-        office,
+        office_id,
         json.dumps(embedding_list) if embedding_list else None,
         datetime.now()
     )
@@ -90,7 +97,10 @@ def get_admin_by_email(email):
     with get_db_cursor() as cursor:
         email_lower = email.lower() if isinstance(email, str) else email
         
-        query = "SELECT * FROM admins WHERE email = %s"
+        query = """SELECT a.*, o.name as office_name 
+                   FROM admins a
+                   LEFT JOIN offices o ON a.office = o.id
+                   WHERE a.email = %s"""
         cursor.execute(query, (email_lower,))
         admin = cursor.fetchone()
         
@@ -124,7 +134,10 @@ def verify_admin_pin(admin, pin):
 
 def get_admin_by_id(admin_id):
     with get_db_cursor() as cursor:
-        query = "SELECT * FROM admins WHERE id = %s"
+        query = """SELECT a.*, o.name as office_name 
+                   FROM admins a
+                   LEFT JOIN offices o ON a.office = o.id
+                   WHERE a.id = %s"""
         cursor.execute(query, (admin_id,))
         admin = cursor.fetchone()
         
