@@ -11,7 +11,7 @@ class DateTimeEncoder(json.JSONEncoder):
             return obj.isoformat()
         return super(DateTimeEncoder, self).default(obj)
 
-TABLES = ['admins', 'clients', 'csm_form', 'face_embeddings', 'logs']
+TABLES = ['offices', 'admins', 'clients', 'csm_form', 'face_embeddings', 'logs']
 
 def test_backup():
     print("Starting backup simulation...")

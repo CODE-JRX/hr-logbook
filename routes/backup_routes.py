@@ -17,7 +17,8 @@ class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (datetime, date)):
             return obj.isoformat()
-        if isinstance(obj, bytes):
+        # Handle bytes and bytearray (bytearray is not a subclass of bytes)
+        if isinstance(obj, (bytes, bytearray)):
             # Attempt to decode bytes to utf-8 string
             try:
                 return obj.decode('utf-8')
@@ -25,6 +26,13 @@ class DateTimeEncoder(json.JSONEncoder):
                 # Fallback to base64 if not valid utf-8 (though unlikely for our use case)
                 import base64
                 return base64.b64encode(obj).decode('ascii')
+        # Handle numpy bytes if present
+        try:
+            import numpy as np
+            if isinstance(obj, np.bytes_):
+                return obj.decode('utf-8')
+        except ImportError:
+            pass
         return super(DateTimeEncoder, self).default(obj)
 
 # Define local admin_required to avoid circular/complex imports with all_routes
@@ -39,7 +47,7 @@ def admin_required(f):
 
 backup_bp = Blueprint('backup', __name__)
 
-TABLES = ['admins', 'clients', 'csm_form', 'face_embeddings', 'logs']
+TABLES = ['offices', 'admins', 'clients', 'csm_form', 'face_embeddings', 'logs']
 
 def _validate_zip_paths(zipfile_obj):
     """
@@ -117,13 +125,36 @@ def download_backup():
                     try:
                         cursor.execute(f"SELECT * FROM {table}")
                         data = cursor.fetchall()
+                        
+                        # Pre-process data to handle non-serializable types
+                        processed_data = []
+                        for row in data:
+                            processed_row = {}
+                            for key, value in row.items():
+                                # Handle bytes/bytearray
+                                if isinstance(value, (bytes, bytearray)):
+                                    try:
+                                        processed_row[key] = value.decode('utf-8')
+                                    except UnicodeDecodeError:
+                                        processed_row[key] = None  # Skip unreadable binary
+                                # Handle numpy types
+                                elif 'numpy' in str(type(value)):
+                                    try:
+                                        processed_row[key] = value.item()
+                                    except:
+                                        processed_row[key] = None
+                                else:
+                                    processed_row[key] = value
+                            processed_data.append(processed_row)
+                        
                         # Serialize to JSON
-                        json_data = json.dumps(data, indent=2, cls=DateTimeEncoder)
+                        json_data = json.dumps(processed_data, indent=2, cls=DateTimeEncoder)
                         zf.writestr(f"database/{table}.json", json_data)
                         logger.debug(f"Backed up table {table}: {len(data)} rows")
                     except Exception as e:
                         logger.error(f"Error backing up table {table}: {e}")
-                        raise
+                        # Continue with other tables instead of failing completely
+                        continue
                     
                 # 2. Add Clients images
                 clients_dir = os.path.join(os.getcwd(), 'Clients')
@@ -232,7 +263,7 @@ def restore_backup():
             zf.extractall(temp_dir)
         
         # Begin database restoration with explicit transaction control
-        with get_db_cursor(commit=False) as cursor:  # commit=False so we control it
+        with get_db_cursor(commit=True) as cursor:  # commit=True to persist changes
             try:
                 db_dir = os.path.join(temp_dir, 'database')
                 
@@ -242,7 +273,8 @@ def restore_backup():
                 cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
                 
                 # Preferred restore order (respects FK constraints when re-enabled)
-                RESTORE_ORDER = ['admins', 'clients', 'csm_form', 'face_embeddings', 'logs']
+                # offices must be FIRST as admins, logs, csm_form reference it via foreign keys
+                RESTORE_ORDER = ['offices', 'clients', 'admins', 'csm_form', 'face_embeddings', 'logs']
                 
                 restored_tables = []
                 for table in RESTORE_ORDER:
@@ -292,9 +324,8 @@ def restore_backup():
                 # Re-enable foreign key checks
                 cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
                 
-                # If we got here, commit the transaction
-                logger.info(f"Committing database changes...")
-                # The context manager will handle commit since commit=True in outer function
+                # Context manager will handle commit (commit=True)
+                logger.info(f"Database restore successful, changes committed")
                 
             except Exception as db_err:
                 logger.error(f"Database restore failed: {db_err}")
@@ -314,12 +345,27 @@ def restore_backup():
             if os.path.exists(src_folder):
                 try:
                     # Verify paths don't escape workspace
-                    os.path.normpath(src_folder)
-                    os.path.normpath(dst_folder)
+                    src_norm = os.path.normpath(os.path.abspath(src_folder))
+                    dst_norm = os.path.normpath(os.path.abspath(dst_folder))
+                    workspace_norm = os.path.normpath(os.path.abspath(os.getcwd()))
+                    
+                    # Ensure destination is within workspace
+                    if not dst_norm.startswith(workspace_norm):
+                        logger.error(f"Destination path escapes workspace: {dst_norm}")
+                        continue
                     
                     for item in os.listdir(src_folder):
                         s = os.path.join(src_folder, item)
                         d = os.path.join(dst_folder, item)
+                        
+                        # Normalize paths for additional safety
+                        s_norm = os.path.normpath(os.path.abspath(s))
+                        d_norm = os.path.normpath(os.path.abspath(d))
+                        
+                        # Ensure normalized paths are within expected folders
+                        if not s_norm.startswith(src_norm) or not d_norm.startswith(dst_norm):
+                            logger.warning(f"Skipping suspicious path: {item}")
+                            continue
                         
                         if os.path.isdir(s):
                             if os.path.exists(d):
