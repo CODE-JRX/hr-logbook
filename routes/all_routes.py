@@ -4,7 +4,7 @@ from functools import wraps
 from models.admin_model import add_admin, get_admin_by_email, verify_admin_credentials, get_admin_by_id, update_admin_password, verify_admin_pin
 from models.client_model import *
 from models.client_model import search_clients
-from models.face_embedding_model import add_face_embedding, find_best_match, update_face_embedding, improve_client_embedding, delete_embeddings_by_client_id
+from models.face_embedding_model import add_face_embedding, find_best_match, improve_client_embedding, delete_embeddings_by_client_id
 from models.admin_model import find_best_admin_match
 from models.log_model import add_time_in, add_time_out, get_logs
 from models.csm_form_model import insert_csm_form, get_csm_forms_filtered
@@ -25,9 +25,9 @@ import sys
 FACE_MODELS_AVAILABLE = True
 try:
     import face_recognition
-except ImportError:
+except (ImportError, SystemExit) as e:
     FACE_MODELS_AVAILABLE = False
-    print("Warning: face_recognition is not installed.")
+    print("Warning: face_recognition is not installed or face_recognition_models is missing.")
 except Exception as e:
     # face_recognition often raises exceptions if models are missing
     if "face_recognition_models" in str(e).lower():

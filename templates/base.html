@@ -34,7 +34,34 @@
       document.documentElement.setAttribute('data-theme', theme);
     })();
   </script>
-  <style>
+<style>
+    /* Background with gradient overlay */
+    body {
+      background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('../static/resources/project-bg.png') !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      background-attachment: fixed !important;
+    }
+    
+    /* Dark theme: stronger dark gradient overlay */
+    [data-theme="dark"] body {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../static/resources/project-bg.png') !important;
+    }
+    
+    /* Make container transparent to show body background */
+    main.container {
+      background-color: transparent !important;
+    }
+    
+    /* Card opacity */
+    .card {
+      opacity: 0.9;
+    }
+    .card:hover {
+      opacity: 1;
+    }
+    
     /* Moving light around the navbar brand */
     .nav-brand-wrapper {
       position: relative;
@@ -458,6 +485,30 @@
               <button type="submit" class="btn btn-primary">Add Office</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Restore Progress Modal -->
+    <div class="modal fade" id="restoreProgressModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="restoreProgressModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title" id="restoreProgressModalLabel">
+              <i class="fas fa-upload me-2"></i>Restoring Data
+            </h5>
+          </div>
+          <div class="modal-body text-center py-4">
+            <div class="mb-4">
+              <div class="progress" style="height: 25px; border-radius: 12px;">
+                <div id="restoreProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                  role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+            </div>
+            <p id="restoreStatusText" class="mb-0 text-muted">Preparing to restore...</p>
+            <small class="text-muted d-block mt-2">Please do not close this window or refresh the page.</small>
+          </div>
         </div>
       </div>
     </div>

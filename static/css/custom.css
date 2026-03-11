@@ -856,17 +856,25 @@ html {
 }
 
 /* Body and general styles */
-
-
 body {
   margin: 0;
   padding-top: 80px;
-  background: var(--bg-color);
+  background: var(--bg-color) !important;
+  background-image: url('../resources/project-bg.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
   color: var(--text-color);
   display: flex;
   flex-direction: column;
+}
+
+/* Make main container transparent to show body background */
+main.container {
+  background-color: transparent !important;
 }
 
 /* Ensure main content and nav appear above the overlay */
@@ -968,7 +976,24 @@ nav {
   overflow: hidden;
 }
 
-/* Card background image decoration */
+/* Card styling */
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  opacity: 0.9;
+}
+
+.card:hover {
+  opacity: 0.95;
+}
+
+/* Remove card background image decoration - background is now on body */
 .card::before {
   content: '';
   position: absolute;
@@ -976,11 +1001,11 @@ nav {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('../resources/project-bg.png');
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.15;
+  opacity: 0;
   z-index: 0;
   pointer-events: none;
 }

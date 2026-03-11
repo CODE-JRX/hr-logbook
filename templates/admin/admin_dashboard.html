@@ -32,11 +32,31 @@
     margin: 0;
   }
 
+  /* Remove image background from all cards in admin dashboard */
+  .card::before {
+    display: none !important;
+  }
+
+  /* Add 90% opacity to all cards in admin dashboard */
+  .card {
+    opacity: 0.9;
+  }
+
+  .card:hover {
+    opacity: 1;
+  }
+
   /* Modern chart card styling */
   .chart-card {
     position: relative;
     overflow: hidden;
     border-radius: .5rem;
+  }
+
+  /* Remove image background from chart cards */
+  .chart-card::before,
+  #chartPurpose::before {
+    display: none !important;
   }
 
   .chart-card .chart-bg {
@@ -70,23 +90,119 @@
           <span class="d-none d-md-inline">Backup Data</span>
         </a>
 
-        <form action="/admin/backup/restore" method="POST" enctype="multipart/form-data" id="restoreForm">
-          <input type="file" name="backup_file" id="backupFile" class="upload-input-hidden" accept=".zip"
-            onchange="confirmRestore()">
-          <button type="button" class="btn btn-sm btn-outline-warning d-flex align-items-center"
-            onclick="document.getElementById('backupFile').click()">
-            <i class="fas fa-upload me-2"></i>
-            <span class="d-none d-md-inline">Restore Data</span>
-          </button>
-        </form>
+        <input type="file" name="backup_file" id="backupFile" class="upload-input-hidden" accept=".zip"
+          onchange="confirmRestore()">
+        <button type="button" class="btn btn-sm btn-outline-warning d-flex align-items-center"
+          onclick="document.getElementById('backupFile').click()">
+          <i class="fas fa-upload me-2"></i>
+          <span class="d-none d-md-inline">Restore Data</span>
+        </button>
 
         <script>
           function confirmRestore() {
             if (confirm('WARNING: Restoring will REPLACE all current data with the backup data. This cannot be undone. Are you sure?')) {
-              document.getElementById('restoreForm').submit();
+              startRestore();
             } else {
               document.getElementById('backupFile').value = ''; // clear selection
             }
+          }
+
+          function startRestore() {
+            const fileInput = document.getElementById('backupFile');
+            if (!fileInput.files.length) {
+              alert('Please select a backup file first.');
+              return;
+            }
+
+            const file = fileInput.files[0];
+            if (!file.name.endsWith('.zip')) {
+              alert('Invalid file format. Please select a ZIP file.');
+              return;
+            }
+
+            // Show the restore progress modal
+            const restoreModal = new bootstrap.Modal(document.getElementById('restoreProgressModal'));
+            restoreModal.show();
+
+            const progressBar = document.getElementById('restoreProgressBar');
+            const statusText = document.getElementById('restoreStatusText');
+
+            // Update progress to indicate upload started
+            progressBar.style.width = '10%';
+            progressBar.textContent = '10%';
+            statusText.textContent = 'Uploading backup file...';
+
+            // Use XMLHttpRequest for progress tracking
+            const xhr = new XMLHttpRequest();
+            const formData = new FormData();
+            formData.append('backup_file', file);
+
+            // Track upload progress
+            xhr.upload.addEventListener('progress', function(e) {
+              if (e.lengthComputable) {
+                const percentComplete = Math.round((e.loaded / e.total) * 50); // 0-50% for upload
+                progressBar.style.width = percentComplete + '%';
+                progressBar.textContent = percentComplete + '%';
+                statusText.textContent = 'Uploading backup file... (' + Math.round(e.loaded / 1024) + ' KB / ' + Math.round(e.total / 1024) + ' KB)';
+              }
+            });
+
+            // Track download progress (server processing)
+            xhr.addEventListener('progress', function(e) {
+              if (e.lengthComputable) {
+                const percentComplete = 50 + Math.round((e.loaded / e.total) * 40); // 50-90% for processing
+                progressBar.style.width = percentComplete + '%';
+                progressBar.textContent = percentComplete + '%';
+                statusText.textContent = 'Restoring data...';
+              }
+            });
+
+            xhr.addEventListener('load', function() {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                // Success
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+                progressBar.classList.remove('progress-bar-animated');
+                progressBar.classList.add('bg-success');
+                statusText.textContent = 'Restore completed successfully!';
+
+                // Close modal after a short delay and reload
+                setTimeout(function() {
+                  restoreModal.hide();
+                  window.location.href = '/admin/dashboard?restored=1';
+                }, 1500);
+              } else {
+                // Error - try to parse JSON response
+                restoreModal.hide();
+                let errorMsg = 'Unknown error';
+                try {
+                  const response = JSON.parse(xhr.responseText);
+                  errorMsg = response.message || xhr.responseText;
+                } catch(e) {
+                  errorMsg = xhr.responseText || 'Unknown error';
+                }
+                alert('Restore failed: ' + errorMsg);
+                fileInput.value = '';
+              }
+            });
+
+            xhr.addEventListener('error', function() {
+              restoreModal.hide();
+              alert('Restore failed: Network error occurred.');
+              fileInput.value = '';
+            });
+
+            xhr.addEventListener('abort', function() {
+              restoreModal.hide();
+              alert('Restore was cancelled.');
+              fileInput.value = '';
+            });
+
+            // Add a slight delay to ensure modal is shown before starting
+            setTimeout(function() {
+              xhr.open('POST', '/admin/backup/restore', true);
+              xhr.send(formData);
+            }, 500);
           }
         </script>
       </div>
@@ -123,14 +239,13 @@
           </div>
 
           <div class="card shadow-sm p-3 mb-3 mt-2 chart-card">
-            <div class="chart-bg" aria-hidden="true"></div>
             <h6><i class="fas fa-chart-line"></i> Recent Activity (last 14 days)</h6>
             <div class="chart-container mt-2">
               <canvas id="chartActivity"></canvas>
             </div>
           </div>
 
-          <div class="card shadow-sm p-3">
+          <div class="card shadow-sm p-3 chart-card">
             <h6><i class="fas fa-chart-bar"></i> Purpose Counts</h6>
             <div class="chart-min-panel">
               <canvas id="chartPurpose"></canvas>
