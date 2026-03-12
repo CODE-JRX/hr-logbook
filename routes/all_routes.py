@@ -1205,32 +1205,35 @@ def verify_face():
 
 @client_bp.route('/generate_control_no')
 def generate_control_no():
-    """Generate a new control number in the format ASIST/UA-S<YY>-<NextID>"""
+    """Generate a new control number in the format UA-<YY>-<NextID>"""
     try:
+        # Use fixed 'UA' initials instead of dynamic office initials
+        initials = 'UA'
+        
         with get_db_cursor() as cursor:
-            # Find the latest control_no to increment
-            # Format: ASIST/UA-S<YY>-<NNN>
             year = datetime.now().year
             yy = str(year)[-2:]
-            prefix = f"SUPER ADMIN-S{yy}-"
             
-            # Find the latest one using MySQL pattern matching
-            query = "SELECT control_no FROM csm_form WHERE control_no LIKE %s ORDER BY control_no DESC LIMIT 1"
-            cursor.execute(query, (f"{prefix}%",))
+            # Search for any existing control numbers with the UA prefix
+            query = """SELECT control_no FROM csm_form 
+                      WHERE control_no LIKE %s 
+                      ORDER BY control_no DESC LIMIT 1"""
+            cursor.execute(query, (f"{initials}-{yy}-%",))
+            
             row = cursor.fetchone()
             
             next_id = 1
             if row:
                 last_no = row['control_no']
-                # extract last 3 digits
+                # Extract last 3 digits after the second hyphen
                 parts = last_no.split('-')
-                if len(parts) >= 3:
+                if len(parts) >= 2:
                     try:
                         next_id = int(parts[-1]) + 1
                     except (ValueError, IndexError):
                         next_id = 1
             
-            control_no = f"{prefix}{next_id:03d}"
+            control_no = f"{initials}-{yy}-{next_id:03d}"
             return jsonify({'control_no': control_no}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

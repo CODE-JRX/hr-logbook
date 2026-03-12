@@ -20,7 +20,7 @@
         <form>
             <!-- Client Information Section -->
             <div class="section">
-                <div class="section-title">{{ form.office }}</div>
+                <div class="section-title">{{ form.office_name }}</div>
 
                 <div class="form-row">
                     <div class="form-field print-field-label">
@@ -36,7 +36,7 @@
                                 <input type="radio"
                                     id="citizen_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="client_type_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Citizen" {% if form.client_type=='Citizen' %}checked{% endif %}>
+                                    value="Citizen" {% if form.client_type and form.client_type|lower=='citizen' %}checked{% endif %}>
                                 <label
                                     for="citizen_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     style="margin-bottom: 0;">Citizen</label>
@@ -45,7 +45,7 @@
                                 <input type="radio"
                                     id="business_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="client_type_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Business" {% if form.client_type=='Business' %}checked{% endif %}>
+                                    value="Business" {% if form.client_type and form.client_type|lower=='business' %}checked{% endif %}>
                                 <label
                                     for="business_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     style="margin-bottom: 0;">Business</label>
@@ -54,7 +54,7 @@
                                 <input type="radio"
                                     id="employee_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="client_type_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Employee" {% if form.client_type=='Employee' %}checked{% endif %}>
+                                    value="Employee" {% if form.client_type and form.client_type|lower=='employee' %}checked{% endif %}>
                                 <label
                                     for="employee_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     style="margin-bottom: 0;">Employee or Another
@@ -108,14 +108,14 @@
                     <div class="form-field">
                         <label class="required">SERVICE AVAILED:</label>
                         <div class="checkbox-group">
-                            {% set service_list = form.service_availed.split(', ') if form.service_availed else []
-                            %}
+                            {% set service_list = form.service_availed.split(', ') if form.service_availed else [] %}
+                            {% set service_list_lower = service_list | map('lower') | list %}
                             <div class="checkbox-option">
                                 <input type="checkbox"
                                     id="service1_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="service_availed_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Releasing of Document Requested" {% if 'Releasing of Document Requested' in
-                                    service_list %}checked{% endif %}>
+                                    value="Releasing of Document Requested" {% if 'releasing of document requested' in
+                                    service_list_lower %}checked{% endif %}>
                                 <label
                                     for="service1_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}">Releasing
                                     of Document Requested</label>
@@ -124,7 +124,7 @@
                                 <input type="checkbox"
                                     id="service2_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="service_availed_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Submission of Documents" {% if 'Submission of Documents' in service_list
+                                    value="Submission of Documents" {% if 'submission of documents' in service_list_lower
                                     %}checked{% endif %}>
                                 <label
                                     for="service2_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}">Submission
@@ -134,7 +134,7 @@
                                 <input type="checkbox"
                                     id="service3_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="service_availed_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Request of Forms" {% if 'Request of Forms' in service_list %}checked{% endif
+                                    value="Request of Forms" {% if 'request of forms' in service_list_lower %}checked{% endif
                                     %}>
                                 <label
                                     for="service3_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}">Request
@@ -144,8 +144,8 @@
                                 <input type="checkbox"
                                     id="service4_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="service_availed_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Processing of Appointments" {% if 'Processing of Appointments' in
-                                    service_list %}checked{% endif %}>
+                                    value="Processing of Appointments" {% if 'processing of appointments' in
+                                    service_list_lower %}checked{% endif %}>
                                 <label
                                     for="service4_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}">Processing
                                     of Appointments</label>
@@ -154,7 +154,7 @@
                                 <input type="checkbox"
                                     id="service5_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="service_availed_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Inquiry" {% if 'Inquiry' in service_list %}checked{% endif %}>
+                                    value="Inquiry" {% if 'inquiry' in service_list_lower %}checked{% endif %}>
                                 <label
                                     for="service5_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}">Inquiry</label>
                             </div>
@@ -162,8 +162,7 @@
                                 <input type="checkbox"
                                     id="service6_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
                                     name="service_availed_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}"
-                                    value="Others" {% if 'Others' in service_list or form.other_service %}checked{%
-                                    endif %}>
+                                    value="Others" {% if 'others' in service_list_lower or form.other_service %}checked{% endif %}>
                                 <label
                                     for="service6_{{ loop.index }}_{{ loop.parent.index if loop.parent is defined else 0 }}">OTHERS</label>
                             </div>

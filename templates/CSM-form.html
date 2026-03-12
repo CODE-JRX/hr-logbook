@@ -637,10 +637,14 @@
     </div>
 
     <script>
+        // Get office_id from the hidden input field
+        const officeId = document.querySelector('input[name="office"]').value;
+        
         // Generate and populate control_no on page load
         async function loadControlNo() {
             try {
-                const res = await fetch('/generate_control_no');
+                // Pass office_id as query parameter
+                const res = await fetch(`/generate_control_no?office_id=${encodeURIComponent(officeId)}`);
                 const data = await res.json();
                 if (data.control_no) {
                     document.getElementById('display_control_no').textContent = data.control_no;
