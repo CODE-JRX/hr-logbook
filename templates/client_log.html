@@ -3,15 +3,7 @@
 
 {% block content %}
 <style>
-	@keyframes scan {
-		0% {
-			top: 0;
-		}
 
-		100% {
-			top: 100%;
-		}
-	}
 
 	.modal,
 	.modal-dialog {
@@ -40,6 +32,40 @@
 	/* Mirror the camera feed horizontally */
 	#video {
 		transform: scaleX(-1);
+	}
+
+	/* Face landmark overlay */
+	#landmarks {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		border-radius: 6px;
+	}
+
+	/* Lightweight loading shimmer while waiting for face mesh */
+	.landmark-loading {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		border-radius: 6px;
+		pointer-events: none;
+		background: radial-gradient(circle at 20% 20%, rgba(13,110,253,0.35), transparent 35%),
+			radial-gradient(circle at 80% 30%, rgba(25,135,84,0.35), transparent 32%),
+			radial-gradient(circle at 50% 70%, rgba(220,53,69,0.28), transparent 40%);
+		animation: shimmer 2s infinite ease-in-out;
+		opacity: 0.45;
+		z-index: 21;
+	}
+
+	@keyframes shimmer {
+		0% { filter: blur(0px); transform: scale(1); }
+		50% { filter: blur(1px); transform: scale(1.01); }
+		100% { filter: blur(0px); transform: scale(1); }
 	}
 
 
@@ -385,6 +411,9 @@
 				<!-- video preview (fills card) -->
 				<video id="video" width="420" height="420" autoplay playsinline muted
 					style="object-fit:cover; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px; display:none;"></video>
+				<canvas id="landmarks" width="420" height="420"
+					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:21;"></canvas>
+				<div id="landmark-loading" class="landmark-loading" style="display:none; z-index:20;"></div>
 
 				<!-- face position guide (subtle broken square corners) -->
 				<div id="face-guide" aria-hidden="true">
@@ -408,9 +437,7 @@
 					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:6px;"></canvas>
 				<img id="preview" src="" alt="Preview"
 					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:6px; background:#0f1720;" />
-				<div id="scan-line"
-					style="display:none; position:absolute; top:0; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, rgba(0,255,0,0.8), transparent); z-index:20; animation: scan 2s linear;">
-				</div>
+
 				<svg id="loading-border"
 					style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:22; pointer-events:none;">
 					<rect x="3" y="3" style="width: calc(100% - 6px); height: calc(100% - 6px);" rx="6" ry="6"
@@ -620,9 +647,11 @@
 {% block scripts %}
 <script>
 	const video = document.getElementById('video');
+	const landmarksCanvas = document.getElementById('landmarks');
+	const landmarkLoading = document.getElementById('landmark-loading');
+	const landmarksCtx = landmarksCanvas ? landmarksCanvas.getContext('2d') : null;
 	const canvas = document.getElementById('canvas');
 	const preview = document.getElementById('preview');
-	const scanLine = document.getElementById('scan-line');
 	const loadingBorder = document.getElementById('loading-border');
 	const placeholder = document.getElementById('camera-placeholder');
 	const actionBtn = document.getElementById('camera-action');
@@ -662,6 +691,9 @@
 
 	const cameraError = document.getElementById('camera-error');
 	const cameraStatus = document.getElementById('camera-status');
+	let scanAnimId = null;
+	let scanDir = 1;
+	let scanPos = 0;
 
 	function updateStatus(status) {
 		const statusText = document.getElementById('status-text');
@@ -719,6 +751,119 @@
 			clearTimeout(t);
 			t = setTimeout(() => fn.apply(this, args), wait);
 		};
+	}
+
+	function sizeOverlayFrom(el) {
+		if (!landmarksCanvas || !el) return;
+		const w = el.clientWidth || el.videoWidth || el.naturalWidth || 640;
+		const h = el.clientHeight || el.videoHeight || el.naturalHeight || 480;
+		landmarksCanvas.width = w;
+		landmarksCanvas.height = h;
+	}
+
+	// Landmark template (normalized 0..1) for a clean, symmetric mesh
+	// Landmark template (normalized) styled after the reference image: simplified but symmetric
+	const scanPointsNorm = [
+		// outline (oval-ish 14)
+		{x:0.50,y:0.12},{x:0.60,y:0.16},{x:0.69,y:0.24},{x:0.74,y:0.35},{x:0.77,y:0.47},{x:0.75,y:0.60},{x:0.68,y:0.71},
+		{x:0.50,y:0.78},{x:0.32,y:0.71},{x:0.25,y:0.60},{x:0.23,y:0.47},{x:0.26,y:0.35},{x:0.31,y:0.24},{x:0.40,y:0.16},
+		// brows (8)
+		{x:0.36,y:0.30},{x:0.44,y:0.27},{x:0.50,y:0.26},{x:0.56,y:0.27},{x:0.64,y:0.30},{x:0.56,y:0.29},{x:0.50,y:0.28},{x:0.44,y:0.29},
+		// nose (5)
+		{x:0.50,y:0.33},{x:0.50,y:0.40},{x:0.50,y:0.48},{x:0.48,y:0.55},{x:0.52,y:0.55},
+		// eyes (12)
+		{x:0.38,y:0.36},{x:0.42,y:0.34},{x:0.46,y:0.35},{x:0.42,y:0.38},{x:0.38,y:0.39},{x:0.36,y:0.38},
+		{x:0.54,y:0.35},{x:0.58,y:0.34},{x:0.62,y:0.36},{x:0.64,y:0.38},{x:0.60,y:0.39},{x:0.56,y:0.38},
+		// mouth (8)
+		{x:0.40,y:0.62},{x:0.46,y:0.60},{x:0.50,y:0.60},{x:0.54,y:0.60},{x:0.60,y:0.62},{x:0.54,y:0.65},{x:0.50,y:0.66},{x:0.46,y:0.65}
+	];
+
+	const scanConnections = [
+		// outline
+		[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,11],[11,12],[12,13],[13,0],
+		// brows
+		[14,15],[15,16],[16,17],
+		[18,19],[19,20],[20,21],
+		// nose
+		[22,23],[23,24],[24,25],[25,26],
+		// left eye loop
+		[27,28],[28,29],[29,30],[30,31],[31,32],[32,27],
+		// right eye loop
+		[33,34],[34,35],[35,36],[36,37],[37,38],[38,33],
+		// mouth
+		[39,40],[40,41],[41,42],[42,43],[43,44],[44,45],[45,46],[46,39]
+	];
+
+	let scanStart = null;
+
+	function easeInOutQuad(t) {
+		return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+	}
+
+	function drawScanFrame(timestamp) {
+		if (!landmarksCtx || !landmarksCanvas) return;
+		if (!scanStart) scanStart = timestamp || performance.now();
+		const elapsed = (timestamp || performance.now()) - scanStart;
+		const cycle = 2000; // ms for full sweep
+		const t = (elapsed % cycle) / cycle; // 0..1
+		const w = landmarksCanvas.width;
+		const h = landmarksCanvas.height;
+		const sweepY = easeInOutQuad(t) * h;
+
+		if (!landmarksCtx || !landmarksCanvas) return;
+		landmarksCtx.clearRect(0, 0, w, h);
+
+		// backdrop grid lines
+		landmarksCtx.save();
+		landmarksCtx.strokeStyle = 'rgba(0, 184, 255, 0.12)';
+		landmarksCtx.lineWidth = 1;
+		for (let gx = 0; gx <= w; gx += w / 12) {
+			landmarksCtx.beginPath();
+			landmarksCtx.moveTo(gx, 0);
+			landmarksCtx.lineTo(gx, h);
+			landmarksCtx.stroke();
+		}
+		for (let gy = 0; gy <= h; gy += h / 12) {
+			landmarksCtx.beginPath();
+			landmarksCtx.moveTo(0, gy);
+			landmarksCtx.lineTo(w, gy);
+			landmarksCtx.stroke();
+		}
+		landmarksCtx.restore();
+
+		// sweep highlight
+		landmarksCtx.fillStyle = 'rgba(0,195,255,0.06)';
+		landmarksCtx.fillRect(0, sweepY - 20, w, 40);
+
+		// glowing scan line
+		const grad = landmarksCtx.createLinearGradient(0, sweepY, w, sweepY);
+		grad.addColorStop(0, 'rgba(0,215,255,0)');
+		grad.addColorStop(0.5, 'rgba(0,215,255,0.9)');
+		grad.addColorStop(1, 'rgba(0,215,255,0)');
+		landmarksCtx.fillStyle = grad;
+		landmarksCtx.fillRect(0, sweepY - 1.5, w, 3);
+	}
+
+	function startScanOverlay(el) {
+		if (!landmarksCanvas) return;
+		sizeOverlayFrom(el || video || preview);
+		scanStart = null;
+		landmarksCanvas.style.display = 'block';
+		if (scanAnimId) cancelAnimationFrame(scanAnimId);
+		const loop = (ts) => {
+			drawScanFrame(ts);
+			scanAnimId = requestAnimationFrame(loop);
+		};
+		scanAnimId = requestAnimationFrame(loop);
+	}
+
+	function hideLandmarkOverlay() {
+		if (scanAnimId) { cancelAnimationFrame(scanAnimId); scanAnimId = null; }
+		if (landmarksCtx && landmarksCanvas) {
+			landmarksCtx.clearRect(0, 0, landmarksCanvas.width, landmarksCanvas.height);
+		}
+		if (landmarksCanvas) landmarksCanvas.style.display = 'none';
+		if (landmarkLoading) landmarkLoading.style.display = 'none';
 	}
 
 	// Sound functions
@@ -843,7 +988,6 @@
 		placeholder.style.display = 'block';
 		preview.style.display = 'none';
 		canvas.style.display = 'none';
-		scanLine.style.display = 'none';
 		if (loadingBorder) loadingBorder.style.display = 'none';
 		cameraState = 'stopped';
 		actionBtn.textContent = 'Start Camera';
@@ -917,9 +1061,8 @@
 		} else if (cameraState === 'captured') {
 			// retry capture immediately? or just let them click scan?
 			// Resetting to 'started' state to allow re-scan
-			preview.style.display = 'none';
+		preview.style.display = 'none';
 			video.style.display = 'block';
-			scanLine.style.display = 'none';
 			cameraState = 'started';
 			actionBtn.textContent = 'SCAN';
 			updateStatus('Ready');
@@ -940,9 +1083,8 @@
 			if (cameraState === 'stopped') {
 				cameraAction(); // Start camera
 			} else if (cameraState === 'captured') {
-				preview.style.display = 'none';
-				video.style.display = 'block';
-				scanLine.style.display = 'none';
+			preview.style.display = 'none';
+			video.style.display = 'block';
 				cameraState = 'started';
 				actionBtn.textContent = 'SCAN';
 				updateStatus('Ready');
@@ -1057,13 +1199,11 @@
 			ctx.restore();
 			const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 			preview.src = dataUrl;
-			preview.style.display = 'block';
-			scanLine.style.display = 'block';
+		preview.style.display = 'block';
 			if (loadingBorder) loadingBorder.style.display = 'block';
-			scanLine.style.animation = 'none';
-			setTimeout(() => { scanLine.style.animation = 'scan 2s linear'; }, 10);
 			canvas.style.display = 'none';
 			video.style.display = 'none';
+			startScanOverlay(preview); // show loading mesh during scanning
 			preview.style.objectFit = 'contain';
 			cameraState = 'captured';
 			actionBtn.textContent = 'Stop Camera';
@@ -1076,6 +1216,7 @@
 				const res = await fetch('/identify', { method: 'POST', body: fd });
 				const body = await res.json();
 				if (loadingBorder) loadingBorder.style.display = 'none';
+				hideLandmarkOverlay();
 				if (body.ok) {
 					// Success - Show Match Modal
 					handleMatchFound({
@@ -1096,6 +1237,7 @@
 				}
 			} catch (err) {
 				if (loadingBorder) loadingBorder.style.display = 'none';
+				hideLandmarkOverlay();
 				setError('Identification failed: ' + err.message);
 				updateStatus('Ready');
 			}
@@ -1113,13 +1255,13 @@
 			stream.getTracks().forEach(t => t.stop());
 			stream = null;
 		}
+		hideLandmarkOverlay();
 		video.srcObject = null;
 		video.style.display = 'none';
 		placeholder.style.display = 'block';
 		preview.style.display = 'none';
-		canvas.style.display = 'none';
-		scanLine.style.display = 'none';
-		if (loadingBorder) loadingBorder.style.display = 'none';
+			canvas.style.display = 'none';
+			if (loadingBorder) loadingBorder.style.display = 'none';
 		cameraState = 'stopped';
 		actionBtn.textContent = 'Start Camera';
 		updateStatus('Ready');
