@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Edit Admin — ASIST/UA Logbook{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-pencil-alt"></i> Edit Admin Details</h5>
+        </div>
+        <div class="card-body">
+            {% if admin %}
+            <form method="post" action="{{ url_for('client.admin_edit_admin', admin_id=admin.id) }}" novalidate>
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">
+                        <i class="fas fa-user"></i> First Name <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" 
+                           value="{{ admin.first_name }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">
+                        <i class="fas fa-user"></i> Last Name <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" 
+                           value="{{ admin.last_name }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        <i class="fas fa-envelope"></i> Email <span class="text-danger">*</span>
+                    </label>
+                    <input type="email" class="form-control input-force-lowercase" id="email" name="email" 
+                           value="{{ admin.email }}" required
+                           oninput="this.value = this.value.toLowerCase()">
+                </div>
+
+                <div class="mb-3">
+                    <label for="office" class="form-label">
+                        <i class="fas fa-building"></i> Assigned Office <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="office" name="office" required>
+                        <option value="">Select Office...</option>
+                        {% for office in offices %}
+                        <option value="{{ office.id }}" {% if office.id == admin.office %}selected{% endif %}>
+                            {{ office.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('client.admin_manage_admins') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="card border-info">
+                <div class="card-header bg-info bg-opacity-10">
+                    <h6 class="mb-0 text-info"><i class="fas fa-info-circle"></i> Admin Information</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-muted">Admin ID:</div>
+                            <div><code>{{ admin.id }}</code></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted">Date Created:</div>
+                            <div>{{ admin.created_at.strftime('%Y-%m-%d %H:%M') if admin.created_at else 'N/A' }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted">Last Updated:</div>
+                            <div>{{ admin.updated_at.strftime('%Y-%m-%d %H:%M') if admin.updated_at else 'Never' }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted">Current Office:</div>
+                            <div>
+                                {% if admin.office_name %}
+                                <span class="badge bg-info">{{ admin.office_name }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Unassigned</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i> Admin not found.
+            </div>
+            <a href="{{ url_for('client.admin_manage_admins') }}" class="btn btn-outline-primary">
+                Back to Admin List
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

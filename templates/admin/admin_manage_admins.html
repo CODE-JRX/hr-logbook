@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Manage Admins — ASIST/UA Logbook{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-users-cog"></i> Manage Admins</h5>
+            <a href="{{ url_for('client.admin_signup') }}" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center" title="Add New Admin">
+                <i class="fas fa-plus me-1"></i>
+                <span class="d-none d-md-inline">Add Admin</span>
+            </a>
+        </div>
+        <div class="card-body">
+            {% if admins %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle table-sm admin-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="id-col">ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Office</th>
+                            <th class="date-col">Date Created</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for admin in admins %}
+                        <tr>
+                            <td>
+                                <small class="text-muted">{{ admin.id }}</small>
+                            </td>
+                            <td>
+                                <strong class="name-cell">{{ admin.first_name }} {{ admin.last_name }}</strong>
+                            </td>
+                            <td>
+                                <code class="email-cell">{{ admin.email }}</code>
+                            </td>
+                            <td>
+                                {% if admin.office_name %}
+                                    <span class="badge bg-info">{{ admin.office_name }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Unassigned</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ admin.created_at.strftime('%Y-%m-%d %H:%M') if admin.created_at else 'N/A' }}
+                                </small>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Admin Actions">
+                                    <a href="{{ url_for('client.admin_edit_admin', admin_id=admin.id) }}" 
+                                       class="btn btn-outline-primary btn-sm d-inline-flex align-items-center" 
+                                       title="Edit">
+                                        <i class="fas fa-pencil-alt me-1"></i> 
+                                        <span class="d-none d-md-inline">Edit</span>
+                                    </a>
+                                    <button type="button"
+                                        class="btn btn-outline-danger btn-sm d-inline-flex align-items-center"
+                                        onclick="window.confirmDeleteAdmin({{ admin.id }}, '{{ admin.first_name }} {{ admin.last_name }}')"
+                                        {% if admin.id|string == session.admin_id|string %}disabled title="Cannot delete your own account"{% else %}title="Delete"{% endif %}>
+                                        <i class="fas fa-trash me-1"></i> 
+                                        <span class="d-none d-md-inline">Delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No admins found.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDeleteAdmin(adminId, adminName) {
+    if (confirm(`Are you sure you want to delete admin "${adminName}"? This action cannot be undone.`)) {
+        // Create form and submit
+        const form = document.createElement('form');
+        form.action = '/admin/manage_admins/delete/' + adminId;
+        form.method = 'POST';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

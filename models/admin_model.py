@@ -185,3 +185,110 @@ def find_best_admin_match(embedding_list, threshold=0.6):
     if best_distance is not None and best_distance <= threshold:
         return best_id, best_distance
     return None, None
+
+def get_all_admins(office_id=None):
+    """Get all admins, optionally filtered by office.
+    
+    Args:
+        office_id: Optional office ID to filter by. If None, returns all admins.
+    
+    Returns:
+        List of admin dictionaries with id, first_name, last_name, email, office_name, created_at.
+    """
+    with get_db_cursor() as cursor:
+        if office_id:
+            query = """SELECT a.id, a.first_name, a.last_name, a.email, a.office, 
+                              o.name as office_name, a.created_at, a.updated_at
+                       FROM admins a
+                       LEFT JOIN offices o ON a.office = o.id
+                       WHERE a.office = %s
+                       ORDER BY a.first_name, a.last_name"""
+            cursor.execute(query, (office_id,))
+        else:
+            query = """SELECT a.id, a.first_name, a.last_name, a.email, a.office, 
+                              o.name as office_name, a.created_at, a.updated_at
+                       FROM admins a
+                       LEFT JOIN offices o ON a.office = o.id
+                       ORDER BY o.name, a.first_name, a.last_name"""
+            cursor.execute(query)
+        
+        admins = cursor.fetchall()
+        return admins if admins else []
+
+def update_admin(admin_id, first_name=None, last_name=None, email=None, office=None):
+    """Update admin details.
+    
+    Args:
+        admin_id: ID of admin to update
+        first_name: Optional new first name
+        last_name: Optional new last name
+        email: Optional new email
+        office: Optional new office ID
+    
+    Returns:
+        True if update successful, False otherwise.
+    """
+    updates = []
+    values = []
+    
+    if first_name is not None:
+        updates.append("first_name = %s")
+        values.append(first_name.upper() if isinstance(first_name, str) else first_name)
+    
+    if last_name is not None:
+        updates.append("last_name = %s")
+        values.append(last_name.upper() if isinstance(last_name, str) else last_name)
+    
+    if email is not None:
+        updates.append("email = %s")
+        values.append(email.lower() if isinstance(email, str) else email)
+    
+    if office is not None:
+        updates.append("office = %s")
+        values.append(office)
+    
+    if not updates:
+        return False
+    
+    updates.append("updated_at = %s")
+    values.append(datetime.now())
+    values.append(admin_id)
+    
+    query = f"UPDATE admins SET {', '.join(updates)} WHERE id = %s"
+    
+    try:
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(query, tuple(values))
+            
+            # Refresh cache on update
+            global _ADMIN_FACE_CACHE
+            _ADMIN_FACE_CACHE = None
+            
+            return cursor.rowcount > 0
+    except mysql.connector.Error as err:
+        print(f"Error updating admin: {err}")
+        return False
+
+def delete_admin(admin_id):
+    """Delete an admin by ID.
+    
+    Args:
+        admin_id: ID of admin to delete
+    
+    Returns:
+        True if deletion successful, False otherwise.
+    """
+    query = "DELETE FROM admins WHERE id = %s"
+    
+    try:
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(query, (admin_id,))
+            
+            # Refresh cache on delete
+            global _ADMIN_FACE_CACHE
+            _ADMIN_FACE_CACHE = None
+            
+            return cursor.rowcount > 0
+    except mysql.connector.Error as err:
+        print(f"Error deleting admin: {err}")
+        return False

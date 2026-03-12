@@ -210,7 +210,13 @@ def add():
                 encodings = face_recognition.face_encodings(img)
                 if encodings:
                     embedding = list(encodings[0])
-                    add_face_embedding(cid, embedding)
+                    # Use improve_client_embedding instead of add_face_embedding to:
+                    # - Validate embeddings
+                    # - Merge similar angles (deduplication)
+                    # - Maintain quality (max 3 embeddings per client)
+                    # - Apply face verification during registration
+                    result = improve_client_embedding(cid, embedding)
+                    print(f"Face embedding processed for {cid}: {result}")
                     return True
                 else:
                     print(f"Warning: No face detected in one of the captured angles for {cid}")
@@ -1462,3 +1468,100 @@ def admin_edit_office(office_id):
         flash('Failed to update office')
         
     return redirect(url_for('client.admin_offices'))
+
+
+# ─────────────────────────────────────────────────────────────
+# ADMIN MANAGEMENT ROUTES (Super Admin only)
+# ─────────────────────────────────────────────────────────────
+
+@client_bp.route('/admin/manage_admins')
+@admin_required
+def admin_manage_admins():
+    """View and manage all admins (Super Admin only)."""
+    allow_ids = ('1', 1, 'SUPER ADMIN', 'ASIST/UA')
+    if session.get('admin_office_id') not in allow_ids and session.get('admin_office') not in allow_ids:
+        flash('Unauthorized: Only Super Admins can manage admins.')
+        return redirect(url_for('client.admin_dashboard'))
+    
+    from models.admin_model import get_all_admins
+    admins = get_all_admins()
+    offices = get_active_offices()
+    
+    return render_template('admin/admin_manage_admins.html', admins=admins, offices=offices)
+
+
+@client_bp.route('/admin/manage_admins/edit/<int:admin_id>', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_admin(admin_id):
+    """Edit an admin's details (Super Admin only)."""
+    allow_ids = ('1', 1, 'SUPER ADMIN', 'ASIST/UA')
+    if session.get('admin_office_id') not in allow_ids and session.get('admin_office') not in allow_ids:
+        flash('Unauthorized: Only Super Admins can manage admins.')
+        return redirect(url_for('client.admin_dashboard'))
+    
+    from models.admin_model import update_admin
+    
+    admin = get_admin_by_id(admin_id)
+    if not admin:
+        flash('Admin not found')
+        return redirect(url_for('client.admin_manage_admins'))
+    
+    if request.method == 'POST':
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        email = request.form.get('email', '').strip()
+        office = request.form.get('office')
+        
+        # Validate inputs
+        if not (first_name and last_name and email):
+            flash('All fields are required')
+            return redirect(url_for('client.admin_edit_admin', admin_id=admin_id))
+        
+        # Check if email is being changed and if it's already in use
+        if email.lower() != admin['email'].lower():
+            existing = get_admin_by_email(email)
+            if existing:
+                flash('An admin with that email already exists')
+                return redirect(url_for('client.admin_edit_admin', admin_id=admin_id))
+        
+        # Attempt update
+        if update_admin(admin_id, first_name, last_name, email, office):
+            flash('Admin updated successfully')
+            return redirect(url_for('client.admin_manage_admins'))
+        else:
+            flash('Failed to update admin')
+            return redirect(url_for('client.admin_edit_admin', admin_id=admin_id))
+    
+    # GET request - show edit form
+    offices = get_active_offices()
+    return render_template('admin/admin_edit_admin.html', admin=admin, offices=offices)
+
+
+@client_bp.route('/admin/manage_admins/delete/<int:admin_id>', methods=['POST'])
+@admin_required
+def admin_delete_admin(admin_id):
+    """Delete an admin (Super Admin only)."""
+    allow_ids = ('1', 1, 'SUPER ADMIN', 'ASIST/UA')
+    if session.get('admin_office_id') not in allow_ids and session.get('admin_office') not in allow_ids:
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 403
+    
+    from models.admin_model import delete_admin
+    
+    # Prevent self-deletion
+    if str(admin_id) == str(session.get('admin_id')):
+        flash('You cannot delete your own admin account')
+        return redirect(url_for('client.admin_manage_admins'))
+    
+    admin = get_admin_by_id(admin_id)
+    if not admin:
+        flash('Admin not found')
+        return redirect(url_for('client.admin_manage_admins'))
+    
+    admin_name = f"{admin['first_name']} {admin['last_name']}"
+    
+    if delete_admin(admin_id):
+        flash(f'Admin "{admin_name}" deleted successfully')
+    else:
+        flash('Failed to delete admin')
+    
+    return redirect(url_for('client.admin_manage_admins'))

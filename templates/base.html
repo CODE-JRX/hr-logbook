@@ -48,6 +48,17 @@
     [data-theme="dark"] body {
       background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../static/resources/project-bg.png') !important;
     }
+
+    /* Global print reset for body backgrounds */
+    @media print {
+      html,
+      body,
+      * {
+        background: #fff !important;
+        background-image: none !important;
+        background-color: #fff !important;
+      }
+    }
     
     /* Make container transparent to show body background */
     main.container {
@@ -230,6 +241,7 @@
               <li><a class="dropdown-item" href="/admin/profile"><i
                     class="fas fa-user-circle icon-gap-5"></i>Profile</a></li>
               {% if session.admin_office in ['SUPER ADMIN', '1', 1] %}
+              <li><a class="dropdown-item" href="/admin/manage_admins"><i class="fas fa-users-cog icon-gap-5"></i>Manage Admins</a></li>
               <li><a class="dropdown-item" href="/admin/offices"><i class="fas fa-building icon-gap-5"></i>Manage
                   Offices</a></li>
               {% endif %}

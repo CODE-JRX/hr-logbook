@@ -576,59 +576,85 @@
     }
 
     /* ===== PRINT STYLES ===== */
-    /* These styles only apply when printing and are completely isolated */
-    @media print {
+@media print {
+        /* Page setup - must be first in @media print */
+        @page {
+            size: legal portrait;
+            margin: 0.15cm;
+            background: white !important;
+        }
+        
+        @page :first {
+            background: white !important;
+        }
+        
+        @page :left {
+            background: white !important;
+        }
+        
+        @page :right {
+            background: white !important;
+        }
 
-        /* Reset everything for clean printing */
-        *,
-        *::before,
-        *::after {
+        /* Universal reset - remove all backgrounds */
+        * {
             color: #000 !important;
-            background: #fff !important;
-            background-color: #fff !important;
+            background-color: white !important;
+            background-image: none !important;
+            background-attachment: scroll !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
 
-        /* Hide navigation and screen-only elements */
-        nav,
-        .navbar,
-        .site-nav,
-        .fixed-top,
-        .filter-section,
-        .screen-view,
-        footer,
-        .site-footer {
+        *::before,
+        *::after {
             display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
+            content: none !important;
         }
 
-        /* Hide the filter card/header that appears on screen but should not print */
-        .card.shadow-sm,
-        .card-header,
-        .card-body,
-        .card {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-
-        /* Reset body for print */
+        /* Body and HTML reset */
         body,
         html {
+            color: #000 !important;
+            background: white !important;
+            background-color: white !important;
+            background-image: none !important;
+            background-attachment: scroll !important;
             width: 100% !important;
             height: auto !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
+        /* Hide all screen-view elements */
+        nav,
+        .navbar,
+        .site-nav,
+        .fixed-top,
+        .no-print,
+        .filter-section,
+        .screen-view,
+        footer,
+        .site-footer,
+        .card,
+        .card-header,
+        .card-body,
+        .table-responsive,
+        #csm-report,
+        .results-card {
+            display: none !important;
+        }
+
+        /* main and container spacing */
         main {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .container {
+            max-width: 100% !important;
             padding: 0 !important;
             margin: 0 !important;
         }
@@ -640,12 +666,6 @@
             padding-top: 0 !important;
         }
 
-        /* Page setup */
-        @page {
-            size: legal portrait;
-            margin: 0.15cm;
-        }
-
         /* Form page styling */
         .form-page {
             page-break-after: always;
@@ -653,13 +673,14 @@
             margin-bottom: 0;
             box-shadow: none !important;
             padding: 0;
+            border: none !important;
+            border-radius: 0 !important;
         }
 
         .form-page:first-child {
             page-break-before: avoid !important;
         }
 
-        /* Avoid extra blank page after the last printed form */
         .form-page:last-child {
             page-break-after: auto !important;
         }
@@ -672,6 +693,7 @@
             padding: 0.25cm 0.4cm !important;
             box-shadow: none !important;
             border: none !important;
+            border-radius: 0 !important;
         }
 
         /* Compact typography for print */
@@ -728,16 +750,45 @@
             padding: 6px 4px !important;
         }
 
+        /* Ensure all text elements are black and background white for print-forms */
+        .print-forms,
+        .print-forms *,
+        .form-page,
+        .form-page * {
+            background: #fff !important;
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+
+        /* Hide all pseudo-elements that might contain background images */
+        .print-forms::before,
+        .print-forms::after,
+        .form-page::before,
+        .form-page::after,
+        .print-forms *::before,
+        .print-forms *::after,
+        .form-page *::before,
+        .form-page *::after,
+        main::before,
+        main::after {
+            display: none !important;
+            visibility: hidden !important;
+            content: none !important;
+            background: none !important;
+            background-image: none !important;
+        }
+
         /* Plain table headers for print */
         .print-forms thead,
         .print-forms th {
-            background: transparent !important;
-            background-color: transparent !important;
+            background: #fff !important;
+            background-color: #fff !important;
             color: #000 !important;
             border: 1px solid #000 !important;
         }
 
         .print-forms td {
+            background: #fff !important;
             border-bottom: 1px solid #000 !important;
         }
 

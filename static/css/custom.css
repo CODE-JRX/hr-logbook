@@ -1,4 +1,4 @@
-/* Custom styles for HRMO Logbook */
+un /* Custom styles for HRMO Logbook */
 
 /* =================================================================
    PHASED IMPLEMENTATION PLAN FOR DESIGN SYSTEM UNIFORMITY
@@ -1145,6 +1145,15 @@ nav {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='currentColor' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
+@media print {
+  body::before,
+  body::after,
+  .site-nav::before {
+    background: none !important;
+    background-image: none !important;
+  }
+}
+
 .navbar-collapse {
   z-index: 1040;
   background: var(--nav-bg);
@@ -1729,8 +1738,64 @@ body {
   transition: color 0.2s ease;
 }
 
-[data-theme="dark"] .table-responsive {
-  overflow-x: visible;
+/* Removed: [data-theme="dark"] .table-responsive override to restore mobile scrolling */
+/* Table Header Accessibility Fix - Enhanced for mobile */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Mobile table optimizations */
+@media (max-width: 768px) {
+  .admin-table .table {
+    font-size: 0.875rem;
+  }
+  
+  .admin-table th,
+  .admin-table td {
+    padding: 0.5rem 0.25rem;
+    white-space: nowrap;
+  }
+  
+  /* Truncate long text */
+  .admin-table .name-cell,
+  .admin-table .email-cell {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Compact buttons */
+  .admin-table .btn-group-sm .btn {
+    padding: 0.25rem 0.375rem;
+    font-size: 0.75rem;
+  }
+  
+  .admin-table .btn span {
+    display: none;
+  }
+  
+  .admin-table .btn i {
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Hide non-essential columns on tiny screens */
+  .admin-table .id-col,
+  .admin-table .date-col {
+    display: none;
+  }
+  
+  .admin-table th:nth-child(1),
+  .admin-table td:nth-child(1),
+  .admin-table th:nth-child(5),
+  .admin-table td:nth-child(5) {
+    display: none;
+  }
+}
+
+
 }
 
 [data-theme="dark"] .filter-section,

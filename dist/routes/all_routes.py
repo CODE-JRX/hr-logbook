@@ -210,7 +210,13 @@ def add():
                 encodings = face_recognition.face_encodings(img)
                 if encodings:
                     embedding = list(encodings[0])
-                    add_face_embedding(cid, embedding)
+                    # Use improve_client_embedding instead of add_face_embedding to:
+                    # - Validate embeddings
+                    # - Merge similar angles (deduplication)
+                    # - Maintain quality (max 3 embeddings per client)
+                    # - Apply face verification during registration
+                    result = improve_client_embedding(cid, embedding)
+                    print(f"Face embedding processed for {cid}: {result}")
                     return True
                 else:
                     print(f"Warning: No face detected in one of the captured angles for {cid}")
