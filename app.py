@@ -85,6 +85,8 @@ ensure_csm_form_office_column()
 app.register_blueprint(client_bp)
 from routes.backup_routes import backup_bp
 app.register_blueprint(backup_bp)
+from routes.employee_routes import employee_bp
+app.register_blueprint(employee_bp)
 
 # 4. Warm up face recognition caches
 try:

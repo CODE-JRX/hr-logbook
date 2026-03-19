@@ -12,6 +12,7 @@ from db import get_db_cursor
 from models.client_model import get_departments
 from models.log_model import get_logs_by_day, get_department_counts, get_purpose_counts, get_total_logs
 from models.office_model import get_offices as get_all_offices, get_active_offices, add_office, delete_office, update_office_status, update_office
+from models.employee_model import get_employee_count
 import os
 import base64
 import re
@@ -805,8 +806,14 @@ def admin_dashboard():
         total_satisfactory_surveys = get_csm_form_count(office=office_filter)
     except Exception:
         total_satisfactory_surveys = 0
+    total_employees = get_employee_count()
     admin = get_admin_by_id(session.get('admin_id'))
-    stats = {'total_clients': total_clients, 'total_logs': total_logs, 'total_satisfactory_surveys': total_satisfactory_surveys}
+    stats = {
+        'total_clients': total_clients, 
+        'total_logs': total_logs, 
+        'total_satisfactory_surveys': total_satisfactory_surveys,
+        'total_employees': total_employees
+    }
     return render_template('admin/admin_dashboard.html', stats=stats, admin=admin)
 
 

@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% block title %}PDS Sheet 4 — ASIST/UA Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+    .form-container {
+        max-width: 1400px;
+        width: 100%;
+        background: white;
+        box-shadow: 0 20px 40px rgba(0,30,60,0.2);
+        padding: 2.2rem 2.5rem;
+        border-radius: 24px;
+        border: 1px solid #b8cde0;
+        margin: 2rem auto;
+    }
+    [data-theme="dark"] .form-container { background: #1e1e1e; border-color: #333; color: #eee; }
+    h2 {
+        color: #003366;
+        border-left: 8px solid #b31b1b;
+        padding-left: 1rem;
+        margin: 0 0 0.25rem 0;
+        font-weight: 500;
+        font-size: 2.2rem;
+        letter-spacing: 1px;
+    }
+    [data-theme="dark"] h2 { color: #5dade2; }
+    .sheet-badge {
+        background: #1d3d6b;
+        color: white;
+        padding: 0.3rem 2rem;
+        border-radius: 40px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1.8rem;
+        font-size: 1rem;
+    }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #003366;
+        border-bottom: 3px double #a0b8d4;
+        padding-bottom: 0.3rem;
+        margin: 2rem 0 1.5rem 0;
+        background: linear-gradient(to right, #f0f6ff, transparent);
+        padding-left: 0.5rem;
+    }
+    [data-theme="dark"] .section-title { color: #5dade2; background: linear-gradient(to right, #2c3e5c, transparent); border-bottom-color: #444; }
+    .question-block {
+        background: #f8faff;
+        border-radius: 20px;
+        padding: 1.2rem 1.8rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ceddec;
+    }
+    [data-theme="dark"] .question-block { background: #252525; border-color: #444; }
+    .q-prompt {
+        font-weight: 700;
+        color: #002856;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: center;
+        gap: 25px;
+    }
+    [data-theme="dark"] .q-prompt { color: #5dade2; }
+    .yes-no {
+        display: flex;
+        gap: 25px;
+        align-items: center;
+        margin: 0.3rem 0 1rem;
+    }
+    .yes-no label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 500;
+        color: #1f3a68;
+    }
+    [data-theme="dark"] .yes-no label { color: #abb2bf; }
+    .detail-line {
+        margin: 0.8rem 0 0.2rem 1.8rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+    }
+    .detail-line input {
+        padding: 0.5rem 1rem;
+        border: 1px solid #aebfda;
+        border-radius: 30px;
+        background: white;
+    }
+    [data-theme="dark"] .detail-line input { background: #2c2c2c; border-color: #444; color: #eee; }
+    .government-id-section {
+        background: #e4edf9;
+        border-radius: 30px;
+        padding: 1.5rem 2rem;
+        margin: 2rem 0 1.8rem;
+    }
+    [data-theme="dark"] .government-id-section { background: #2c3e5c; }
+    .btn-step {
+        padding: 0.8rem 2.5rem;
+        border-radius: 40px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: 0.2s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <form action="/employee/pds/4" method="POST">
+            <h2>PERSONAL DATA SHEET</h2>
+            <div class="sheet-badge">SHEET 4 : DECLARATIONS · REFERENCES · OATH</div>
+
+            {% if prefill %}
+            <div class="alert alert-info d-flex align-items-center gap-2 mb-3" style="border-radius:12px;">
+                <i class="fas fa-magic fa-lg text-primary"></i>
+                <div>
+                    <strong>Excel data pre-filled!</strong> Review and edit the fields below before submitting.
+                    <a href="/admin/manage-employees" class="ms-2 alert-link">← Back to Manage Employees</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="section-title">IV. DECLARATIONS</div>
+            <div class="question-block">
+                <div class="q-prompt">34. Are you related to any authority?</div>
+                <div class="yes-no">
+                    <label><input name="q34a" type="radio" value="yes"/> Yes</label>
+                    <label><input checked="" name="q34a" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line">
+                    <input name="details_34" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-prompt">35. Administrative offense or criminally charged?</div>
+                <div class="yes-no">
+                    <label><input name="q35a" type="radio" value="yes"/> Yes</label>
+                    <label><input checked="" name="q35a" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line">
+                    <input name="details_35" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-prompt">38. Candidate in election?</div>
+                <div class="yes-no">
+                    <label><input name="q38a" type="radio" value="yes"/> Yes</label>
+                    <label><input checked="" name="q38a" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line">
+                    <input name="details_38a" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-prompt">39. Immigrant status?</div>
+                <div class="yes-no">
+                    <label><input name="q39" type="radio" value="yes"/> Yes</label>
+                    <label><input checked="" name="q39" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line">
+                    <input name="details_39" placeholder="If YES, give country" type="text" class="form-control" style="border-radius:20px;"/>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-prompt">40. IP, PWD, or Solo Parent?</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <label class="fw-bold small">IP Member?</label>
+                        <div class="yes-no" style="gap: 15px; margin: 0.2rem 0;">
+                            <label><input name="q40a" type="radio" value="yes"/> Y</label>
+                            <label><input checked="" name="q40a" type="radio" value="no"/> N</label>
+                        </div>
+                        <input name="details_40a" placeholder="Specify" type="text" class="form-control form-control-sm" style="border-radius:15px;">
+                    </div>
+                    <div>
+                        <label class="fw-bold small">PWD?</label>
+                        <div class="yes-no" style="gap: 15px; margin: 0.2rem 0;">
+                            <label><input name="q40b" type="radio" value="yes"/> Y</label>
+                            <label><input checked="" name="q40b" type="radio" value="no"/> N</label>
+                        </div>
+                        <input name="details_40b" placeholder="ID No." type="text" class="form-control form-control-sm" style="border-radius:15px;">
+                    </div>
+                    <div>
+                        <label class="fw-bold small">Solo Parent?</label>
+                        <div class="yes-no" style="gap: 15px; margin: 0.2rem 0;">
+                            <label><input name="q40c" type="radio" value="yes"/> Y</label>
+                            <label><input checked="" name="q40c" type="radio" value="no"/> N</label>
+                        </div>
+                        <input name="details_40c" placeholder="ID No." type="text" class="form-control form-control-sm" style="border-radius:15px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-prompt">36. Have you ever been convicted of any crime?</div>
+                <div class="yes-no">
+                    <label><input name="q36" type="radio" value="yes"/> Yes</label>
+                    <label><input checked="" name="q36" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line">
+                    <input name="details_36" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-prompt">37. Have you ever been separated from the service?</div>
+                <div class="yes-no">
+                    <label><input name="q37" type="radio" value="yes"/> Yes</label>
+                    <label><input checked="" name="q37" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line">
+                    <input name="details_37" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                </div>
+            </div>
+
+            <div class="section-title">41. REFERENCES (Person not related by consanguinity or affinity)</div>
+            <style>
+                .ref-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+                .ref-card { background: #f1f7ff; padding: 1rem; border-radius: 15px; border: 1px solid #b9cee8; }
+                [data-theme="dark"] .ref-card { background: #2c2c2c; border-color: #444; }
+                .ref-card input { margin-bottom: 0.5rem; border-radius: 10px; font-size: 0.85rem; }
+            </style>
+            <div class="ref-grid">
+                {% for i in range(3) %}
+                <div class="ref-card">
+                    <input name="ref_name[]" placeholder="Full Name" type="text" class="form-control">
+                    <input name="ref_address[]" placeholder="Address" type="text" class="form-control">
+                    <input name="ref_tel_no[]" placeholder="Telephone/Mobile No." type="text" class="form-control">
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="government-id-section">
+                <h6 class="fw-bold mb-3">42. GOVERNMENT ISSUED ID</h6>
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <label class="fw-bold small">ID Type:</label>
+                        <input name="gov_issued_id" placeholder="Passport / GSIS / SSS" type="text" class="form-control mt-1" style="border-radius:20px;"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="fw-bold small">ID Number:</label>
+                        <input name="id_no" placeholder="Number" type="text" class="form-control mt-1" style="border-radius:20px;"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="fw-bold small">Date/Place of Issuance:</label>
+                        <input name="date_place_issuance" placeholder="dd/mm/yyyy / Place" type="text" class="form-control mt-1" style="border-radius:20px;"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-label">CS FORM 212 (Revised 2025), Page 4 of 4</div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="/employee/pds/3" class="btn btn-outline-secondary btn-step"><i class="fas fa-arrow-left me-2"></i> Previous Step</a>
+                <button class="btn btn-success btn-step" type="submit">Submit PDS <i class="fas fa-check ms-2"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

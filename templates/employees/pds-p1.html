@@ -1,0 +1,526 @@
+{% extends 'base.html' %}
+{% block title %}PDS Sheet 1 — ASIST/UA Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+    .form-container {
+        max-width: 1400px;
+        width: 100%;
+        background: white;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        padding: 2rem 1.8rem;
+        border-radius: 12px;
+        border: 1px solid #cfd9e6;
+        margin: 2rem auto;
+    }
+    [data-theme="dark"] .form-container {
+        background: #1e1e1e;
+        border-color: #333;
+        color: #eee;
+    }
+    h2 {
+        color: #003366;
+        border-left: 8px solid #b31b1b;
+        padding-left: 1rem;
+        margin: 0 0 0.25rem 0;
+        font-weight: 500;
+        font-size: 2.2rem;
+        letter-spacing: 1px;
+    }
+    [data-theme="dark"] h2 { color: #5dade2; }
+    .subhead {
+        font-size: 0.95rem;
+        background: #f0f3f9;
+        padding: 1rem 1.2rem;
+        border-radius: 8px;
+        margin: 1rem 0 1.8rem 0;
+        border-left: 4px solid #b31b1b;
+        font-weight: 500;
+        color: #1a2b4c;
+        line-height: 1.5;
+    }
+    [data-theme="dark"] .subhead { background: #2c3e5c; color: #eee; }
+    .warning-banner {
+        background: #fff8e5;
+        border: 1px solid #f9c74f;
+        padding: 0.8rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        color: #7d5d23;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #003366;
+        border-bottom: 3px double #a0b8d4;
+        padding-bottom: 0.3rem;
+        margin: 2rem 0 1.5rem 0;
+        background: linear-gradient(to right, #f0f6ff, transparent);
+        padding-left: 0.5rem;
+    }
+    [data-theme="dark"] .section-title { color: #5dade2; background: linear-gradient(to right, #2c3e5c, transparent); border-bottom-color: #444; }
+    .section-sub {
+        font-weight: 600;
+        background: #d9e4f0;
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        margin: 1.5rem 0 1rem 0;
+    }
+    [data-theme="dark"] .section-sub { background: #34495e; color: #eee; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem 2rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem 1.5rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem 1.2rem; }
+    .field-group { display: flex; flex-direction: column; margin-bottom: 0.3rem; }
+    .field-group label {
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #1f3a68;
+        margin-bottom: 4px;
+    }
+    [data-theme="dark"] .field-group label { color: #abb2bf; }
+    .field-group input, .field-group select, .field-group textarea {
+        padding: 0.7rem 0.8rem;
+        border: 1px solid #b4c4d4;
+        border-radius: 8px;
+        background: white;
+        font-size: 0.95rem;
+        transition: 0.15s;
+    }
+    [data-theme="dark"] .field-group input, [data-theme="dark"] .field-group select {
+        background: #2c2c2c;
+        border-color: #444;
+        color: #eee;
+    }
+
+    .address-block {
+        background: #f7faff;
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        margin: 1.2rem 0;
+        border: 1px dashed #7b9bc2;
+    }
+    [data-theme="dark"] .address-block { background: #252525; border-color: #444; }
+    .address-title { font-weight: 700; color: #003366; margin-bottom: 0.7rem; font-size: 1.05rem; }
+    [data-theme="dark"] .address-title { color: #5dade2; }
+    .children-section { background: #fafbfe; border: 1px solid #cddae9; padding: 1.2rem; border-radius: 14px; margin: 1.5rem 0; }
+    [data-theme="dark"] .children-section { background: #252525; border-color: #444; }
+    .signature-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 2px solid #2c4b74;
+        padding-top: 1.5rem;
+        margin-top: 2rem;
+    }
+    .page-label {
+        text-align: right;
+        font-size: 0.85rem;
+        color: #4d6b91;
+        font-weight: 500;
+        border-top: 1px solid #b3c7e2;
+        padding-top: 0.5rem;
+    }
+    .btn-step {
+        padding: 0.7rem 2.2rem;
+        border-radius: 40px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: 0.2s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <form action="/employee/pds/1" method="POST">
+            <h2>PERSONAL DATA SHEET</h2>
+            <div class="warning-banner">
+                Any misrepresentation shall cause administrative/criminal case(s). Read attached guide before accomplishing.
+            </div>
+            <div class="subhead">
+                <span>📝 Print legibly if handwritten. Tick boxes (✔). Use separate sheet if necessary. Indicate N/A if not applicable. DO NOT ABBREVIATE.</span>
+            </div>
+
+            {% if prefill %}
+            <div class="alert alert-info d-flex align-items-center gap-2 mb-3" style="border-radius:12px;">
+                <i class="fas fa-magic fa-lg text-primary"></i>
+                <div>
+                    <strong>Excel data pre-filled!</strong> Review and edit the fields below before submitting.
+                    <a href="/admin/manage-employees" class="ms-2 alert-link">← Back to Manage Employees</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Manual Bind Alert Banner -->
+            <div id="manualBindBanner" class="alert alert-warning d-flex align-items-center justify-content-between gap-3 mb-4" style="border-radius:15px; display:none; border: 2px dashed #f59e0b;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-file-import fa-2x text-warning"></i>
+                    <div>
+                        <h6 class="mb-1 fw-bold">Unsaved Excel Data Found!</h6>
+                        <p class="mb-0 small text-muted">A PDS Excel file was recently uploaded. Click the button to populate the textboxes.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-warning px-4 py-2 fw-bold" onclick="autoFillForm1()" style="border-radius:30px; box-shadow: 0 4px 12px rgba(245,158,11,0.2);">
+                    <i class="fas fa-magic me-2"></i> Bind Data to Form
+                </button>
+            </div>
+
+            <div class="section-title">I. PERSONAL INFORMATION</div>
+            
+            <div class="grid-3" style="margin-bottom: 1rem;">
+                <div class="field-group"><label>1. SURNAME</label><input name="surname" placeholder="Surname" type="text" value="{{ (prefill.personal_info.surname if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>2. FIRST NAME</label><input name="first_name" placeholder="First name" type="text" value="{{ (prefill.personal_info.first_name if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>NAME EXTENSION (JR., SR)</label><input name="name_extension" placeholder="e.g. Jr" type="text" value="{{ (prefill.personal_info.name_extension if prefill else '') or '' }}"/></div>
+            </div>
+
+            <div class="grid-3">
+                <div class="field-group"><label>MIDDLE NAME</label><input name="middle_name" placeholder="Middle name" type="text" value="{{ (prefill.personal_info.middle_name if prefill else '') or '' }}"/></div>
+                <div class="field-group">
+                    <label>6. CIVIL STATUS</label>
+                    <select name="civil_status">
+                        <option>Single</option>
+                        <option>Married</option>
+                        <option>Widow/er</option>
+                        <option>Separated</option>
+                        <option>Solo Parent</option>
+                        <option>Others</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>CITIZENSHIP</label>
+                    <select name="country_citizenship">
+                        <option>Philippines</option>
+                        <option>Others</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid-3 mt-3">
+                <div class="field-group"><label>3. DATE OF BIRTH</label><input name="date_of_birth" placeholder="dd/mm/yyyy" type="text" value="{{ (prefill.personal_info.date_of_birth if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>4. PLACE OF BIRTH</label><input name="place_of_birth" type="text" value="{{ (prefill.personal_info.place_of_birth if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>5. SEX AT BIRTH</label><select name="sex"><option>Male</option><option>Female</option></select></div>
+            </div>
+
+            <div class="address-block">
+                <div class="address-title">🏠 17. RESIDENTIAL ADDRESS</div>
+                <div class="grid-4">
+                    <div class="field-group"><label>House/Block/Lot No.</label><input name="res_house_no" type="text" value="{{ (prefill.personal_info.residential_address.house_no if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Street</label><input name="res_street" type="text" value="{{ (prefill.personal_info.residential_address.street if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Subdivision/Village</label><input name="res_subdivision" type="text"/></div>
+                    <div class="field-group"><label>Barangay</label><input name="res_barangay" type="text" value="{{ (prefill.personal_info.residential_address.barangay if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>City/Municipality</label><input name="res_city" type="text" value="{{ (prefill.personal_info.residential_address.city if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Province</label><input name="res_province" type="text" value="{{ (prefill.personal_info.residential_address.province if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>ZIP CODE</label><input name="res_zip_code" type="text" value="{{ (prefill.personal_info.residential_address.zip_code if prefill else '') or '' }}"/></div>
+                </div>
+            </div>
+
+            <div class="address-block">
+                <div class="address-title">🏠 18. PERMANENT ADDRESS</div>
+                <div class="grid-4">
+                    <div class="field-group"><label>House/Block/Lot No.</label><input name="perm_house_no" type="text" value="{{ (prefill.personal_info.permanent_address.house_no if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Street</label><input name="perm_street" type="text" value="{{ (prefill.personal_info.permanent_address.street if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Subdivision/Village</label><input name="perm_subdivision" type="text"/></div>
+                    <div class="field-group"><label>Barangay</label><input name="perm_barangay" type="text" value="{{ (prefill.personal_info.permanent_address.barangay if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>City/Municipality</label><input name="perm_city" type="text" value="{{ (prefill.personal_info.permanent_address.city if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Province</label><input name="perm_province" type="text" value="{{ (prefill.personal_info.permanent_address.province if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>ZIP CODE</label><input name="perm_zip_code" type="text" value="{{ (prefill.personal_info.permanent_address.zip_code if prefill else '') or '' }}"/></div>
+                </div>
+            </div>
+
+            <div class="grid-4">
+                <div class="field-group"><label>7. HEIGHT (m)</label><input name="height" type="text" value="{{ (prefill.personal_info.height if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>8. WEIGHT (kg)</label><input name="weight" type="text" value="{{ (prefill.personal_info.weight if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>9. BLOOD TYPE</label><input name="blood_type" type="text" value="{{ (prefill.personal_info.blood_type if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>10. UMID ID NO.</label><input name="umid_no" type="text"/></div>
+            </div>
+
+            <div class="grid-3 mt-2">
+                <div class="field-group"><label>11. GSIS ID NO.</label><input name="gsis_no" type="text" value="{{ (prefill.personal_info.gsis_no if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>12. PAG-IBIG ID NO.</label><input name="pagibig_no" type="text" value="{{ (prefill.personal_info.pagibig_no if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>13. PHILHEALTH NO.</label><input name="philhealth_no" type="text" value="{{ (prefill.personal_info.philhealth_no if prefill else '') or '' }}"/></div>
+            </div>
+
+            <div class="grid-3 mt-2">
+                <div class="field-group"><label>14. SSS NO.</label><input name="sss_no" type="text" value="{{ (prefill.personal_info.sss_no if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>15. TIN NO.</label><input name="tin_no" type="text" value="{{ (prefill.personal_info.tin_no if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>16. AGENCY EMPLOYEE NO.</label><input name="agency_employee_no" type="text" value="{{ (prefill.personal_info.agency_employee_no if prefill else '') or '' }}"/></div>
+            </div>
+
+            <div class="grid-3 mt-3">
+                <div class="field-group"><label>19. TELEPHONE NO.</label><input name="telephone_no" type="text"/></div>
+                <div class="field-group"><label>20. MOBILE NO.</label><input name="mobile_no" type="text" value="{{ (prefill.personal_info.mobile_no if prefill else '') or '' }}"/></div>
+                <div class="field-group"><label>21. E-MAIL ADDRESS</label><input name="email" type="email" value="{{ (prefill.personal_info.email_address if prefill else '') or '' }}"/></div>
+            </div>
+
+            <div class="section-title">II. FAMILY BACKGROUND</div>
+            <div class="address-block">
+                <div class="address-title">22. SPOUSE</div>
+                <div class="grid-4">
+                    <div class="field-group"><label>Surname</label><input name="spouse_surname" type="text" value="{{ (prefill.family_background.spouse.surname if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>First Name</label><input name="spouse_first_name" type="text" value="{{ (prefill.family_background.spouse.first_name if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Middle Name</label><input name="spouse_middle_name" type="text" value="{{ (prefill.family_background.spouse.middle_name if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Occupation</label><input name="spouse_occupation" type="text" value="{{ (prefill.family_background.spouse.occupation if prefill else '') or '' }}"/></div>
+                </div>
+                <div class="grid-3 mt-2">
+                    <div class="field-group"><label>Employer/Biz Name</label><input name="spouse_employer" type="text" value="{{ (prefill.family_background.spouse.employer if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Biz Address</label><input name="spouse_biz_address" type="text" value="{{ (prefill.family_background.spouse.biz_address if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Telephone No.</label><input name="spouse_tel_no" type="text" value="{{ (prefill.family_background.spouse.tel_no if prefill else '') or '' }}"/></div>
+                </div>
+            </div>
+
+            <div class="address-block mt-3">
+                <div class="address-title">24. FATHER'S NAME</div>
+                <div class="grid-3">
+                    <div class="field-group"><label>Surname</label><input name="father_surname" type="text" value="{{ (prefill.family_background.father.surname if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>First Name</label><input name="father_first_name" type="text" value="{{ (prefill.family_background.father.first_name if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Middle Name</label><input name="father_middle_name" type="text" value="{{ (prefill.family_background.father.middle_name if prefill else '') or '' }}"/></div>
+                </div>
+            </div>
+
+            <div class="address-block mt-2">
+                <div class="address-title">25. MOTHER'S MAIDEN NAME</div>
+                <div class="grid-3">
+                    <div class="field-group"><label>Surname</label><input name="mother_surname" type="text" value="{{ (prefill.family_background.mother.surname if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>First Name</label><input name="mother_first_name" type="text" value="{{ (prefill.family_background.mother.first_name if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Middle Name</label><input name="mother_middle_name" type="text" value="{{ (prefill.family_background.mother.middle_name if prefill else '') or '' }}"/></div>
+                </div>
+            </div>
+
+            <div class="children-section">
+                <div class="address-title d-flex justify-content-between align-items-center">
+                    <span>23. NAME OF CHILDREN (Write full name and list all)</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="addChildRow()">
+                        <i class="fas fa-plus me-1"></i> Add Child
+                    </button>
+                </div>
+                <div id="childrenRowsContainer" class="mt-2">
+                    {% if prefill and prefill.family_background.children %}
+                        {% for child in prefill.family_background.children %}
+                        <div class="row g-2 mb-2 child-row align-items-center">
+                            <div class="col-8">
+                                <input name="child_fullname[]" placeholder="Full Name" type="text" class="form-control form-control-sm" style="border-radius:10px;" value="{{ child.name or '' }}">
+                            </div>
+                            <div class="col-3">
+                                <input name="child_dob[]" placeholder="dd/mm/yyyy" type="text" class="form-control form-control-sm" style="border-radius:10px;" value="{{ child.dob or '' }}">
+                            </div>
+                            <div class="col-1 text-end">
+                                <button type="button" class="btn btn-sm text-danger" onclick="this.closest('.child-row').remove()"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <script>
+                function addChildRow() {
+                    const container = document.getElementById('childrenRowsContainer');
+                    const div = document.createElement('div');
+                    div.className = 'row g-2 mb-2 child-row align-items-center';
+                    div.innerHTML = `
+                        <div class="col-8">
+                            <input name="child_fullname[]" placeholder="Full Name" type="text" class="form-control form-control-sm" style="border-radius:10px;">
+                        </div>
+                        <div class="col-3">
+                            <input name="child_dob[]" placeholder="dd/mm/yyyy" type="text" class="form-control form-control-sm" style="border-radius:10px;">
+                        </div>
+                        <div class="col-1 text-end">
+                            <button type="button" class="btn btn-sm text-danger" onclick="this.closest('.child-row').remove()"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                }
+                // Initial row if empty
+                document.addEventListener('DOMContentLoaded', () => {
+                    const container = document.getElementById('childrenRowsContainer');
+                    if (container && container.children.length === 0) addChildRow();
+                });
+            </script>
+
+            <div class="section-title">III. EDUCATIONAL BACKGROUND</div>
+            <div class="table-responsive mt-3">
+                <style>
+                    .edu-table th { font-size: 0.7rem; vertical-align: middle; padding: 0.4rem; background: #f0f4f8; color: #1f3a68; }
+                    .edu-table td { padding: 0.2rem; }
+                    .edu-table input { border: 1px solid #c0d1e5; border-radius: 4px; padding: 0.3rem 0.5rem; width: 100%; font-size: 0.85rem; }
+                    [data-theme="dark"] .edu-table th { background: #2c3e5c; color: #eee; border-color: #444; }
+                    [data-theme="dark"] .edu-table td { border-color: #444; }
+                    [data-theme="dark"] .edu-table input { background: #2c2c2c; border-color: #555; color: #eee; }
+                </style>
+                <table class="table table-bordered edu-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">LEVEL</th>
+                            <th rowspan="2">NAME OF SCHOOL</th>
+                            <th rowspan="2">BASIC EDUCATION/DEGREE/COURSE</th>
+                            <th colspan="2">PERIOD ATTENDANCE</th>
+                            <th rowspan="2">HIGHEST LEVEL / UNITS EARNED</th>
+                            <th rowspan="2">YEAR GRADUATED</th>
+                            <th rowspan="2">SCHOLARSHIP / HONORS</th>
+                        </tr>
+                        <tr>
+                            <th>FROM</th>
+                            <th>TO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set levels = ['ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE STUDIES'] %}
+                        {% for level_name in levels %}
+                        {% set entry = none %}
+                        {% if prefill and prefill.educational_background %}
+                            {% for edu in prefill.educational_background %}
+                                {% if edu.level == level_name %}{% set entry = edu %}{% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        <tr>
+                            <td><strong>{{ level_name }}</strong><input type="hidden" name="level[]" value="{{ level_name }}"></td>
+                            <td><input type="text" name="name_of_school[]" value="{{ entry.school if entry else '' }}"></td>
+                            <td><input type="text" name="basic_education_degree_course[]" value="{{ entry.degree if entry else '' }}"></td>
+                            <td><input type="text" name="period_from[]" value="{{ entry.from if entry else '' }}"></td>
+                            <td><input type="text" name="period_to[]" value="{{ entry.to if entry else '' }}"></td>
+                            <td><input type="text" name="highest_level_units_earned[]" value="{{ entry.units if entry else '' }}"></td>
+                            <td><input type="text" name="year_graduated[]" value="{{ entry.graduated if entry else '' }}"></td>
+                            <td><input type="text" name="scholarship_academic_honors[]" value="{{ entry.honors if entry else '' }}"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="signature-line">
+                <div><span style="font-weight:600;">SIGNATURE</span> <input placeholder="signature" style="width:250px; margin-left:15px;" type="text"/></div>
+                <div><span style="font-weight:600;">DATE</span> <input placeholder="dd/mm/yyyy" type="text"/></div>
+            </div>
+            <div class="page-label">CS FORM 212 (Revised 2025), Page 1 of 4</div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button class="btn btn-primary btn-step" type="submit">Next Step <i class="fas fa-arrow-right ms-2"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Floating FAB removed - using Banner at top instead -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('pds_prefill_data')) {
+        const banner = document.getElementById('manualBindBanner');
+        if (banner) banner.style.display = 'flex';
+    }
+});
+
+function autoFillForm1() {
+    const raw = localStorage.getItem('pds_prefill_data');
+    if (!raw) return alert("No Excel data found in local storage.");
+    const data = JSON.parse(raw);
+    
+    // Personal Info
+    const pi = data.personal_info || {};
+    const mapping = {
+        'surname': pi.surname,
+        'first_name': pi.first_name,
+        'middle_name': pi.middle_name,
+        'name_extension': pi.name_extension,
+        'date_of_birth': pi.date_of_birth,
+        'place_of_birth': pi.place_of_birth,
+        'sex': pi.sex,
+        'civil_status': pi.civil_status,
+        'height': pi.height,
+        'weight': pi.weight,
+        'blood_type': pi.blood_type,
+        'gsis_no': pi.gsis_no,
+        'pagibig_no': pi.pagibig_no,
+        'philhealth_no': pi.philhealth_no,
+        'sss_no': pi.sss_no,
+        'tin_no': pi.tin_no,
+        'agency_employee_no': pi.agency_employee_no,
+        'citizenship': pi.citizenship,
+        'mobile_no': pi.mobile_no,
+        'email': pi.email_address,
+        
+        // Residential Address
+        'res_house_no': pi.residential_address?.house_no,
+        'res_street': pi.residential_address?.street,
+        'res_barangay': pi.residential_address?.barangay,
+        'res_city': pi.residential_address?.city,
+        'res_province': pi.residential_address?.province,
+        'res_zip_code': pi.residential_address?.zip_code,
+        
+        // Permanent Address
+        'perm_house_no': pi.permanent_address?.house_no,
+        'perm_street': pi.permanent_address?.street,
+        'perm_barangay': pi.permanent_address?.barangay,
+        'perm_city': pi.permanent_address?.city,
+        'perm_province': pi.permanent_address?.province,
+        'perm_zip_code': pi.permanent_address?.zip_code,
+        
+        // Family
+        'spouse_surname': data.family_background?.spouse?.surname,
+        'spouse_first_name': data.family_background?.spouse?.first_name,
+        'spouse_middle_name': data.family_background?.spouse?.middle_name,
+        'spouse_occupation': data.family_background?.spouse?.occupation,
+        'spouse_employer': data.family_background?.spouse?.employer_name,
+        'spouse_biz_address': data.family_background?.spouse?.business_address,
+        'spouse_tel_no': data.family_background?.spouse?.telephone_no,
+        
+        'father_surname': data.family_background?.father?.surname,
+        'father_first_name': data.family_background?.father?.first_name,
+        'father_middle_name': data.family_background?.father?.middle_name,
+        
+        'mother_surname': data.family_background?.mother?.maiden_surname,
+        'mother_first_name': data.family_background?.mother?.first_name,
+        'mother_middle_name': data.family_background?.mother?.middle_name,
+    };
+
+    for (let name in mapping) {
+        const input = document.querySelector(`[name="${name}"]`);
+        if (input && mapping[name]) input.value = mapping[name];
+    }
+    
+    // Children
+    if (data.family_background?.children?.length) {
+        const container = document.getElementById('childrenRowsContainer');
+        container.innerHTML = ''; // clear initial
+        data.family_background.children.forEach(child => {
+            const div = document.createElement('div');
+            div.className = 'row g-2 mb-2 child-row align-items-center';
+            div.innerHTML = `
+                <div class="col-8"><input name="child_fullname[]" value="${child.name || ''}" type="text" class="form-control form-control-sm"></div>
+                <div class="col-3"><input name="child_dob[]" value="${child.date_of_birth || ''}" type="text" class="form-control form-control-sm"></div>
+                <div class="col-1 text-end"><button type="button" class="btn btn-sm text-danger" onclick="this.closest('.child-row').remove()"><i class="fas fa-trash-alt"></i></button></div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // Education
+    if (data.educational_background?.length) {
+        data.educational_background.forEach(edu => {
+            const levelRows = document.querySelectorAll(`input[name="level[]"]`);
+            levelRows.forEach(row => {
+               if(row.value.toUpperCase() === edu.level.toUpperCase()) {
+                   const tr = row.closest('tr');
+                   tr.querySelector('[name="name_of_school[]"]').value = edu.school_name || '';
+                   tr.querySelector('[name="basic_education_degree_course[]"]').value = edu.degree || '';
+                   tr.querySelector('[name="period_from[]"]').value = edu.from || '';
+                   tr.querySelector('[name="period_to[]"]').value = edu.to || '';
+                   tr.querySelector('[name="highest_level_units_earned[]"]').value = edu.highest_level || '';
+                   tr.querySelector('[name="year_graduated[]"]').value = edu.year_graduated || '';
+                   tr.querySelector('[name="scholarship_academic_honors[]"]').value = edu.scholarships || '';
+               }
+            });
+        });
+    }
+
+    alert("PDS Page 1 fields populated! Please review before clicking Next.");
+}
+</script>
+{% endblock %}

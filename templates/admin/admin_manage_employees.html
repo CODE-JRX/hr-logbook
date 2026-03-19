@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% block title %}Manage Employees — ASIST/UA Logbook{% endblock %}
+
+{% block head_extra %}
+<style>
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,30,80,0.08);
+        border: 1px solid #dce8f5;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    [data-theme="dark"] .section-card {
+        background: #1e1e1e;
+        border-color: #333;
+    }
+    .section-card-header {
+        background: linear-gradient(135deg, #1d3d6b, #2d5fa1);
+        color: white;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .section-card-header h5 { margin: 0; font-weight: 600; }
+    .section-card-body { padding: 1.5rem; }
+
+    /* Upload zone */
+    .upload-zone {
+        border: 2.5px dashed #b0c9e8;
+        border-radius: 14px;
+        background: #f5f9ff;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+        border-color: #3a7bd5;
+        background: #eaf2ff;
+    }
+    [data-theme="dark"] .upload-zone { background: #22293a; border-color: #3a5070; }
+    [data-theme="dark"] .upload-zone:hover { background: #273045; border-color: #4a7ac0; }
+    .upload-zone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 2.8rem; color: #4a90d9; margin-bottom: 0.5rem; }
+    .upload-zone .file-label { font-weight: 600; color: #2d5fa1; font-size: 1rem; }
+    .upload-zone .file-hint { color: #7a99bb; font-size: 0.85rem; }
+
+    /* Preview */
+    #previewSection { display: none; }
+    .json-preview {
+        background: #0d1117;
+        color: #56d364;
+        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        font-size: 0.8rem;
+        font-family: 'Fira Code', 'Courier New', monospace;
+        max-height: 380px;
+        overflow-y: auto;
+        border: 1px solid #1e2d40;
+        line-height: 1.6;
+    }
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 0.35rem 1rem;
+        border-radius: 40px;
+        font-weight: 600; font-size: 0.85rem;
+    }
+    .badge-success { background: #d1fadf; color: #1a7340; }
+    .badge-error   { background: #ffe0e0; color: #9b1c1c; }
+    .badge-loading { background: #e0eaff; color: #1e3a8a; }
+
+    /* Action buttons */
+    .action-btn {
+        padding: 0.6rem 1.4rem;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.18s;
+    }
+    .action-btn:active { transform: scale(0.97); }
+    .btn-dark-dl  { background: #1e2d40; color: #fff; }
+    .btn-dark-dl:hover { background: #2d4460; }
+    .btn-green    { background: #16a34a; color: #fff; box-shadow: 0 4px 12px rgba(22,163,74,0.25); }
+    .btn-green:hover { background: #15803d; }
+    .btn-blue-submit { background: #2563eb; color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+    .btn-blue-submit:hover { background: #1d4ed8; }
+    .btn-blue-submit:disabled { background: #93b4f5; box-shadow: none; cursor: not-allowed; }
+
+    /* Employee table */
+    .emp-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #4d6b91; }
+    .emp-table td { vertical-align: middle; }
+    .name-badge {
+        background: linear-gradient(135deg, #e8f0fb, #d0e2f5);
+        color: #1a3a6a;
+        border-radius: 8px;
+        padding: 0.25rem 0.7rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: inline-block;
+    }
+    [data-theme="dark"] .name-badge { background: #2c3e5c; color: #90c8f5; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+
+    <!-- ──────────────────── Excel Import Section ──────────────────── -->
+    <div class="section-card">
+        <div class="section-card-header">
+            <h5><i class="fas fa-file-excel me-2"></i> Import PDS from Excel</h5>
+            <span class="badge bg-light text-primary fw-semibold" style="border-radius:20px;">
+                CS Form 212 – .xlsx / .xls
+            </span>
+        </div>
+        <div class="section-card-body">
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="pdsExcelFile" style="position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;" accept=".xlsx,.xls">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="file-label" id="uploadLabel">Click or drag &amp; drop to upload PDS Excel file</div>
+                <div class="file-hint mt-1">Supported: CSC PDS Form 212 (.xlsx, .xls)</div>
+            </div>
+
+            <!-- Preview Section -->
+            <div id="previewSection" class="mt-4" style="display:none;">
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="status-badge badge-success" id="extractBadge">
+                            <i class="fas fa-check-circle"></i> Extraction Successful! 
+                        </span>
+                        <code class="text-primary small fw-600" id="fileNameLabel"></code>
+                    </div>
+                </div>
+                
+                <div class="card bg-dark border-0 shadow-sm mb-4">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center text-white-50" style="font-size: 0.75rem; background: #1a1a1a; border-bottom: 1px solid #333;">
+                        <span><i class="fas fa-database me-2"></i> DATA EXTRACTED FROM EXCEL (JSON PREVIEW)</span>
+                        <span class="badge bg-secondary p-1">READ-ONLY VIEW</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <pre id="jsonPreview" class="m-0 p-3" style="height: 320px; overflow-y: auto; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #a5d6ff; background: #0d1117;"></pre>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-outline-secondary px-4 py-2" onclick="resetUpload()" style="border-radius:30px;">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button>
+                    <a id="proceedBtn" href="/employee/pds/1" class="btn btn-primary px-5 py-2 fw-bold d-inline-flex align-items-center" style="border-radius:30px; box-shadow: 0 4px 15px rgba(37,99,235,0.3);">
+                        Proceed to PDS Form <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div id="errorSection" class="mt-4" style="display:none;">
+                <div class="alert alert-danger mb-0">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <span id="errorMsg">Upload failed.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ──────────────────── Employee Table ──────────────────── -->
+    <div class="section-card">
+        <div class="section-card-header">
+            <h5><i class="fas fa-users me-2"></i> Employee Records</h5>
+            <a href="/employee/pds/1" class="btn btn-light btn-sm fw-semibold d-inline-flex align-items-center gap-1" style="border-radius:20px;">
+                <i class="fas fa-plus"></i>
+                <span class="d-none d-md-inline">Add PDS Manually</span>
+            </a>
+        </div>
+        <div class="section-card-body" style="padding: 0.5rem 1.5rem 1.5rem;">
+            {% if employees %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle table-sm emp-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Sex</th>
+                            <th>Birth Date</th>
+                            <th>Mobile No.</th>
+                            <th>Email</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in employees %}
+                        <tr>
+                            <td><small class="text-muted">{{ emp.id }}</small></td>
+                            <td>
+                                <span class="name-badge">{{ emp.surname }}, {{ emp.first_name }} {{ emp.middle_name or '' }}</span>
+                                <br><small class="text-muted">{{ emp.agency_employee_no or 'N/A' }}</small>
+                            </td>
+                            <td>{{ emp.sex or 'N/A' }}</td>
+                            <td>{{ emp.date_of_birth or 'N/A' }}</td>
+                            <td>{{ emp.mobile_no or 'N/A' }}</td>
+                            <td><code class="small">{{ emp.email or 'N/A' }}</code></td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="/admin/employee/view/{{ emp.id }}"
+                                       class="btn btn-outline-info btn-sm d-inline-flex align-items-center" title="View">
+                                        <i class="fas fa-eye me-1"></i>
+                                        <span class="d-none d-md-inline">View</span>
+                                    </a>
+                                    <a href="/admin/employee/edit/{{ emp.id }}"
+                                       class="btn btn-outline-primary btn-sm d-inline-flex align-items-center mx-1" title="Edit">
+                                        <i class="fas fa-pencil-alt me-1"></i>
+                                        <span class="d-none d-md-inline">Edit</span>
+                                    </a>
+                                    <button type="button"
+                                        class="btn btn-outline-danger btn-sm d-inline-flex align-items-center"
+                                        onclick="confirmDeleteEmployee('{{ emp.id }}', '{{ emp.surname }}, {{ emp.first_name }}')"
+                                        title="Delete">
+                                        <i class="fas fa-trash me-1"></i>
+                                        <span class="d-none d-md-inline">Delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle me-2"></i> No employee records found. Add one manually or import from Excel above.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block script_extra %}
+<script>
+const uploadZone   = document.getElementById('uploadZone');
+const fileInput    = document.getElementById('pdsExcelFile');
+const uploadLabel  = document.getElementById('uploadLabel');
+const previewSection = document.getElementById('previewSection');
+const errorSection   = document.getElementById('errorSection');
+const fileNameLabel  = document.getElementById('fileNameLabel');
+const errorMsg       = document.getElementById('errorMsg');
+
+// Click listener removed - the hidden input now covers the entire zone and handles clicks natively
+
+// Drag-and-drop styling
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+function handleFile(file) {
+    if (!file) return;
+    console.log("Starting handleFile for:", file.name);
+    
+    // Explicit alert to confirm the script is active and receiving the file
+    alert("Parsing file: " + file.name + "\nPlease wait while we process the data...");
+
+    uploadLabel.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> Parsing ${file.name}…`;
+    previewSection.style.display  = 'none';
+    errorSection.style.display    = 'none';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/api/employees/upload-pds-excel', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => {
+        console.log("Fetch response status:", r.status);
+        if (!r.ok) {
+            return r.json().then(data => { 
+                throw new Error(data.error || 'Server error ' + r.status); 
+            }).catch(e => {
+                throw new Error('Server side error (' + r.status + '). Please check if openpyxl is installed and the file is a valid PDS Excel.');
+            });
+        }
+        return r.json();
+    })
+    .then(result => {
+        console.log("Parse result:", result);
+        if (result.success) {
+            // Confirm success via alert
+            alert("Data extracted successfully! Reviewing the preview below.");
+
+            fileNameLabel.textContent = file.name;
+            uploadLabel.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i> Extraction Complete! Review below.';
+            
+            const jsonDisplay = document.getElementById('jsonPreview');
+            if (jsonDisplay) {
+                try {
+                    jsonDisplay.textContent = JSON.stringify(result.data, null, 4);
+                } catch(e) {
+                    jsonDisplay.textContent = "Error displaying JSON: " + e.message;
+                }
+            }
+
+            localStorage.setItem('pds_prefill_data', JSON.stringify(result.data));
+            
+            previewSection.style.display = 'block';
+            setTimeout(() => {
+                previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            
+            const proceedBtn = document.getElementById('proceedBtn');
+            if (proceedBtn) {
+                proceedBtn.href = result.redirect || '/employee/pds/1';
+            }
+        } else {
+            throw new Error(result.error || 'The server returned success but no data was provided.');
+        }
+    })
+    .catch(err => {
+        console.error("Critical Upload Error:", err);
+        showError(err.message);
+    });
+}
+
+function showError(msg) {
+    errorMsg.textContent = msg;
+    errorSection.style.display = 'block';
+    uploadLabel.innerHTML = '<i class="fas fa-exclamation-triangle text-danger me-2"></i> Error. Try again.';
+    // Alert is annoying but helps identify if the script reached this point
+    alert("Notice: " + msg);
+}
+
+function resetUpload() {
+    previewSection.style.display = 'none';
+    errorSection.style.display = 'none';
+    fileInput.value = '';
+    uploadLabel.innerHTML = '<i class="fas fa-cloud-upload-alt me-2"></i> Click or drag &amp; drop to upload PDS Excel file';
+    localStorage.removeItem('pds_prefill_data');
+}
+
+function confirmDeleteEmployee(id, name) {
+    if (confirm("Are you sure you want to delete employee " + name + " and all their PDS data? This action cannot be undone.")) {
+        window.location.href = "/admin/employee/delete/" + id;
+    }
+}
+</script>
+{% endblock %}

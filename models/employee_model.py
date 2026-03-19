@@ -1,0 +1,51 @@
+from db import get_db_cursor
+import logging
+
+logger = logging.getLogger(__name__)
+
+def get_employee_count():
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) as count FROM pds_personal_information")
+            result = cursor.fetchone()
+            return result['count'] if result else 0
+    except Exception as e:
+        logger.error(f"Error getting employee count: {e}")
+        return 0
+
+def get_employees_filtered(search=None, limit=25):
+    try:
+        with get_db_cursor() as cursor:
+            query = "SELECT id, surname, first_name, middle_name, sex, date_of_birth, mobile_no, email, agency_employee_no FROM pds_personal_information"
+            params = []
+            if search:
+                query += " WHERE surname LIKE %s OR first_name LIKE %s OR email LIKE %s OR agency_employee_no LIKE %s"
+                search_param = f"%{search}%"
+                params = [search_param, search_param, search_param, search_param]
+            
+            query += " ORDER BY surname ASC LIMIT %s"
+            params.append(int(limit))
+            
+            cursor.execute(query, params)
+            return cursor.fetchall()
+    except Exception as e:
+        logger.error(f"Error fetching employees: {e}")
+        return []
+
+def delete_employee(id):
+    try:
+        with get_db_cursor(commit=True) as cursor:
+            # Delete from dependent tables first due to foreign key constraints
+            tables = [
+                'pds_spouse', 'pds_parents', 'pds_children', 'pds_education',
+                'pds_work_experience', 'pds_civil_service_eligibility', 'pds_voluntary_work',
+                'pds_training', 'pds_other_information', 'pds_declarations', 'pds_references', 'pds_oath'
+            ]
+            for table in tables:
+                cursor.execute(f"DELETE FROM {table} WHERE personal_info_id = %s", (id,))
+            
+            cursor.execute("DELETE FROM pds_personal_information WHERE id = %s", (id,))
+            return True
+    except Exception as e:
+        logger.error(f"Error deleting employee {id}: {e}")
+        return False
