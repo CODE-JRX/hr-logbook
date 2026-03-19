@@ -86,3 +86,105 @@ CREATE TABLE IF NOT EXISTS logs (
     FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE,
     FOREIGN KEY (office) REFERENCES offices(id) ON DELETE SET NULL
 );
+
+-- PDS Tables (new tables for employee data)
+CREATE TABLE IF NOT EXISTS pds_personal_information (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    surname VARCHAR(255),
+    first_name VARCHAR(255),
+    middle_name VARCHAR(255),
+    sex VARCHAR(10),
+    date_of_birth DATE,
+    mobile_no VARCHAR(20),
+    email VARCHAR(255),
+    agency_employee_no VARCHAR(100),
+    signature_path VARCHAR(255),
+    pds_excel_path VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_spouse (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_parents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_children (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_education (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_work_experience (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_civil_service_eligibility (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_voluntary_work (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_training (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_other_information (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_declarations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_references (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pds_oath (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    personal_info_id INT NOT NULL,
+    FOREIGN KEY (personal_info_id) REFERENCES pds_personal_information(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

@@ -6,24 +6,23 @@
     .form-container {
         max-width: 1400px;
         width: 100%;
-        background: white;
-        box-shadow: 0 20px 40px rgba(0,30,60,0.2);
-        padding: 2.2rem 2.5rem;
-        border-radius: 24px;
-        border: 1px solid #b8cde0;
+        background: var(--card-bg);
+        backdrop-filter: blur(14px);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
         margin: 2rem auto;
     }
-    [data-theme="dark"] .form-container { background: #1e1e1e; border-color: #333; color: #eee; }
     h2 {
-        color: #003366;
-        border-left: 8px solid #b31b1b;
+        color: var(--primary-color);
+        border-left: 8px solid var(--primary-color);
         padding-left: 1rem;
-        margin: 0 0 0.25rem 0;
-        font-weight: 500;
-        font-size: 2.2rem;
-        letter-spacing: 1px;
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+        font-size: 2rem;
+        letter-spacing: 0.5px;
     }
-    [data-theme="dark"] h2 { color: #5dade2; }
     .sheet-badge {
         background: #1d3d6b;
         color: white;
@@ -35,24 +34,24 @@
         font-size: 1rem;
     }
     .section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #003366;
-        border-bottom: 3px double #a0b8d4;
-        padding-bottom: 0.3rem;
-        margin: 2rem 0 1.5rem 0;
-        background: linear-gradient(to right, #f0f6ff, transparent);
-        padding-left: 0.5rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        margin: 2.5rem 0 1.5rem 0;
+        background: linear-gradient(to right, rgba(20, 99, 255, 0.05), transparent);
+        padding-left: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    [data-theme="dark"] .section-title { color: #5dade2; background: linear-gradient(to right, #2c3e5c, transparent); border-bottom-color: #444; }
     .question-block {
-        background: #f8faff;
-        border-radius: 20px;
+        background: rgba(20, 99, 255, 0.03);
+        border-radius: 16px;
         padding: 1.2rem 1.8rem;
         margin-bottom: 1.5rem;
-        border: 1px solid #ceddec;
+        border: 1px solid var(--border-color);
     }
-    [data-theme="dark"] .question-block { background: #252525; border-color: #444; }
     .q-prompt {
         font-weight: 700;
         color: #002856;
@@ -85,18 +84,18 @@
     }
     .detail-line input {
         padding: 0.5rem 1rem;
-        border: 1px solid #aebfda;
+        border: 1px solid var(--border-color);
         border-radius: 30px;
-        background: white;
+        background: rgba(255,255,255,0.05);
+        font-size: 0.9rem;
     }
-    [data-theme="dark"] .detail-line input { background: #2c2c2c; border-color: #444; color: #eee; }
     .government-id-section {
-        background: #e4edf9;
-        border-radius: 30px;
+        background: rgba(20, 99, 255, 0.08);
+        border-radius: 20px;
         padding: 1.5rem 2rem;
         margin: 2rem 0 1.8rem;
+        border: 1px solid var(--border-color);
     }
-    [data-theme="dark"] .government-id-section { background: #2c3e5c; }
     .btn-step {
         padding: 0.8rem 2.5rem;
         border-radius: 40px;
@@ -110,9 +109,37 @@
 {% block content %}
 <div class="container">
     <div class="form-container">
-        <form action="/employee/pds/4" method="POST">
+        <form id="pdsFinalForm" action="/employee/pds/submit" method="POST" enctype="multipart/form-data">
+            {% if session.editing_employee_id %}
+            <h2>UPDATE EMPLOYEE RECORD</h2>
+            <div class="sheet-badge bg-primary text-white">EDITING ID: {{ session.editing_employee_id }}</div>
+            {% else %}
             <h2>PERSONAL DATA SHEET</h2>
-            <div class="sheet-badge">SHEET 4 : DECLARATIONS · REFERENCES · OATH</div>
+            <div class="sheet-badge">NEW EMPLOYEE RECORD</div>
+            {% endif %}
+
+            <!-- Manual Bind Card -->
+            <div id="manualBindBanner" class="card border-0 shadow-sm mb-4 p-3" style="border-radius:20px; display:none; background: linear-gradient(135deg, #fff9f0, #fff2dd); border-left: 5px solid #f59e0b !important;">
+                <div class="card-body p-1 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width:45px; height:45px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245,158,11,0.3);">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-dark">Excel Data Available!</h6>
+                            <p class="mb-0 small text-muted">A PDS Excel file was recently uploaded. Click the button to populate Page 4 textboxes.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-warning px-4 py-2 fw-bold rounded-pill shadow-sm" onclick="autoFillForm4()">
+                            <i class="fas fa-file-import me-2"></i> Bind Data to Form
+                        </button>
+                        <button type="button" class="btn btn-link text-muted p-2" onclick="document.getElementById('manualBindBanner').style.display='none'" title="Dismiss">
+                            <i class="fas fa-times fa-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             {% if prefill %}
             <div class="alert alert-info d-flex align-items-center gap-2 mb-3" style="border-radius:12px;">
@@ -256,13 +283,176 @@
                 </div>
             </div>
 
+            <div class="section-title">V. SIGNATURE & OATH</div>
+            <div class="card mb-4 border-0 shadow-sm" style="border-radius: 20px; background: #f8faff; border: 1px solid #ceddec !important;">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h6 class="fw-bold mb-2">Digital Signature Upload</h6>
+                            <p class="text-muted small mb-3">Please upload a clear image of your signature (PNG or JPG). This will be used for all generated PDS documents.</p>
+                            <div class="d-flex align-items-center gap-3">
+                                <label for="signatureUpload" class="btn btn-outline-primary px-4 rounded-pill">
+                                    <i class="fas fa-upload me-2"></i> Choose File
+                                </label>
+                                <input name="signature_image" type="file" id="signatureUpload" accept="image/*" style="display: none;" onchange="previewSignature(this)">
+                                <span id="fileNameLabel" class="small text-muted">No file chosen</span>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-center">
+                            <div id="signaturePreviewContainer" class="d-flex flex-column align-items-center justify-content-center" style="min-height: 120px; border: 2px dashed #a0b8d4; border-radius: 15px; background: white;">
+                                <img id="sigPreview" src="#" alt="Signature Preview" style="display: none; max-width: 100%; max-height: 100px; object-fit: contain;">
+                                <div id="previewPlaceholder" class="text-muted small">
+                                    <i class="fas fa-signature fa-3x mb-2" style="opacity: 0.3;"></i>
+                                    <div>Signature Preview</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function previewSignature(input) {
+                    const label = document.getElementById('fileNameLabel');
+                    const preview = document.getElementById('sigPreview');
+                    const placeholder = document.getElementById('previewPlaceholder');
+                    const container = document.getElementById('signaturePreviewContainer');
+
+                    if (input.files && input.files[0]) {
+                        label.textContent = input.files[0].name;
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                            placeholder.style.display = 'none';
+                            container.style.borderStyle = 'solid';
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    } else {
+                        label.textContent = 'No file chosen';
+                        preview.style.display = 'none';
+                        placeholder.style.display = 'block';
+                        container.style.borderStyle = 'dashed';
+                    }
+                }
+            </script>
+
             <div class="page-label">CS FORM 212 (Revised 2025), Page 4 of 4</div>
 
             <div class="d-flex justify-content-between mt-4">
                 <a href="/employee/pds/3" class="btn btn-outline-secondary btn-step"><i class="fas fa-arrow-left me-2"></i> Previous Step</a>
-                <button class="btn btn-success btn-step" type="submit">Submit PDS <i class="fas fa-check ms-2"></i></button>
+                <button class="btn btn-success btn-step" type="submit" id="submitPdsBtn">
+                    {% if session.editing_employee_id %}
+                        Update PDS Record <i class="fas fa-save ms-2"></i>
+                    {% else %}
+                        Submit PDS <i class="fas fa-check ms-2"></i>
+                    {% endif %}
+                </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('pds_prefill_data')) {
+            const banner = document.getElementById('manualBindBanner');
+            if (banner) banner.style.display = 'flex';
+        }
+
+        const form = document.getElementById('pdsFinalForm');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitPdsBtn');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            {% if session.editing_employee_id %}
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Saving Changes...';
+            {% else %}
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
+            {% endif %}
+            
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('/employee/pds/submit', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    {% if session.editing_employee_id %}
+                    showAlert("Employee information has been successfully updated.", "Update Successful", "check-circle", "success");
+                    {% else %}
+                    showAlert("Employee Personal Data Sheet (PDS) has been successfully submitted and saved to the database.", "Submission Successful", "check-circle", "success");
+                    {% endif %}
+                    
+                    // Cleanup PDS prefill since we are done
+                    localStorage.removeItem('pds_prefill_data');
+                    
+                    // Redirect after modal is closed
+                    const modalEl = document.getElementById('systemAlertModal');
+                    if (modalEl) {
+                        modalEl.addEventListener('hidden.bs.modal', () => {
+                            window.location.href = '/admin/manage-employees';
+                        }, { once: true });
+                    } else {
+                        // Fallback if modal system fails
+                        setTimeout(() => window.location.href = '/admin/manage-employees', 1500);
+                    }
+                } else {
+                    showAlert(result.error || "An error occurred during submission.", "Submission Failed", "exclamation-circle", "danger");
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error("Submission Error:", error);
+                showAlert("Network error or server unavailable. Please try again.", "Connection Error", "bug", "danger");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        };
+    });
+
+    function autoFillForm4() {
+        const raw = localStorage.getItem('pds_prefill_data');
+        if (!raw) return showAlert("No Excel data found.", "No Data", "info-circle", "warning");
+        let data;
+        try {
+            data = JSON.parse(raw);
+        } catch(e) { return showAlert("Error parsing data.", "Parse Error", "exclamation-circle", "danger"); }
+
+        // References
+        if (data.references && data.references.length) {
+            const names = document.querySelectorAll('[name="ref_name[]"]');
+            const addresses = document.querySelectorAll('[name="ref_address[]"]');
+            const contacts = document.querySelectorAll('[name="ref_tel_no[]"]');
+            
+            data.references.forEach((ref, i) => {
+                if (i < 3) {
+                    if (names[i]) names[i].value = ref.name || '';
+                    if (addresses[i]) addresses[i].value = ref.address || '';
+                    if (contacts[i]) contacts[i].value = ref.contact || '';
+                }
+            });
+        }
+
+        // Government ID
+        if (data.government_id) {
+            const gid = data.government_id;
+            const t = document.querySelector('[name="gov_issued_id"]');
+            const n = document.querySelector('[name="id_no"]');
+            const i = document.querySelector('[name="date_place_issuance"]');
+            
+            if (t) t.value = gid.type || '';
+            if (n) n.value = gid.number || '';
+            if (i) i.value = gid.date_place_of_issuance || '';
+        }
+
+        showAlert("PDS Page 4 (References & ID) fields populated!", "Form Populated", "magic", "success");
+    }
+</script>
 {% endblock %}

@@ -6,11 +6,12 @@
     .form-container {
         max-width: 1400px;
         width: 100%;
-        background: white;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-        padding: 2rem 1.8rem;
-        border-radius: 12px;
-        border: 1px solid #cfd9e6;
+        background: var(--card-bg);
+        backdrop-filter: blur(14px);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
         margin: 2rem auto;
     }
     [data-theme="dark"] .form-container {
@@ -19,24 +20,23 @@
         color: #eee;
     }
     h2 {
-        color: #003366;
-        border-left: 8px solid #b31b1b;
+        color: var(--primary-color);
+        border-left: 8px solid var(--primary-color);
         padding-left: 1rem;
-        margin: 0 0 0.25rem 0;
-        font-weight: 500;
-        font-size: 2.2rem;
-        letter-spacing: 1px;
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+        font-size: 2rem;
+        letter-spacing: 0.5px;
     }
-    [data-theme="dark"] h2 { color: #5dade2; }
     .subhead {
-        font-size: 0.95rem;
-        background: #f0f3f9;
+        font-size: 0.9rem;
+        background: rgba(20, 99, 255, 0.05);
         padding: 1rem 1.2rem;
-        border-radius: 8px;
-        margin: 1rem 0 1.8rem 0;
-        border-left: 4px solid #b31b1b;
+        border-radius: 12px;
+        margin: 1rem 0 2rem 0;
+        border-left: 4px solid var(--primary-color);
         font-weight: 500;
-        color: #1a2b4c;
+        color: var(--text-color);
         line-height: 1.5;
     }
     [data-theme="dark"] .subhead { background: #2c3e5c; color: #eee; }
@@ -53,45 +53,46 @@
         gap: 8px;
     }
     .section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #003366;
-        border-bottom: 3px double #a0b8d4;
-        padding-bottom: 0.3rem;
-        margin: 2rem 0 1.5rem 0;
-        background: linear-gradient(to right, #f0f6ff, transparent);
-        padding-left: 0.5rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        margin: 2.5rem 0 1.5rem 0;
+        background: linear-gradient(to right, rgba(20, 99, 255, 0.05), transparent);
+        padding-left: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     [data-theme="dark"] .section-title { color: #5dade2; background: linear-gradient(to right, #2c3e5c, transparent); border-bottom-color: #444; }
     .section-sub {
-        font-weight: 600;
-        background: #d9e4f0;
-        padding: 0.3rem 1rem;
-        border-radius: 20px;
-        font-size: 1.1rem;
-        margin: 1.5rem 0 1rem 0;
+        font-weight: 700;
+        background: rgba(20, 99, 255, 0.08);
+        padding: 0.4rem 1.2rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        margin: 1.5rem 0 1.2rem 0;
+        color: var(--primary-color);
     }
-    [data-theme="dark"] .section-sub { background: #34495e; color: #eee; }
     .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem 2rem; }
     .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem 1.5rem; }
     .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem 1.2rem; }
     .field-group { display: flex; flex-direction: column; margin-bottom: 0.3rem; }
     .field-group label {
-        font-weight: 600;
-        font-size: 0.8rem;
+        font-weight: 700;
+        font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.4px;
-        color: #1f3a68;
-        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+        color: var(--neutral-color);
+        margin-bottom: 6px;
     }
-    [data-theme="dark"] .field-group label { color: #abb2bf; }
     .field-group input, .field-group select, .field-group textarea {
-        padding: 0.7rem 0.8rem;
-        border: 1px solid #b4c4d4;
-        border-radius: 8px;
-        background: white;
-        font-size: 0.95rem;
-        transition: 0.15s;
+        padding: 0.75rem 0.9rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.05);
+        font-size: 0.9rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
     [data-theme="dark"] .field-group input, [data-theme="dark"] .field-group select {
         background: #2c2c2c;
@@ -134,6 +135,66 @@
         font-size: 1rem;
         transition: 0.2s;
     }
+
+    /* Excel Import styles */
+    .import-card {
+        background: linear-gradient(135deg, #ffffff, #f0f7ff);
+        border: 2px solid #3b82f6;
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+    }
+    [data-theme="dark"] .import-card {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border-color: #3b82f6;
+    }
+    .import-card::before {
+        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+        background: linear-gradient(to right, #3b82f6, #60a5fa, #3b82f6);
+    }
+    .upload-zone {
+        border: 2px dashed #93c5fd;
+        background: rgba(239, 246, 255, 0.5);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.2s;
+        position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        transform: translateY(-2px);
+    }
+    [data-theme="dark"] .upload-zone {
+        background: rgba(30, 41, 59, 0.4);
+        border-color: #334155;
+    }
+    .upload-icon { font-size: 3rem; color: #3b82f6; margin-bottom: 1rem; }
+    .file-label { font-weight: 700; color: #1e3a8a; font-size: 1.1rem; }
+    [data-theme="dark"] .file-label { color: #93c5fd; }
+    .file-hint { color: #64748b; font-size: 0.85rem; }
+    
+    #statusOverlay {
+        display: none;
+        position: absolute; inset: 0;
+        background: rgba(255,255,255,0.9);
+        z-index: 20;
+        align-items: center; justify-content: center;
+        flex-direction: column;
+        border-radius: 12px;
+    }
+    [data-theme="dark"] #statusOverlay { background: rgba(15,23,42,0.9); }
+    
+    .spinner-custom {
+        width: 50px; height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 {% endblock %}
 
@@ -141,7 +202,13 @@
 <div class="container">
     <div class="form-container">
         <form action="/employee/pds/1" method="POST">
+            {% if session.editing_employee_id %}
+            <h2>UPDATE EMPLOYEE RECORD</h2>
+            <div class="sheet-badge bg-primary text-white">EDITING ID: {{ session.editing_employee_id }}</div>
+            {% else %}
             <h2>PERSONAL DATA SHEET</h2>
+            <div class="sheet-badge">NEW EMPLOYEE RECORD</div>
+            {% endif %}
             <div class="warning-banner">
                 Any misrepresentation shall cause administrative/criminal case(s). Read attached guide before accomplishing.
             </div>
@@ -159,19 +226,94 @@
             </div>
             {% endif %}
 
-            <!-- Manual Bind Alert Banner -->
-            <div id="manualBindBanner" class="alert alert-warning d-flex align-items-center justify-content-between gap-3 mb-4" style="border-radius:15px; display:none; border: 2px dashed #f59e0b;">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-file-import fa-2x text-warning"></i>
-                    <div>
-                        <h6 class="mb-1 fw-bold">Unsaved Excel Data Found!</h6>
-                        <p class="mb-0 small text-muted">A PDS Excel file was recently uploaded. Click the button to populate the textboxes.</p>
+            {% if not session.editing_employee_id %}
+            <!-- Excel Upload Section -->
+            <div class="card import-card shadow-lg mb-5">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">Quick Import</h5>
+                            <p class="text-muted small mb-0">Upload your CSC Form 212 and we'll fill the form for you!</p>
+                        </div>
+                    </div>
+
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" id="pdsExcelFile" style="position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;" accept=".xlsx,.xls">
+                        
+                        <div id="statusOverlay">
+                            <div class="spinner-custom"></div>
+                            <div class="fw-bold text-primary" id="statusMessage">Processing Excel File...</div>
+                        </div>
+
+                        <div id="dropPrompt">
+                            <div class="upload-icon"><i class="fas fa-file-excel"></i></div>
+                            <div class="file-label" id="uploadLabel">Drag your PDS Excel here</div>
+                            <div class="file-hint mt-1">or click to browse from your computer</div>
+                        </div>
+
+                        <div id="fileSelectedView" style="display:none; position: relative; z-index: 20;">
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                                <i class="fas fa-file-excel fa-2x text-success"></i>
+                                <span class="fw-bold text-success" id="selectedFileName">filename.xlsx</span>
+                            </div>
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill" onclick="triggerUpload()">
+                                    <i class="fas fa-file-import me-2"></i> Start Extraction
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary rounded-pill" onclick="cancelSelection()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="extractionSummary" class="mt-4 p-3 bg-light rounded-3" style="display:none; border: 1px solid #d1e3f8;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Extraction Complete!</div>
+                                    <div class="small text-muted" id="summaryText">We found records for [Name]</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm" onclick="autoFillForm1()">
+                                <i class="fas fa-magic me-2"></i> Bind to Page 1
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-warning px-4 py-2 fw-bold" onclick="autoFillForm1()" style="border-radius:30px; box-shadow: 0 4px 12px rgba(245,158,11,0.2);">
-                    <i class="fas fa-magic me-2"></i> Bind Data to Form
-                </button>
             </div>
+            {% endif %}
+
+            {% if not session.editing_employee_id %}
+            <!-- Manual Bind Card -->
+            <div id="manualBindBanner" class="card border-0 shadow-sm mb-4 p-3" style="border-radius:20px; display:none; background: linear-gradient(135deg, #fff9f0, #fff2dd); border-left: 5px solid #f59e0b !important;">
+                <div class="card-body p-1 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width:45px; height:45px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245,158,11,0.3);">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-dark">Unsaved Excel Data Found!</h6>
+                            <p class="mb-0 small text-muted">A PDS Excel file was recently uploaded. Click the button to populate the textboxes.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-warning px-4 py-2 fw-bold rounded-pill shadow-sm" onclick="autoFillForm1()">
+                            <i class="fas fa-file-import me-2"></i> Bind Data to Form
+                        </button>
+                        <button type="button" class="btn btn-link text-muted p-2" onclick="document.getElementById('manualBindBanner').style.display='none'" title="Dismiss">
+                            <i class="fas fa-times fa-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <div class="section-title">I. PERSONAL INFORMATION</div>
             
@@ -239,7 +381,7 @@
                 <div class="field-group"><label>7. HEIGHT (m)</label><input name="height" type="text" value="{{ (prefill.personal_info.height if prefill else '') or '' }}"/></div>
                 <div class="field-group"><label>8. WEIGHT (kg)</label><input name="weight" type="text" value="{{ (prefill.personal_info.weight if prefill else '') or '' }}"/></div>
                 <div class="field-group"><label>9. BLOOD TYPE</label><input name="blood_type" type="text" value="{{ (prefill.personal_info.blood_type if prefill else '') or '' }}"/></div>
-                <div class="field-group"><label>10. UMID ID NO.</label><input name="umid_no" type="text"/></div>
+                <div class="field-group"><label>10. UMID ID NO.</label><input name="umid_no" type="text" value="{{ (prefill.personal_info.umid_no if prefill else '') or '' }}"/></div>
             </div>
 
             <div class="grid-3 mt-2">
@@ -255,7 +397,7 @@
             </div>
 
             <div class="grid-3 mt-3">
-                <div class="field-group"><label>19. TELEPHONE NO.</label><input name="telephone_no" type="text"/></div>
+                <div class="field-group"><label>19. TELEPHONE NO.</label><input name="telephone_no" type="text" value="{{ (prefill.personal_info.telephone_no if prefill else '') or '' }}"/></div>
                 <div class="field-group"><label>20. MOBILE NO.</label><input name="mobile_no" type="text" value="{{ (prefill.personal_info.mobile_no if prefill else '') or '' }}"/></div>
                 <div class="field-group"><label>21. E-MAIL ADDRESS</label><input name="email" type="email" value="{{ (prefill.personal_info.email_address if prefill else '') or '' }}"/></div>
             </div>
@@ -288,7 +430,7 @@
             <div class="address-block mt-2">
                 <div class="address-title">25. MOTHER'S MAIDEN NAME</div>
                 <div class="grid-3">
-                    <div class="field-group"><label>Surname</label><input name="mother_surname" type="text" value="{{ (prefill.family_background.mother.surname if prefill else '') or '' }}"/></div>
+                    <div class="field-group"><label>Surname</label><input name="mother_surname" type="text" value="{{ (prefill.family_background.mother.maiden_surname if prefill else '') or '' }}"/></div>
                     <div class="field-group"><label>First Name</label><input name="mother_first_name" type="text" value="{{ (prefill.family_background.mother.first_name if prefill else '') or '' }}"/></div>
                     <div class="field-group"><label>Middle Name</label><input name="mother_middle_name" type="text" value="{{ (prefill.family_background.mother.middle_name if prefill else '') or '' }}"/></div>
                 </div>
@@ -395,10 +537,6 @@
                 </table>
             </div>
 
-            <div class="signature-line">
-                <div><span style="font-weight:600;">SIGNATURE</span> <input placeholder="signature" style="width:250px; margin-left:15px;" type="text"/></div>
-                <div><span style="font-weight:600;">DATE</span> <input placeholder="dd/mm/yyyy" type="text"/></div>
-            </div>
             <div class="page-label">CS FORM 212 (Revised 2025), Page 1 of 4</div>
 
             <div class="d-flex justify-content-end mt-4">
@@ -415,12 +553,115 @@ document.addEventListener('DOMContentLoaded', () => {
         const banner = document.getElementById('manualBindBanner');
         if (banner) banner.style.display = 'flex';
     }
+
+    // Excel Upload Logic
+    const dropZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('pdsExcelFile');
+    const dropPrompt = document.getElementById('dropPrompt');
+    const fileSelectedView = document.getElementById('fileSelectedView');
+    const selectedFileName = document.getElementById('selectedFileName');
+    const statusOverlay = document.getElementById('statusOverlay');
+    const extractionSummary = document.getElementById('extractionSummary');
+    const summaryText = document.getElementById('summaryText');
+
+    let currentFile = null;
+
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files[0]) {
+            currentFile = e.dataTransfer.files[0];
+            showFileSelected();
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files[0]) {
+            currentFile = fileInput.files[0];
+            showFileSelected();
+        }
+    });
+
+    window.cancelSelection = () => {
+        currentFile = null;
+        fileInput.value = '';
+        dropPrompt.style.display = 'block';
+        fileSelectedView.style.display = 'none';
+        extractionSummary.style.display = 'none';
+    };
+
+    function showFileSelected() {
+        if (!currentFile) return;
+        selectedFileName.textContent = currentFile.name;
+        dropPrompt.style.display = 'none';
+        fileSelectedView.style.display = 'block';
+        extractionSummary.style.display = 'none';
+    }
+
+    window.triggerUpload = () => {
+        if (!currentFile) return;
+        
+        statusOverlay.style.display = 'flex';
+        const fd = new FormData();
+        fd.append('file', currentFile);
+
+        fetch('/api/employees/upload-pds-excel', {
+            method: 'POST',
+            body: fd
+        })
+        .then(r => r.json())
+        .then(res => {
+            statusOverlay.style.display = 'none';
+            if (res.success) {
+                localStorage.setItem('pds_prefill_data', JSON.stringify(res.data));
+                const pi = res.data.personal_info || {};
+                const name = `${pi.surname || ''}, ${pi.first_name || ''}`.trim();
+                summaryText.textContent = `Extracted data for: ${name || 'Unknown'}`;
+                extractionSummary.style.display = 'block';
+                fileSelectedView.style.display = 'none';
+                
+                // Show floating banner if on other pages later
+                const banner = document.getElementById('manualBindBanner');
+                if (banner) banner.style.display = 'flex';
+                
+                if (res.warning) {
+                    showAlert("Warning: " + res.warning + "\n\nPartial data was extracted.", "Extraction Warning", "exclamation-triangle", "warning");
+                } else {
+                    showAlert("Excel data extracted successfully! Click 'Bind to Page 1' to fill the inputs.", "Extraction Success", "check-circle", "success");
+                }
+            } else {
+                showAlert(res.error || "Failed to parse file", "Import Error", "times-circle", "danger");
+                cancelSelection();
+            }
+        })
+        .catch(err => {
+            statusOverlay.style.display = 'none';
+            showAlert(err.message, "Critical Error", "bug", "danger");
+            cancelSelection();
+        });
+    };
 });
 
 function autoFillForm1() {
     const raw = localStorage.getItem('pds_prefill_data');
-    if (!raw) return alert("No Excel data found in local storage.");
-    const data = JSON.parse(raw);
+    if (!raw) return showAlert("No Excel data found in local storage.", "No Data", "info-circle", "warning");
+    let data;
+    try {
+        data = JSON.parse(raw);
+    } catch (e) {
+        localStorage.removeItem('pds_prefill_data');
+        const banner = document.getElementById('manualBindBanner');
+        if (banner) banner.style.display = 'none';
+        return showAlert("Invalid cached data cleared. Re-upload Excel if needed.", "Cache Error", "exclamation-circle", "danger");
+    }
+    if (!data) return showAlert("No Excel data found in local storage.", "No Data", "info-circle", "warning");
     
     // Personal Info
     const pi = data.personal_info || {};
@@ -431,7 +672,7 @@ function autoFillForm1() {
         'name_extension': pi.name_extension,
         'date_of_birth': pi.date_of_birth,
         'place_of_birth': pi.place_of_birth,
-        'sex': pi.sex,
+        'sex': pi.sex_at_birth, // Fixed to match excel_parser key
         'civil_status': pi.civil_status,
         'height': pi.height,
         'weight': pi.weight,
@@ -442,13 +683,14 @@ function autoFillForm1() {
         'sss_no': pi.sss_no,
         'tin_no': pi.tin_no,
         'agency_employee_no': pi.agency_employee_no,
-        'citizenship': pi.citizenship,
+        'country_citizenship': pi.citizenship, // Adjusted for country_citizenship
         'mobile_no': pi.mobile_no,
         'email': pi.email_address,
         
         // Residential Address
         'res_house_no': pi.residential_address?.house_no,
         'res_street': pi.residential_address?.street,
+        'res_subdivision': pi.residential_address?.subdivision,
         'res_barangay': pi.residential_address?.barangay,
         'res_city': pi.residential_address?.city,
         'res_province': pi.residential_address?.province,
@@ -457,6 +699,7 @@ function autoFillForm1() {
         // Permanent Address
         'perm_house_no': pi.permanent_address?.house_no,
         'perm_street': pi.permanent_address?.street,
+        'perm_subdivision': pi.permanent_address?.subdivision,
         'perm_barangay': pi.permanent_address?.barangay,
         'perm_city': pi.permanent_address?.city,
         'perm_province': pi.permanent_address?.province,
@@ -482,14 +725,46 @@ function autoFillForm1() {
 
     for (let name in mapping) {
         const input = document.querySelector(`[name="${name}"]`);
-        if (input && mapping[name]) input.value = mapping[name];
+        if (input) {
+            if (mapping[name]) {
+                input.value = mapping[name];
+            }
+        }
+    }
+    
+    // Select dropdowns handling
+    if (pi.sex_at_birth) {
+        const sexSel = document.querySelector('select[name="sex"]');
+        if (sexSel) {
+            const val = pi.sex_at_birth.trim();
+            for (let opt of sexSel.options) {
+                if (opt.text.toLowerCase() === val.toLowerCase()) {
+                    sexSel.value = opt.text;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (pi.civil_status) {
+        const civSel = document.querySelector('select[name="civil_status"]');
+        if (civSel) {
+            const val = pi.civil_status.trim();
+            for (let opt of civSel.options) {
+                if (val.toLowerCase().includes(opt.text.toLowerCase())) {
+                    civSel.value = opt.text;
+                    break;
+                }
+            }
+        }
     }
     
     // Children
-    if (data.family_background?.children?.length) {
+    const children = data.family_background?.children;
+    if (Array.isArray(children) && children.length) {
         const container = document.getElementById('childrenRowsContainer');
         container.innerHTML = ''; // clear initial
-        data.family_background.children.forEach(child => {
+        children.forEach(child => {
             const div = document.createElement('div');
             div.className = 'row g-2 mb-2 child-row align-items-center';
             div.innerHTML = `
@@ -502,25 +777,37 @@ function autoFillForm1() {
     }
 
     // Education
-    if (data.educational_background?.length) {
-        data.educational_background.forEach(edu => {
+    const edu_bg = data.educational_background;
+    if (Array.isArray(edu_bg) && edu_bg.length) {
+        console.log("PDS: Found education records:", edu_bg.length);
+        edu_bg.forEach(edu => {
             const levelRows = document.querySelectorAll(`input[name="level[]"]`);
             levelRows.forEach(row => {
-               if(row.value.toUpperCase() === edu.level.toUpperCase()) {
+               const targetLevel = row.value.toUpperCase();
+               const extractedLevel = (edu.level || "").toUpperCase();
+               
+               // More flexible matching: e.g. "ELEMENTARY" matches "ELEMENTARY SCHOOL"
+               if(extractedLevel && (extractedLevel.includes(targetLevel) || targetLevel.includes(extractedLevel))) {
                    const tr = row.closest('tr');
-                   tr.querySelector('[name="name_of_school[]"]').value = edu.school_name || '';
-                   tr.querySelector('[name="basic_education_degree_course[]"]').value = edu.degree || '';
-                   tr.querySelector('[name="period_from[]"]').value = edu.from || '';
-                   tr.querySelector('[name="period_to[]"]').value = edu.to || '';
-                   tr.querySelector('[name="highest_level_units_earned[]"]').value = edu.highest_level || '';
-                   tr.querySelector('[name="year_graduated[]"]').value = edu.year_graduated || '';
-                   tr.querySelector('[name="scholarship_academic_honors[]"]').value = edu.scholarships || '';
+                   if (tr) {
+                       console.log("PDS: Binding level", targetLevel);
+                       tr.querySelector('[name="name_of_school[]"]').value = edu.school_name || '';
+                       tr.querySelector('[name="basic_education_degree_course[]"]').value = edu.degree || '';
+                       tr.querySelector('[name="period_from[]"]').value = edu.from || '';
+                       tr.querySelector('[name="period_to[]"]').value = edu.to || '';
+                       tr.querySelector('[name="highest_level_units_earned[]"]').value = edu.highest_level || '';
+                       tr.querySelector('[name="year_graduated[]"]').value = edu.year_graduated || '';
+                       tr.querySelector('[name="scholarship_academic_honors[]"]').value = edu.scholarships || '';
+                   }
                }
             });
         });
     }
 
-    alert("PDS Page 1 fields populated! Please review before clicking Next.");
+    showAlert("PDS Page 1 fields populated! Any existing data in textboxes might have been overwritten. Please review.", "Form Populated", "magic", "success");
+    // Hide summary after bind to keep it clean
+    const summary = document.getElementById('extractionSummary');
+    if (summary) summary.style.display = 'none';
 }
 </script>
 {% endblock %}

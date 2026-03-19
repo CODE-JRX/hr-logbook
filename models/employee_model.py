@@ -49,3 +49,60 @@ def delete_employee(id):
     except Exception as e:
         logger.error(f"Error deleting employee {id}: {e}")
         return False
+
+def get_employee_full_pds(id):
+    """Fetches all related PDS records for a specific employee ID."""
+    try:
+        with get_db_cursor() as cursor:
+            data = {}
+            # 1. Personal Information
+            cursor.execute("SELECT * FROM pds_personal_information WHERE id = %s", (id,))
+            data['personal_info'] = cursor.fetchone()
+            if not data['personal_info']:
+                return None
+                
+            # 2. Family & Dependents
+            cursor.execute("SELECT * FROM pds_spouse WHERE personal_info_id = %s", (id,))
+            data['spouse'] = cursor.fetchone()
+            
+            cursor.execute("SELECT * FROM pds_parents WHERE personal_info_id = %s", (id,))
+            data['parents'] = cursor.fetchone()
+            
+            cursor.execute("SELECT * FROM pds_children WHERE personal_info_id = %s", (id,))
+            data['children'] = cursor.fetchall()
+            
+            # 3. Education
+            cursor.execute("SELECT * FROM pds_education WHERE personal_info_id = %s", (id,))
+            data['education'] = cursor.fetchall()
+            
+            # 4. Eligibility & Work
+            cursor.execute("SELECT * FROM pds_civil_service_eligibility WHERE personal_info_id = %s", (id,))
+            data['eligibility'] = cursor.fetchall()
+            
+            cursor.execute("SELECT * FROM pds_work_experience WHERE personal_info_id = %s", (id,))
+            data['work_experience'] = cursor.fetchall()
+            
+            # 5. Voluntary & Training
+            cursor.execute("SELECT * FROM pds_voluntary_work WHERE personal_info_id = %s", (id,))
+            data['voluntary'] = cursor.fetchall()
+            
+            cursor.execute("SELECT * FROM pds_training WHERE personal_info_id = %s", (id,))
+            data['training'] = cursor.fetchall()
+            
+            # 6. Others
+            cursor.execute("SELECT * FROM pds_other_information WHERE personal_info_id = %s", (id,))
+            data['other_info'] = cursor.fetchone()
+            
+            cursor.execute("SELECT * FROM pds_declarations WHERE personal_info_id = %s", (id,))
+            data['declarations'] = cursor.fetchone()
+            
+            cursor.execute("SELECT * FROM pds_references WHERE personal_info_id = %s", (id,))
+            data['references'] = cursor.fetchall()
+            
+            cursor.execute("SELECT * FROM pds_oath WHERE personal_info_id = %s", (id,))
+            data['oath'] = cursor.fetchone()
+            
+            return data
+    except Exception as e:
+        logger.error(f"Error fetching full PDS for {id}: {e}")
+        return None

@@ -1,0 +1,66 @@
+{
+  "pds_voluntary_work": [
+    "id",
+    "personal_info_id",
+    "organization",
+    "date_from",
+    "date_to",
+    "hours",
+    "position"
+  ],
+  "pds_training": [
+    "id",
+    "personal_info_id",
+    "title",
+    "date_from",
+    "date_to",
+    "hours",
+    "type",
+    "conducted_by"
+  ],
+  "pds_other_information": [
+    "id",
+    "personal_info_id",
+    "special_skills_hobbies",
+    "non_academic_distinctions",
+    "membership_associations"
+  ],
+  "pds_declarations": [
+    "id",
+    "personal_info_id",
+    "related_appointing_authority_3rd_degree",
+    "related_appointing_authority_4th_degree",
+    "administrative_offense_details",
+    "criminal_charge_details",
+    "criminal_charge_date",
+    "criminal_charge_status",
+    "conviction_details",
+    "separation_details",
+    "election_candidacy_details",
+    "resignation_campaign_details",
+    "immigrant_status_country",
+    "indigenous_group",
+    "pwd_id",
+    "solo_parent_id"
+  ],
+  "pds_references": [
+    "id",
+    "personal_info_id",
+    "full_name",
+    "address",
+    "contact"
+  ],
+  "pds_oath": [
+    "id",
+    "personal_info_id",
+    "declaration_text",
+    "government_id",
+    "id_number",
+    "issuance_date_place",
+    "signature",
+    "date_signed",
+    "thumbmark",
+    "subscribed_date",
+    "administering_person"
+  ]
+}

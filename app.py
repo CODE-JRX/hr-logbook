@@ -22,20 +22,31 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max upload size
 app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutes session timeout
 
 
-def ensure_csm_form_office_column():
-    """Rename the legacy CSM office column on startup when needed."""
+def ensure_db_migrations():
+    """Ensure all required columns and migrations are applied on startup."""
     try:
         with get_db_cursor(commit=True) as cursor:
+            # 1. CSM Form office column
             cursor.execute("SHOW COLUMNS FROM csm_form LIKE 'office'")
-            office_exists = cursor.fetchone() is not None
-            cursor.execute("SHOW COLUMNS FROM csm_form LIKE 'agency_visited'")
-            legacy_exists = cursor.fetchone() is not None
+            if cursor.fetchone() is None:
+                cursor.execute("SHOW COLUMNS FROM csm_form LIKE 'agency_visited'")
+                if cursor.fetchone() is not None:
+                    cursor.execute("ALTER TABLE csm_form RENAME COLUMN agency_visited TO office")
+                    logger.info('Renamed csm_form.agency_visited to office.')
 
-            if not office_exists and legacy_exists:
-                cursor.execute("ALTER TABLE csm_form RENAME COLUMN agency_visited TO office")
-                logger.info('Renamed csm_form.agency_visited to office.')
+            # 2. PDS Personal Information paths (for Excel and Signature)
+            cursor.execute("SHOW COLUMNS FROM pds_personal_information LIKE 'pds_excel_path'")
+            if cursor.fetchone() is None:
+                cursor.execute("ALTER TABLE pds_personal_information ADD COLUMN pds_excel_path VARCHAR(255) DEFAULT NULL")
+                logger.info('Added pds_excel_path to pds_personal_information.')
+
+            cursor.execute("SHOW COLUMNS FROM pds_personal_information LIKE 'signature_path'")
+            if cursor.fetchone() is None:
+                cursor.execute("ALTER TABLE pds_personal_information ADD COLUMN signature_path VARCHAR(255) DEFAULT NULL")
+                logger.info('Added signature_path to pds_personal_information.')
+
     except Exception as e:
-        logger.warning(f"Failed to ensure csm_form.office column: {e}")
+        logger.warning(f"Database migration check failed: {e}")
 
 
 def validate_startup_schema():
@@ -78,8 +89,8 @@ logger.info("□ Starting HR Logbook application...")
 # 1. Validate schema
 validate_startup_schema()
 
-# 2. Ensure CSM form has correct column names
-ensure_csm_form_office_column()
+# 2. Ensure database migrations (new columns/renames)
+ensure_db_migrations()
 
 # 3. Register blueprints
 app.register_blueprint(client_bp)

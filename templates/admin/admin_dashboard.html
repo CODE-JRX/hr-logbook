@@ -262,17 +262,24 @@
         </div>
 
         <div class="col-md-4">
-          <div class="card shadow-sm p-3 mb-3">
-            <h6><i class="fas fa-bolt text-warning me-2"></i> Quick Actions</h6>
-            <div class="d-grid gap-2 mt-2">
-                <a href="/employee/pds/1" class="btn btn-primary text-start d-flex align-items-center justify-content-between p-2" style="border-radius: 10px;">
-                    <span><i class="fas fa-user-plus me-2"></i> Add PDS Manually</span>
+          <div class="section-card p-3 mb-3">
+            <h6 class="fw-bold text-muted mb-3"><i class="fas fa-bolt text-warning me-2"></i> Quick Actions</h6>
+            <div class="d-grid gap-2">
+                <a href="/employee/pds/1" class="btn btn-primary text-start d-flex align-items-center justify-content-between p-3" style="border-radius: 12px; font-weight:600;">
+                    <span><i class="fas fa-user-plus me-2"></i> New Employee (PDS)</span>
                     <i class="fas fa-chevron-right small opacity-50"></i>
                 </a>
-                <a href="/admin/manage-employees" class="btn btn-outline-primary text-start d-flex align-items-center justify-content-between p-2" style="border-radius: 10px;">
-                    <span><i class="fas fa-file-excel me-2"></i> Import from Excel</span>
+                <a href="/admin/manage-employees" class="btn btn-outline-primary text-start d-flex align-items-center justify-content-between p-3" style="border-radius: 12px; font-weight:600;">
+                    <span><i class="fas fa-users me-2"></i> Manage Record Records</span>
                     <i class="fas fa-chevron-right small opacity-50"></i>
                 </a>
+                <button type="button" onclick="document.getElementById('importTrigger').click()" class="btn btn-outline-success text-start d-flex align-items-center justify-content-between p-3" style="border-radius: 12px; border-style: dashed; font-weight:600;">
+                    <span><i class="fas fa-file-excel me-2"></i> Bulk Import PDS</span>
+                    <i class="fas fa-upload small opacity-50"></i>
+                </button>
+                <form id="dashImportForm" action="/import_pds" method="POST" enctype="multipart/form-data" style="display:none;">
+                    <input type="file" name="file" id="importTrigger" onchange="this.form.submit()">
+                </form>
             </div>
           </div>
 

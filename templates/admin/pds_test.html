@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDS Excel Parser — Test Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --panel-soft: #0f2040;
+            --panel-deep: #0d1117;
+            --border: #334155;
+            --border-soft: #1e3a5f;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --muted-2: #64748b;
+            --primary: #3b82f6;
+            --primary-2: #60a5fa;
+            --success: #16a34a;
+            --success-bg: #052e16;
+            --warning: #d97706;
+            --warning-bg: #451a03;
+            --danger: #dc2626;
+            --danger-bg: #3f0f0f;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--primary-2);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header p {
+            color: var(--muted);
+            margin-top: 0.6rem;
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: var(--panel);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .section-label {
+            font-size: 0.82rem;
+            color: var(--muted-2);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .debug-toggle {
+            font-size: 0.82rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .debug-toggle input[type="checkbox"] {
+            accent-color: #f59e0b;
+        }
+
+        .zone {
+            border: 2px dashed var(--primary);
+            border-radius: 14px;
+            background: var(--panel-soft);
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .zone:hover,
+        .zone.dragover {
+            background: #0d2e5a;
+            border-color: var(--primary-2);
+        }
+
+        .zone input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .zone i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .zone p {
+            color: var(--muted);
+        }
+
+        .zone .hint {
+            font-size: 0.82rem;
+            color: var(--muted-2);
+            margin-top: 0.4rem;
+        }
+
+        #statusBar {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .status-loading {
+            background: #1e3a5f;
+            border: 1px solid var(--primary);
+            color: #93c5fd;
+        }
+
+        .status-ok {
+            background: var(--success-bg);
+            border: 1px solid var(--success);
+            color: #86efac;
+        }
+
+        .status-warn {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning);
+            color: #fcd34d;
+        }
+
+        .status-error {
+            background: var(--danger-bg);
+            border: 1px solid var(--danger);
+            color: #fca5a5;
+        }
+
+        .spinner {
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #debugSection,
+        #resultSection {
+            display: none;
+        }
+
+        .section-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.84rem;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .result-panel {
+            display: none;
+        }
+
+        .result-panel.active {
+            display: block;
+        }
+
+        pre {
+            background: var(--panel-deep);
+            border-radius: 12px;
+            padding: 1rem;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 560px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            color: #a5d6ff;
+            border: 1px solid var(--border-soft);
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.86rem;
+            min-width: 720px;
+        }
+
+        table.data-table th {
+            background: #1e3a5f;
+            color: #93c5fd;
+            padding: 0.7rem 0.8rem;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        table.data-table td {
+            padding: 0.65rem 0.8rem;
+            border-bottom: 1px solid #1e293b;
+            color: #cbd5e1;
+            word-break: break-word;
+            vertical-align: top;
+        }
+
+        table.data-table tr:hover td {
+            background: var(--panel-soft);
+        }
+
+        .empty-row td {
+            color: #475569;
+            font-style: italic;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .kv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .kv-item {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 0.9rem;
+            min-height: 78px;
+        }
+
+        .kv-key {
+            font-size: 0.72rem;
+            color: var(--muted-2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kv-val {
+            font-size: 0.92rem;
+            color: var(--text);
+            word-break: break-word;
+            margin-top: 0.2rem;
+            line-height: 1.45;
+        }
+
+        .kv-val.empty {
+            color: #475569;
+            font-style: italic;
+        }
+
+        .subsection-title {
+            color: #93c5fd;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin: 1.1rem 0 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .badge-ok {
+            background: var(--success-bg);
+            color: #86efac;
+            border: 1px solid var(--success);
+        }
+
+        .badge-warn {
+            background: var(--warning-bg);
+            color: #fcd34d;
+            border: 1px solid var(--warning);
+        }
+
+        .badge-soft {
+            background: var(--panel-soft);
+            color: #cbd5e1;
+            border: 1px solid var(--border);
+        }
+
+        .summary-row {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .summary-chip {
+            background: var(--panel-soft);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            font-size: 0.84rem;
+            color: var(--muted);
+        }
+
+        .summary-chip strong {
+            color: var(--primary-2);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.35rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #475569;
+            color: var(--muted);
+        }
+
+        .btn-outline:hover {
+            background: #1e293b;
+            color: var(--text);
+        }
+
+        .muted-note {
+            color: var(--muted-2);
+            font-size: 0.8rem;
+            margin-top: 0.6rem;
+            line-height: 1.5;
+        }
+
+        .list-view {
+            padding-left: 1.2rem;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .list-view li {
+            margin-bottom: 0.35rem;
+        }
+
+        .panel-empty {
+            color: #64748b;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .zone {
+                padding: 2.25rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .action-row {
+                justify-content: stretch;
+            }
+
+            .action-row .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="header">
+            <h1><i class="fas fa-file-waveform"></i> PDS Excel Parser — Test Page</h1>
+            <p>Upload a CSC Form 212 workbook (.xlsx / .xls) and inspect the extracted data before prefill.</p>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="card">
+            <div class="card-header">
+                <label class="section-label">Step 1 — Choose File</label>
+
+                <label class="debug-toggle">
+                    <input type="checkbox" id="debugMode">
+                    <span style="color:#f59e0b;"><i class="fas fa-bug"></i> Debug Mode (show raw cells)</span>
+                </label>
+            </div>
+
+            <div class="zone" id="uploadZone">
+                <input type="file" id="pdsFile" accept=".xlsx,.xls" />
+                <i class="fas fa-file-excel"></i>
+                <p>Click to select or drag &amp; drop your PDS Excel file here</p>
+                <p class="hint">CSC Form 212 · Revised 2025 layout supported</p>
+            </div>
+
+            <div id="statusBar">
+                <i id="statusIcon" class="fas fa-circle-notch spinner"></i>
+                <span id="statusText">Uploading…</span>
+            </div>
+        </div>
+
+        <!-- Debug Card -->
+        <div class="card" id="debugSection">
+            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:1rem; flex-wrap:wrap;">
+                <i class="fas fa-bug" style="color:#f59e0b;"></i>
+                <h3 style="color:#f59e0b; font-size:1rem; font-weight:800;">Raw Cell Dump</h3>
+                <span class="badge badge-soft">Non-empty cells · first 75 rows</span>
+            </div>
+
+            <div id="sheetTabs" class="section-tabs"></div>
+            <div id="debugPanels"></div>
+        </div>
+
+        <!-- Results Card -->
+        <div class="card" id="resultSection">
+            <div class="summary-row" id="summaryRow"></div>
+            <div class="section-tabs" id="tabs"></div>
+            <div id="panels"></div>
+
+            <div class="action-row">
+                <button class="btn btn-outline" type="button" onclick="resetAll()">
+                    <i class="fas fa-rotate-right"></i> Upload Another
+                </button>
+
+                <a class="btn btn-primary" href="/employee/pds/1" id="proceedLink">
+                    <i class="fas fa-arrow-right"></i> Proceed to PDS Form
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('pdsFile');
+        const dropZone = document.getElementById('uploadZone');
+        const statusBar = document.getElementById('statusBar');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusText = document.getElementById('statusText');
+        const resultSection = document.getElementById('resultSection');
+        const debugSection = document.getElementById('debugSection');
+
+        const SECTION_LABELS = {
+            personal_info: { label: 'Personal Info', icon: 'fas fa-user' },
+            family_background: { label: 'Family Background', icon: 'fas fa-users' },
+            educational_background: { label: 'Education', icon: 'fas fa-graduation-cap' },
+            civil_service_eligibility: { label: 'Eligibility', icon: 'fas fa-certificate' },
+            work_experience: { label: 'Work Experience', icon: 'fas fa-briefcase' },
+            voluntary_work: { label: 'Voluntary Work', icon: 'fas fa-hand-holding-heart' },
+            training_programs: { label: 'Training', icon: 'fas fa-book' },
+            other_information: { label: 'Other Info', icon: 'fas fa-circle-info' },
+            references: { label: 'References', icon: 'fas fa-address-book' },
+            government_id: { label: 'Government ID', icon: 'fas fa-id-card' },
+            _raw: { label: 'Raw JSON', icon: 'fas fa-code' }
+        };
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files[0]) uploadFile(fileInput.files[0]);
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]);
+        });
+
+        function setStatus(state, msg) {
+            statusBar.style.display = 'flex';
+            statusBar.className = '';
+
+            if (state === 'loading') {
+                statusBar.classList.add('status-loading');
+                statusIcon.className = 'fas fa-circle-notch spinner';
+            } else if (state === 'ok') {
+                statusBar.classList.add('status-ok');
+                statusIcon.className = 'fas fa-check-circle';
+            } else if (state === 'warn') {
+                statusBar.classList.add('status-warn');
+                statusIcon.className = 'fas fa-triangle-exclamation';
+            } else {
+                statusBar.classList.add('status-error');
+                statusIcon.className = 'fas fa-times-circle';
+            }
+
+            statusText.textContent = msg;
+        }
+
+        async function safeJson(response) {
+            const text = await response.text();
+            try {
+                return JSON.parse(text);
+            } catch {
+                throw new Error(text || 'Invalid server response');
+            }
+        }
+
+        async function uploadFile(file) {
+            resultSection.style.display = 'none';
+            debugSection.style.display = 'none';
+
+            const isDebug = document.getElementById('debugMode').checked;
+            const fd = new FormData();
+            fd.append('file', file);
+
+            setStatus('loading', `Reading "${file.name}"…`);
+
+            try {
+                if (isDebug) {
+                    const response = await fetch('/api/employees/debug-excel', {
+                        method: 'POST',
+                        body: fd
+                    });
+                    const d = await safeJson(response);
+
+                    if (!response.ok || !d.success) {
+                        throw new Error(d.error || 'Debug endpoint failed');
+                    }
+
+                    setStatus('ok', `Raw cell dump ready. Sheets: ${(d.sheets || []).join(', ')}`);
+                    renderDebug(d);
+                    return;
+                }
+
+                const response = await fetch('/api/employees/upload-pds-excel', {
+                    method: 'POST',
+                    body: fd
+                });
+
+                const d = await safeJson(response);
+
+                if (!response.ok || !d.success) {
+                    throw new Error(d.error || 'Server returned an error');
+                }
+
+                if (d.warning) {
+                    setStatus('warn', `Parsed with warning: ${d.warning}`);
+                } else {
+                    setStatus('ok', `"${file.name}" parsed successfully.`);
+                }
+
+                localStorage.setItem('pds_prefill_data', JSON.stringify(d.data || {}));
+                renderResults(d.data || {});
+            } catch (err) {
+                setStatus('error', 'Parse failed: ' + err.message);
+            }
+        }
+
+        function resetAll() {
+            resultSection.style.display = 'none';
+            debugSection.style.display = 'none';
+            statusBar.style.display = 'none';
+            fileInput.value = '';
+            document.getElementById('tabs').innerHTML = '';
+            document.getElementById('panels').innerHTML = '';
+            document.getElementById('sheetTabs').innerHTML = '';
+            document.getElementById('debugPanels').innerHTML = '';
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function formatLabel(key) {
+            return String(key || '')
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, (m) => m.toUpperCase());
+        }
+
+        function isEmptyValue(val) {
+            return val === null || val === undefined || val === '';
+        }
+
+        function displayValue(val) {
+            if (isEmptyValue(val)) return '—';
+            if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+            if (Array.isArray(val)) return val.length ? val.join(', ') : '—';
+            if (typeof val === 'object') return JSON.stringify(val);
+            return String(val);
+        }
+
+        function sanitizeId(value) {
+            return String(value).replace(/[^a-zA-Z0-9_-]/g, '_');
+        }
+
+        /* ---------------- Debug Renderer ---------------- */
+        function renderDebug(d) {
+            const sheetTabsEl = document.getElementById('sheetTabs');
+            const debugPanelsEl = document.getElementById('debugPanels');
+
+            sheetTabsEl.innerHTML = '';
+            debugPanelsEl.innerHTML = '';
+
+            (d.sheets || []).forEach((name, i) => {
+                const safeName = sanitizeId(name);
+
+                const tab = document.createElement('button');
+                tab.className = 'tab-btn' + (i === 0 ? ' active' : '');
+                tab.textContent = name;
+                tab.dataset.sheet = safeName;
+                tab.onclick = () => {
+                    document.querySelectorAll('#sheetTabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    document.querySelectorAll('#debugPanels .debug-panel').forEach(panel => {
+                        panel.style.display = 'none';
+                    });
+
+                    const target = document.getElementById('dp-' + safeName);
+                    if (target) target.style.display = 'block';
+                };
+                sheetTabsEl.appendChild(tab);
+
+                const panel = document.createElement('div');
+                panel.className = 'debug-panel';
+                panel.id = 'dp-' + safeName;
+                panel.style.display = i === 0 ? 'block' : 'none';
+
+                const rows = (d.dump && d.dump[name]) || {};
+                if (!Object.keys(rows).length) {
+                    panel.innerHTML = '<p class="panel-empty">No data found in the first 75 rows.</p>';
+                } else {
+                    let html = '<div class="table-wrap"><table class="data-table"><thead><tr><th>Row</th><th>Cell</th><th>Value</th></tr></thead><tbody>';
+
+                    for (const [rowKey, cells] of Object.entries(rows)) {
+                        const rowNum = parseInt(String(rowKey).replace('row_', ''), 10);
+
+                        for (const [cell, val] of Object.entries(cells)) {
+                            const col = cell.replace(/[0-9]/g, '');
+                            const isHighlight = col === 'D' && rowNum >= 10 && rowNum <= 15;
+                            const rowStyle = isHighlight ? ' style="background:#0f2040;color:#fcd34d;"' : '';
+
+                            html += `
+                        <tr${rowStyle}>
+                            <td>${rowNum}</td>
+                            <td style="font-family:monospace; color:#60a5fa;">${escapeHtml(cell)}</td>
+                            <td>${escapeHtml(val)}</td>
+                        </tr>
+                    `;
+                        }
+                    }
+
+                    html += '</tbody></table></div>';
+                    html += `
+                <p class="muted-note">
+                    <i class="fas fa-circle-info"></i>
+                    Highlighted rows show <strong>column D, rows 10–15</strong>, which is where the updated parser expects the core personal-name block in the revised 2025 layout.
+                </p>
+            `;
+                    panel.innerHTML = html;
+                }
+
+                debugPanelsEl.appendChild(panel);
+            });
+
+            debugSection.style.display = 'block';
+            debugSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        /* ---------------- Result Renderer ---------------- */
+        function renderResults(data) {
+            const tabsEl = document.getElementById('tabs');
+            const panelsEl = document.getElementById('panels');
+            const summaryEl = document.getElementById('summaryRow');
+
+            tabsEl.innerHTML = '';
+            panelsEl.innerHTML = '';
+            summaryEl.innerHTML = '';
+
+            const pi = data.personal_info || {};
+            const refs = data.references || [];
+            const govt = data.government_id || {};
+            const fullName = [pi.surname, pi.first_name, pi.middle_name].filter(Boolean).join(', ') || 'N/A';
+
+            summaryEl.innerHTML = `
+        <div class="summary-chip">Name: <strong>${escapeHtml(fullName)}</strong></div>
+        <div class="summary-chip">DOB: <strong>${escapeHtml(pi.date_of_birth || 'N/A')}</strong></div>
+        <div class="summary-chip">Sex: <strong>${escapeHtml(pi.sex_at_birth || 'N/A')}</strong></div>
+        <div class="summary-chip">Work Exp: <strong>${(data.work_experience || []).length}</strong></div>
+        <div class="summary-chip">Training: <strong>${(data.training_programs || []).length}</strong></div>
+        <div class="summary-chip">Eligibility: <strong>${(data.civil_service_eligibility || []).length}</strong></div>
+        <div class="summary-chip">References: <strong>${refs.length}</strong></div>
+        <div class="summary-chip">Gov ID: <strong>${escapeHtml(govt.type || 'N/A')}</strong></div>
+    `;
+
+            const keys = [...Object.keys(data), '_raw'];
+
+            keys.forEach((key, i) => {
+                const meta = SECTION_LABELS[key] || { label: formatLabel(key), icon: 'fas fa-database' };
+
+                const tab = document.createElement('button');
+                tab.className = 'tab-btn' + (i === 0 ? ' active' : '');
+                tab.innerHTML = `<i class="${meta.icon}"></i> ${escapeHtml(meta.label)}`;
+                tab.dataset.key = key;
+                tab.onclick = () => switchTab(key);
+                tabsEl.appendChild(tab);
+
+                const panel = document.createElement('div');
+                panel.className = 'result-panel' + (i === 0 ? ' active' : '');
+                panel.id = 'panel-' + sanitizeId(key);
+
+                if (key === '_raw') {
+                    panel.innerHTML = `<pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
+                } else if (key === 'personal_info') {
+                    panel.innerHTML = renderPersonalInfo(data.personal_info || {});
+                } else if (key === 'family_background') {
+                    panel.innerHTML = renderFamily(data.family_background || {});
+                } else if (key === 'other_information') {
+                    panel.innerHTML = renderOtherInfo(data.other_information || {});
+                } else if (key === 'government_id') {
+                    panel.innerHTML = renderKV(data.government_id || {});
+                } else if (Array.isArray(data[key])) {
+                    panel.innerHTML = renderTable(data[key]);
+                } else if (typeof data[key] === 'object' && data[key] !== null) {
+                    panel.innerHTML = renderKV(data[key]);
+                } else {
+                    panel.innerHTML = `<p class="panel-empty">No data</p>`;
+                }
+
+                panelsEl.appendChild(panel);
+            });
+
+            resultSection.style.display = 'block';
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function switchTab(key) {
+            const safeKey = sanitizeId(key);
+
+            document.querySelectorAll('#tabs .tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.key === key);
+            });
+
+            document.querySelectorAll('#panels .result-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === 'panel-' + safeKey);
+            });
+        }
+
+        function kvItem(label, val) {
+            const empty = isEmptyValue(val);
+            return `
+        <div class="kv-item">
+            <div class="kv-key">${escapeHtml(label)}</div>
+            <div class="kv-val${empty ? ' empty' : ''}">${escapeHtml(displayValue(val))}</div>
+        </div>
+    `;
+        }
+
+        function renderKV(obj, prefix = '') {
+            if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+                return '<p class="panel-empty">No data</p>';
+            }
+
+            const primitiveEntries = [];
+            const nestedEntries = [];
+
+            for (const [k, v] of Object.entries(obj)) {
+                if (Array.isArray(v) || (v && typeof v === 'object')) {
+                    nestedEntries.push([k, v]);
+                } else {
+                    primitiveEntries.push([k, v]);
+                }
+            }
+
+            let html = '';
+
+            if (primitiveEntries.length) {
+                html += '<div class="kv-grid">';
+                primitiveEntries.forEach(([k, v]) => {
+                    html += kvItem(prefix ? `${prefix}.${k}` : k, v);
+                });
+                html += '</div>';
+            }
+
+            nestedEntries.forEach(([k, v]) => {
+                const title = prefix ? `${prefix}.${k}` : k;
+                html += `<div class="subsection-title"><i class="fas fa-folder-open"></i> ${escapeHtml(formatLabel(title))}</div>`;
+
+                if (Array.isArray(v)) {
+                    html += renderTable(v);
+                } else {
+                    html += renderKV(v, title);
+                }
+            });
+
+            return html || '<p class="panel-empty">No data</p>';
+        }
+
+        function renderPersonalInfo(pi) {
+            if (!pi || typeof pi !== 'object') return '<p class="panel-empty">No data</p>';
+
+            let html = '';
+
+            const topFields = {
+                surname: pi.surname,
+                first_name: pi.first_name,
+                middle_name: pi.middle_name,
+                name_extension: pi.name_extension,
+                date_of_birth: pi.date_of_birth,
+                place_of_birth: pi.place_of_birth,
+                sex_at_birth: pi.sex_at_birth,
+                civil_status: pi.civil_status,
+                height: pi.height,
+                weight: pi.weight,
+                blood_type: pi.blood_type,
+                umid_no: pi.umid_no,
+                gsis_no: pi.gsis_no,
+                pagibig_no: pi.pagibig_no,
+                philhealth_no: pi.philhealth_no,
+                philsys_no: pi.philsys_no,
+                tin_no: pi.tin_no,
+                agency_employee_no: pi.agency_employee_no,
+                telephone_no: pi.telephone_no,
+                mobile_no: pi.mobile_no,
+                email_address: pi.email_address
+            };
+
+            html += '<div class="subsection-title"><i class="fas fa-id-badge"></i> Core Information</div>';
+            html += renderKV(topFields);
+
+            html += '<div class="subsection-title"><i class="fas fa-house"></i> Residential Address</div>';
+            html += renderKV(pi.residential_address || {});
+
+            html += '<div class="subsection-title"><i class="fas fa-location-dot"></i> Permanent Address</div>';
+            html += renderKV(pi.permanent_address || {});
+
+            return html;
+        }
+
+        function renderFamily(fb) {
+            if (!fb || typeof fb !== 'object') return '<p class="panel-empty">No data</p>';
+
+            let html = '';
+            html += '<div class="subsection-title"><i class="fas fa-heart"></i> Spouse</div>' + renderKV(fb.spouse || {});
+            html += '<div class="subsection-title"><i class="fas fa-user-tie"></i> Father</div>' + renderKV(fb.father || {});
+            html += '<div class="subsection-title"><i class="fas fa-person-dress"></i> Mother</div>' + renderKV(fb.mother || {});
+            html += '<div class="subsection-title"><i class="fas fa-children"></i> Children</div>' + renderTable(fb.children || []);
+            return html;
+        }
+
+        function renderOtherInfo(oi) {
+            if (!oi || typeof oi !== 'object') return '<p class="panel-empty">No data</p>';
+
+            let html = '';
+            html += '<div class="subsection-title"><i class="fas fa-star"></i> Skills / Hobbies</div>' + renderList(oi.skills || []);
+            html += '<div class="subsection-title"><i class="fas fa-award"></i> Non-Academic Distinctions</div>' + renderList(oi.distinctions || []);
+            html += '<div class="subsection-title"><i class="fas fa-people-group"></i> Membership in Associations</div>' + renderList(oi.memberships || []);
+            return html;
+        }
+
+        function renderList(arr) {
+            if (!Array.isArray(arr) || !arr.length) {
+                return '<p class="panel-empty">No entries</p>';
+            }
+
+            return `<ul class="list-view">${arr.map(v => `<li>${escapeHtml(displayValue(v))}</li>`).join('')}</ul>`;
+        }
+
+        function renderTable(rows) {
+            if (!Array.isArray(rows) || !rows.length) {
+                return '<p class="panel-empty">No rows found</p>';
+            }
+
+            const cols = Array.from(
+                rows.reduce((set, row) => {
+                    Object.keys(row || {}).forEach(k => set.add(k));
+                    return set;
+                }, new Set())
+            );
+
+            let html = '<div class="table-wrap"><table class="data-table"><thead><tr>';
+            cols.forEach(c => {
+                html += `<th>${escapeHtml(formatLabel(c))}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            rows.forEach(row => {
+                const isEmpty = cols.every(c => isEmptyValue(row?.[c]));
+                html += `<tr class="${isEmpty ? 'empty-row' : ''}">`;
+
+                cols.forEach(c => {
+                    const val = row?.[c];
+                    html += `<td>${isEmptyValue(val) ? '<span style="color:#475569;">—</span>' : escapeHtml(displayValue(val))}</td>`;
+                });
+
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            return html;
+        }
+    </script>
+</body>
+
+</html>

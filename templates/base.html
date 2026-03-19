@@ -240,7 +240,7 @@
               </li>
               <li><a class="dropdown-item" href="/admin/profile"><i
                     class="fas fa-user-circle icon-gap-5"></i>Profile</a></li>
-              <li><a class="dropdown-item" href="/employee/pds/1"><i
+              <li><a class="dropdown-item" href="/admin/employee/add"><i
                     class="fas fa-user-plus icon-gap-5"></i>Add PDS Manually</a></li>
               <li><a class="dropdown-item" href="/admin/manage-employees"><i
                     class="fas fa-users icon-gap-5"></i>Manage Employees</a></li>
@@ -480,6 +480,27 @@
       </div>
     </div>
 
+    <!-- System Alert Modal -->
+    <div class="modal fade" id="systemAlertModal" tabindex="-1" aria-hidden="true" inert="">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+          <div class="modal-header border-0">
+            <h5 class="modal-title d-flex align-items-center gap-2">
+              <i id="systemAlertIcon" class="fas fa-info-circle text-primary"></i>
+              <span id="systemAlertLabel" class="fw-bold">Notification</span>
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body py-4 text-center">
+             <p class="mb-0 px-3" id="systemAlertMessage" style="font-size: 1.1rem; color: #444;"></p>
+          </div>
+          <div class="modal-footer border-0 justify-content-center">
+            <button type="button" class="btn btn-primary px-5 py-2 rounded-pill fw-bold shadow-sm" data-bs-dismiss="modal">Got it</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Add Office Modal -->
     <div class="modal fade" id="addOfficeModal" tabindex="-1" aria-labelledby="addOfficeModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
@@ -676,6 +697,29 @@
 
     // Global modal functionality
     document.addEventListener('DOMContentLoaded', function () {
+      // Global showAlert helper
+      window.showAlert = function(message, title='Notification', icon='info-circle', type='primary') {
+          const modalEl = document.getElementById('systemAlertModal');
+          if (!modalEl) { alert(message); return; }
+          const label = document.getElementById('systemAlertLabel');
+          const msg = document.getElementById('systemAlertMessage');
+          const iconEl = document.getElementById('systemAlertIcon');
+          if (label) label.textContent = title;
+          if (msg) msg.textContent = message;
+          if (iconEl) iconEl.className = `fas fa-${icon} text-${type}`;
+          const modalInst = new bootstrap.Modal(modalEl);
+          modalInst.show();
+      };
+
+      // Clear PDS prefill if triggered by submission redirect
+      if (window.location.search.includes('clear_pds=1')) {
+          localStorage.removeItem('pds_prefill_data');
+          // cleanup URL without reload
+          const url = new URL(window.location);
+          url.searchParams.delete('clear_pds');
+          window.history.replaceState({}, '', url);
+      }
+
       // Delete confirmation modal
       let deleteId = null;
       window.confirmDelete = function (button) {

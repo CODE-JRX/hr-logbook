@@ -6,24 +6,23 @@
     .form-container {
         max-width: 1400px;
         width: 100%;
-        background: white;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-        padding: 2rem 2rem;
-        border-radius: 16px;
-        border: 1px solid #c0d0e5;
+        background: var(--card-bg);
+        backdrop-filter: blur(14px);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
         margin: 2rem auto;
     }
-    [data-theme="dark"] .form-container { background: #1e1e1e; border-color: #333; color: #eee; }
     h2 {
-        color: #003366;
-        border-left: 8px solid #b31b1b;
+        color: var(--primary-color);
+        border-left: 8px solid var(--primary-color);
         padding-left: 1rem;
-        margin: 0 0 0.25rem 0;
-        font-weight: 500;
-        font-size: 2.2rem;
-        letter-spacing: 1px;
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+        font-size: 2rem;
+        letter-spacing: 0.5px;
     }
-    [data-theme="dark"] h2 { color: #5dade2; }
     .sheet-badge {
         background: #1d3d6b;
         color: white;
@@ -47,51 +46,57 @@
         gap: 8px;
     }
     .section-title {
-        font-size: 1.6rem;
-        font-weight: 600;
-        color: #003366;
-        border-bottom: 3px double #a0b8d4;
-        padding-bottom: 0.3rem;
-        margin: 2rem 0 1.5rem 0;
-        background: linear-gradient(to right, #f0f6ff, transparent);
-        padding-left: 0.5rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        margin: 2.5rem 0 1.5rem 0;
+        background: linear-gradient(to right, rgba(20, 99, 255, 0.05), transparent);
+        padding-left: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    [data-theme="dark"] .section-title { color: #5dade2; background: linear-gradient(to right, #2c3e5c, transparent); border-bottom-color: #444; }
     .subsection {
-        font-weight: 600;
-        background: #d9e4f0;
+        font-weight: 700;
+        background: rgba(20, 99, 255, 0.08);
         padding: 0.4rem 1.2rem;
-        border-radius: 30px;
-        font-size: 1.2rem;
-        margin: 1.5rem 0 1rem 0;
+        border-radius: 10px;
+        font-size: 1rem;
+        margin: 1.5rem 0 1.2rem 0;
+        color: var(--primary-color);
     }
-    [data-theme="dark"] .subsection { background: #34495e; color: #eee; }
     .field-group { display: flex; flex-direction: column; margin-bottom: 0.6rem; }
     .field-group label {
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.3px;
-        color: #1f3a68;
-        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+        color: var(--neutral-color);
+        margin-bottom: 6px;
     }
-    [data-theme="dark"] .field-group label { color: #abb2bf; }
     .field-group input, .field-group select {
-        padding: 0.6rem 0.8rem;
-        border: 1px solid #b0c2d6;
-        border-radius: 8px;
-        background: white;
+        padding: 0.65rem 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.05);
         font-size: 0.9rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
-    [data-theme="dark"] .field-group input, [data-theme="dark"] .field-group select { background: #2c2c2c; border-color: #444; color: #eee; }
-    .eligibility-row, .work-row {
+    .eligibility-row {
         display: grid;
-        grid-template-columns: 2fr 0.6fr 1.2fr 1.2fr 0.9fr 0.9fr;
-        gap: 0.5rem 1rem;
+        grid-template-columns: 1.8fr 0.5fr 1fr 1fr 0.8fr 0.8fr 32px;
+        gap: 0.5rem 0.6rem;
         margin-bottom: 0.8rem;
         align-items: center;
     }
-    .work-row { grid-template-columns: 1.2fr 1.2fr 2fr 2fr 1fr 1fr 1fr 0.5fr; }
+    .work-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 2fr 2fr 1.2fr 0.6fr 32px;
+        gap: 0.5rem 0.6rem;
+        margin-bottom: 0.8rem;
+        align-items: center;
+    }
     .remove-btn {
         background: #b22222;
         color: white;
@@ -148,8 +153,13 @@
 <div class="container">
     <div class="form-container">
         <form action="/employee/pds/2" method="POST">
+            {% if session.editing_employee_id %}
+            <h2>UPDATE EMPLOYEE RECORD</h2>
+            <div class="sheet-badge bg-primary text-white">EDITING ID: {{ session.editing_employee_id }}</div>
+            {% else %}
             <h2>PERSONAL DATA SHEET</h2>
-            <div class="sheet-badge">SHEET 2 : CIVIL SERVICE ELIGIBILITY & WORK EXPERIENCE</div>
+            <div class="sheet-badge">NEW EMPLOYEE RECORD</div>
+            {% endif %}
 
             {% if prefill %}
             <div class="alert alert-info d-flex align-items-center gap-2 mb-3" style="border-radius:12px;">
@@ -165,18 +175,27 @@
                  Any misrepresentation shall cause administrative/criminal case(s). Read attached guide before accomplishing.
             </div>
 
-            <!-- Manual Bind Alert Banner -->
-            <div id="manualBindBanner" class="alert alert-warning d-flex align-items-center justify-content-between gap-3 mb-4" style="border-radius:15px; display:none; border: 2px dashed #f59e0b;">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-file-import fa-2x text-warning"></i>
-                    <div>
-                        <h6 class="mb-1 fw-bold">Excel Data Available!</h6>
-                        <p class="mb-0 small text-muted">A PDS Excel file was recently uploaded. Click the button to populate Page 2 textboxes.</p>
+            <!-- Manual Bind Card -->
+            <div id="manualBindBanner" class="card border-0 shadow-sm mb-4 p-3" style="border-radius:20px; display:none; background: linear-gradient(135deg, #fff9f0, #fff2dd); border-left: 5px solid #f59e0b !important;">
+                <div class="card-body p-1 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width:45px; height:45px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245,158,11,0.3);">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-dark">Excel Data Available!</h6>
+                            <p class="mb-0 small text-muted">A PDS Excel file was recently uploaded. Click the button to populate Page 2 textboxes.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-warning px-4 py-2 fw-bold rounded-pill shadow-sm" onclick="autoFillForm2()">
+                            <i class="fas fa-file-import me-2"></i> Bind Data to Form
+                        </button>
+                        <button type="button" class="btn btn-link text-muted p-2" onclick="document.getElementById('manualBindBanner').style.display='none'" title="Dismiss">
+                            <i class="fas fa-times fa-lg"></i>
+                        </button>
                     </div>
                 </div>
-                <button type="button" class="btn btn-warning px-4 py-2 fw-bold" onclick="autoFillForm2()" style="border-radius:30px; box-shadow: 0 4px 12px rgba(245,158,11,0.2);">
-                    <i class="fas fa-magic me-2"></i> Bind Data to Form
-                </button>
             </div>
 
             <div class="section-title">IV. CIVIL SERVICE ELIGIBILITY</div>
@@ -190,10 +209,8 @@
                         <div class="field-group"><input name="elig_date[]" placeholder="DATE" type="text" value="{{ elig.exam_date or '' }}"/></div>
                         <div class="field-group"><input name="elig_place[]" placeholder="PLACE" type="text" value="{{ elig.exam_place or '' }}"/></div>
                         <div class="field-group"><input name="elig_license_no[]" placeholder="LICENSE#" type="text" value="{{ elig.license_number or '' }}"/></div>
-                        <div style="display: flex; gap: 5px; align-items: center;">
-                            <div class="field-group" style="flex:1;"><input name="elig_validity[]" placeholder="VALIDITY" type="text" value="{{ elig.license_date or '' }}"/></div>
-                            <button type="button" class="remove-btn" onclick="this.closest('.eligibility-row').remove()">−</button>
-                        </div>
+                        <div class="field-group"><input name="elig_validity[]" placeholder="VALIDITY" type="text" value="{{ elig.license_date or '' }}"/></div>
+                        <button type="button" class="remove-btn" onclick="this.closest('.eligibility-row').remove()">−</button>
                     </div>
                     {% endfor %}
                 {% else %}
@@ -203,10 +220,8 @@
                         <div class="field-group"><input name="elig_date[]" placeholder="DATE" type="text"/></div>
                         <div class="field-group"><input name="elig_place[]" placeholder="PLACE" type="text"/></div>
                         <div class="field-group"><input name="elig_license_no[]" placeholder="LICENSE#" type="text"/></div>
-                        <div style="display: flex; gap: 5px; align-items: center;">
-                            <div class="field-group" style="flex:1;"><input name="elig_validity[]" placeholder="VALIDITY" type="text"/></div>
-                            <button type="button" class="remove-btn" onclick="this.closest('.eligibility-row').remove()">−</button>
-                        </div>
+                        <div class="field-group"><input name="elig_validity[]" placeholder="VALIDITY" type="text"/></div>
+                        <button type="button" class="remove-btn" onclick="this.closest('.eligibility-row').remove()">−</button>
                     </div>
                 {% endif %}
             </div>
@@ -222,16 +237,12 @@
                         <div class="field-group"><input name="work_to[]" placeholder="TO" type="text" value="{{ work.to or '' }}"/></div>
                         <div class="field-group"><input name="work_position[]" placeholder="POSITION" type="text" value="{{ work.position or '' }}"/></div>
                         <div class="field-group"><input name="work_company[]" placeholder="COMPANY" type="text" value="{{ work.department or '' }}"/></div>
-                        <div class="field-group"><input name="work_salary[]" placeholder="SALARY" type="text" value="{{ work.salary or '' }}"/></div>
-                        <div class="field-group"><input name="work_sg_step[]" placeholder="SG/STEP" type="text" value="{{ work.pay_grade or '' }}"/></div>
                         <div class="field-group"><input name="work_status[]" placeholder="STATUS" type="text" value="{{ work.appointment_status or '' }}"/></div>
-                        <div style="display: flex; gap: 8px; align-items:center;">
-                            <select name="work_govt_service[]" style="padding:0.4rem; border-radius:8px;">
-                                <option value="Y" {% if work.govt_service == 'Y' %}selected{% endif %}>Y</option>
-                                <option value="N" {% if work.govt_service == 'N' or not work.govt_service %}selected{% endif %}>N</option>
-                            </select>
-                            <button type="button" class="remove-btn" onclick="this.closest('.work-row').remove()">−</button>
-                        </div>
+                        <select name="work_govt_service[]" style="padding:0.4rem; border-radius:8px;">
+                            <option value="Y" {% if work.govt_service == 'Y' %}selected{% endif %}>Y</option>
+                            <option value="N" {% if work.govt_service == 'N' or not work.govt_service %}selected{% endif %}>N</option>
+                        </select>
+                        <button type="button" class="remove-btn" onclick="this.closest('.work-row').remove()">−</button>
                     </div>
                     {% endfor %}
                 {% else %}
@@ -240,22 +251,14 @@
                         <div class="field-group"><input name="work_to[]" placeholder="TO" type="text"/></div>
                         <div class="field-group"><input name="work_position[]" placeholder="POSITION" type="text"/></div>
                         <div class="field-group"><input name="work_company[]" placeholder="COMPANY" type="text"/></div>
-                        <div class="field-group"><input name="work_salary[]" placeholder="SALARY" type="text"/></div>
-                        <div class="field-group"><input name="work_sg_step[]" placeholder="SG/STEP" type="text"/></div>
                         <div class="field-group"><input name="work_status[]" placeholder="STATUS" type="text"/></div>
-                        <div style="display: flex; gap: 8px; align-items:center;">
-                            <select name="work_govt_service[]" style="padding:0.4rem; border-radius:8px;"><option>Y</option><option>N</option></select>
-                            <button type="button" class="remove-btn" onclick="this.closest('.work-row').remove()">−</button>
-                        </div>
+                        <select name="work_govt_service[]" style="padding:0.4rem; border-radius:8px;"><option>Y</option><option>N</option></select>
+                        <button type="button" class="remove-btn" onclick="this.closest('.work-row').remove()">−</button>
                     </div>
                 {% endif %}
             </div>
             <button type="button" class="add-btn" id="addWorkBtn">➕ Add another work experience</button>
 
-            <div class="signature-line">
-                <div><span style="font-weight:600;">SIGNATURE</span> <input placeholder="signature" style="width:250px; padding:0.6rem; border-radius:30px; border:1px solid #a0b8d4;" type="text"/></div>
-                <div><span style="font-weight:600;">DATE</span> <input placeholder="dd/mm/yyyy" style="width:130px; padding:0.6rem; border-radius:30px; border:1px solid #a0b8d4;" type="text"/></div>
-            </div>
             <div class="page-label">CS FORM 212 (Revised 2025), Page 2 of 4</div>
 
             <div class="d-flex justify-content-between mt-4">
@@ -277,7 +280,7 @@
 
     function autoFillForm2() {
         const raw = localStorage.getItem('pds_prefill_data');
-        if (!raw) return alert("No Excel data found.");
+        if (!raw) return showAlert("No Excel data found.", "No Data", "info-circle", "warning");
         const data = JSON.parse(raw);
 
         // Eligibility
@@ -294,10 +297,8 @@
                         <div class="field-group"><input type="text" name="elig_date[]" value="${item.exam_date ||''}" /></div>
                         <div class="field-group"><input type="text" name="elig_place[]" value="${item.exam_place ||''}" /></div>
                         <div class="field-group"><input type="text" name="elig_license_no[]" value="${item.license_number ||''}" /></div>
-                        <div style="display: flex; gap:5px; align-items:center;">
-                            <div class="field-group" style="flex:1;"><input type="text" name="elig_validity[]" value="${item.license_date ||''}" /></div>
-                            <button type="button" class="remove-btn" onclick="this.closest('.eligibility-row').remove()">−</button>
-                        </div>
+                        <div class="field-group"><input type="text" name="elig_validity[]" value="${item.license_date ||''}" /></div>
+                        <button type="button" class="remove-btn" onclick="this.closest('.eligibility-row').remove()">−</button>
                     `;
                     container.appendChild(div);
                 });
@@ -317,22 +318,18 @@
                         <div class="field-group"><input type="text" name="work_to[]" value="${item.to ||'N/A'}" /></div>
                         <div class="field-group"><input type="text" name="work_position[]" value="${item.position ||''}" /></div>
                         <div class="field-group"><input type="text" name="work_company[]" value="${item.department ||''}" /></div>
-                        <div class="field-group"><input type="text" name="work_salary[]" value="${item.salary ||''}" /></div>
-                        <div class="field-group"><input type="text" name="work_sg_step[]" value="${item.pay_grade ||''}" /></div>
                         <div class="field-group"><input type="text" name="work_status[]" value="${item.appointment_status ||''}" /></div>
-                        <div style="display: flex; gap:8px; align-items:center;">
-                            <select name="work_govt_service[]" style="padding:0.4rem; border-radius:8px;">
-                                <option value="Y" ${item.govt_service=='Y'?'selected':''}>Y</option>
-                                <option value="N" ${item.govt_service!='Y'?'selected':''}>N</option>
-                            </select>
-                            <button type="button" class="remove-btn" onclick="this.closest('.work-row').remove()">−</button>
-                        </div>
+                        <select name="work_govt_service[]" style="padding:0.4rem; border-radius:8px;">
+                            <option value="Y" ${item.govt_service=='Y'?'selected':''}>Y</option>
+                            <option value="N" ${item.govt_service!='Y'?'selected':''}>N</option>
+                        </select>
+                        <button type="button" class="remove-btn" onclick="this.closest('.work-row').remove()">−</button>
                     `;
                     container.appendChild(div);
                 });
             }
         }
-        alert("PDS Page 2 fields populated!");
+        showAlert("PDS Page 2 fields populated!", "Form Populated", "magic", "success");
     }
 
     document.getElementById('addEligibilityBtn').addEventListener('click', function() {
@@ -345,10 +342,8 @@
             <div class="field-group"><input type="text" name="elig_date[]" placeholder="Date" /></div>
             <div class="field-group"><input type="text" name="elig_place[]" placeholder="Place" /></div>
             <div class="field-group"><input type="text" name="elig_license_no[]" placeholder="No." /></div>
-            <div style="display: flex; gap:5px; align-items:center;">
-                <div class="field-group" style="flex:1;"><input type="text" name="elig_validity[]" placeholder="Val" /></div>
-                <button type="button" class="remove-btn" onclick="this.closest('.eligibility-row').remove()">−</button>
-            </div>
+            <div class="field-group"><input type="text" name="elig_validity[]" placeholder="Validity" /></div>
+            <button type="button" class="remove-btn" onclick="this.closest('.eligibility-row').remove()">−</button>
         `;
         container.appendChild(newRow);
     });
@@ -362,13 +357,9 @@
             <div class="field-group"><input type="text" name="work_to[]" placeholder="To" /></div>
             <div class="field-group"><input type="text" name="work_position[]" placeholder="Position" /></div>
             <div class="field-group"><input type="text" name="work_company[]" placeholder="Company" /></div>
-            <div class="field-group"><input type="text" name="work_salary[]" placeholder="Salary" /></div>
-            <div class="field-group"><input type="text" name="work_sg_step[]" placeholder="SG" /></div>
             <div class="field-group"><input type="text" name="work_status[]" placeholder="Status" /></div>
-            <div style="display: flex; gap:8px; align-items:center;">
-                <select name="work_govt_service[]" style="padding:0.4rem; border-radius:8px;"><option>Y</option><option>N</option></select>
-                <button type="button" class="remove-btn" onclick="this.closest('.work-row').remove()">−</button>
-            </div>
+            <select name="work_govt_service[]" style="padding:0.4rem; border-radius:8px;"><option>Y</option><option>N</option></select>
+            <button type="button" class="remove-btn" onclick="this.closest('.work-row').remove()">−</button>
         `;
         container.appendChild(newRow);
     });

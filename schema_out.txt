@@ -1,0 +1,63 @@
+{
+  "pds_spouse": [
+    "id",
+    "personal_info_id",
+    "surname",
+    "first_name",
+    "middle_name",
+    "name_extension",
+    "occupation",
+    "employer",
+    "business_address",
+    "telephone_no"
+  ],
+  "pds_parents": [
+    "id",
+    "personal_info_id",
+    "father_surname",
+    "father_first_name",
+    "father_middle_name",
+    "father_name_extension",
+    "mother_maiden_surname",
+    "mother_first_name",
+    "mother_middle_name"
+  ],
+  "pds_children": [
+    "id",
+    "personal_info_id",
+    "full_name",
+    "date_of_birth"
+  ],
+  "pds_education": [
+    "id",
+    "personal_info_id",
+    "level",
+    "school_name",
+    "degree_course",
+    "from_year",
+    "to_year",
+    "highest_level_units",
+    "year_graduated",
+    "scholarship_honors"
+  ],
+  "pds_work_experience": [
+    "id",
+    "personal_info_id",
+    "date_from",
+    "date_to",
+    "position_title",
+    "department_agency_company",
+    "status_of_appointment",
+    "gov_service"
+  ],
+  "pds_civil_service_eligibility": [
+    "id",
+    "personal_info_id",
+    "eligibility",
+    "rating",
+    "date_of_exam",
+    "place_of_exam",
+    "license_number",
+    "valid_until"
+  ]
+}
