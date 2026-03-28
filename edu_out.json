@@ -1,0 +1,42 @@
+[
+  {
+    "level": "ELEMENTARY",
+    "school_name": "BILABILA ELEMENTARY SCHOOL",
+    "degree": "ELEMENTARY",
+    "from": "JUN,2001",
+    "to": "MAR,2007",
+    "highest_level": "GRADUATED",
+    "year_graduated": "2007",
+    "scholarships": ""
+  },
+  {
+    "level": "SECONDARY",
+    "school_name": "ABAS NATIONAL HIGH SCHOOL",
+    "degree": "HIGHSCHOOL",
+    "from": "JUN,2007",
+    "to": "MAR,2011",
+    "highest_level": "GRADUATED",
+    "year_graduated": 2011,
+    "scholarships": ""
+  },
+  {
+    "level": "COLLEGE",
+    "school_name": "ABRA STATE INSTITUTE OF SCIENCE AND TECHNOLOGY(MAIN CAMPUS)",
+    "degree": "BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY",
+    "from": "JUN,2011",
+    "to": "MAR,2015",
+    "highest_level": "GRADUATED",
+    "year_graduated": 2015,
+    "scholarships": ""
+  },
+  {
+    "level": "GRADUATE STUDIES",
+    "school_name": "UNIVERSITY OF CORDILLERA",
+    "degree": "MASTER IN INFORMATION TECHNOLOGY",
+    "from": "JUNE,2016",
+    "to": "JULY, 2023",
+    "highest_level": "GRADUATED",
+    "year_graduated": "2023",
+    "scholarships": ""
+  }
+]

@@ -187,14 +187,18 @@
     [data-theme="dark"] #statusOverlay { background: rgba(15,23,42,0.9); }
     
     .spinner-custom {
-        width: 50px; height: 50px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #3b82f6;
+        width: 60px; height: 60px;
+        border: 4px solid rgba(59, 130, 246, 0.1);
+        border-left: 4px solid #3b82f6;
         border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes spin { 
+        0% { transform: rotate(0deg); } 
+        100% { transform: rotate(360deg); } 
+    }
 </style>
 {% endblock %}
 
@@ -549,9 +553,20 @@
 <!-- Floating FAB removed - using Banner at top instead -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if server requested to clear local storage (stale excel data)
+    {% if clear_ls %}
+    localStorage.removeItem('pds_prefill_data');
+    {% endif %}
+    {% if prefill %}
+    try {
+        localStorage.setItem('pds_prefill_data', JSON.stringify({{ prefill|tojson }}));
+    } catch (e) { console.warn('Unable to cache prefill data', e); }
+    {% endif %}
+
     if (localStorage.getItem('pds_prefill_data')) {
         const banner = document.getElementById('manualBindBanner');
-        if (banner) banner.style.display = 'flex';
+        if (banner) banner.style.display = 'none';
+        autoFillForm1();
     }
 
     // Excel Upload Logic
@@ -599,10 +614,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showFileSelected() {
         if (!currentFile) return;
-        selectedFileName.textContent = currentFile.name;
         dropPrompt.style.display = 'none';
-        fileSelectedView.style.display = 'block';
         extractionSummary.style.display = 'none';
+        triggerUpload();
     }
 
     window.triggerUpload = () => {
@@ -627,9 +641,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 extractionSummary.style.display = 'block';
                 fileSelectedView.style.display = 'none';
                 
-                // Show floating banner if on other pages later
-                const banner = document.getElementById('manualBindBanner');
-                if (banner) banner.style.display = 'flex';
+                // Automate data binding immediately
+                autoFillForm1();
                 
                 if (res.warning) {
                     showAlert("Warning: " + res.warning + "\n\nPartial data was extracted.", "Extraction Warning", "exclamation-triangle", "warning");
@@ -804,7 +817,7 @@ function autoFillForm1() {
         });
     }
 
-    showAlert("PDS Page 1 fields populated! Any existing data in textboxes might have been overwritten. Please review.", "Form Populated", "magic", "success");
+console.log("Form populated successfully!");
     // Hide summary after bind to keep it clean
     const summary = document.getElementById('extractionSummary');
     if (summary) summary.style.display = 'none';

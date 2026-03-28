@@ -9,7 +9,6 @@ from openpyxl.utils.datetime import from_excel
 
 logger = logging.getLogger(__name__)
 
-
 # -----------------------------
 # Normalization / value helpers
 # -----------------------------
@@ -283,8 +282,12 @@ def parse_pds_excel(file_content: bytes) -> Dict[str, Any]:
     education_row = find_row_any(c1, 1, 150, r"III\.\s*EDUCATIONAL BACKGROUND", merged_lookup=m1)
 
     # Find Father/Mother within family section more robustly
-    father_row = find_row_any(c1, family_row, family_row + 20, r"24\.\s*FATHER'S NAME", merged_lookup=m1) if family_row > 0 else -1
-    mother_row = find_row_any(c1, family_row, family_row + 25, r"25\.\s*MOTHER'S MAIDEN NAME", merged_lookup=m1) if family_row > 0 else -1
+    father_row = find_row_any(c1, family_row, family_row + 20, r"FATHER'?S (?:NAME|SURNAME)", merged_lookup=m1) if family_row > 0 else -1
+    mother_row = find_row_any(c1, family_row, family_row + 25, r"MOTHER['S]?\\s+MAIDEN\\s+NAME", merged_lookup=m1) if family_row > 0 else -1
+    if mother_row < 0 and family_row > 0:
+        mother_row = find_row_any(c1, family_row, family_row + 25, r"MOTHER[’]?\\s+MAIDEN\\s+NAME", merged_lookup=m1)
+    if mother_row < 0:
+        mother_row = 46
 
     civil_service_row = find_row_any(c2, 1, 50, r"IV\.\s*CIVIL SERVICE ELIGIBILITY", merged_lookup=m2)
     work_row = find_row_any(c2, 1, 80, r"V\.\s*WORK EXPERIENCE", merged_lookup=m2)
@@ -365,21 +368,23 @@ def parse_pds_excel(file_content: bytes) -> Dict[str, Any]:
                 "business_address": get_val(c1, 41, 4, m1),
                 "telephone_no": get_val(c1, 42, 4, m1),
             },
-            "father": {
-                "surname": get_val(c1, father_row, 4, m1) if father_row > 0 else "",
-                "first_name": get_val(c1, father_row + 1, 4, m1) if father_row > 0 else "",
-                "middle_name": get_val(c1, father_row + 2, 4, m1) if father_row > 0 else "",
-            },
-            "mother": {
-                "maiden_surname": get_val(c1, mother_row, 4, m1) if mother_row > 0 else "",
-                "first_name": get_val(c1, mother_row + 1, 4, m1) if mother_row > 0 else "",
-                "middle_name": get_val(c1, mother_row + 2, 4, m1) if mother_row > 0 else "",
-            },
-            "children": parse_table(
-                c1,
-                37,
-                (education_row - 1 if education_row > 0 else 49),
-                {
+        "father": {
+            "surname": get_val(c1, father_row, 4, m1) if father_row > 0 else "",
+            "first_name": get_val(c1, father_row + 1, 4, m1) if father_row > 0 else "",
+            "middle_name": get_val(c1, father_row + 2, 4, m1) if father_row > 0 else "",
+        },
+        "mother": {
+            # Values start one row below the header line:
+            # row +1 = surname, +2 = first name, +3 = middle name.
+            "maiden_surname": get_val(c1, mother_row + 1, 4, m1) if mother_row > 0 else "",
+            "first_name": get_val(c1, mother_row + 2, 4, m1) if mother_row > 0 else "",
+            "middle_name": get_val(c1, mother_row + 3, 4, m1) if mother_row > 0 else "",
+        },
+        "children": parse_table(
+            c1,
+            37,
+            (education_row - 1 if education_row > 0 else 49),
+            {
                     "name": 9,
                     "date_of_birth": {"col": 13, "transform": lambda v: parse_date(v, wb.epoch)},
                 },
@@ -486,33 +491,106 @@ def parse_pds_excel(file_content: bytes) -> Dict[str, Any]:
         },
     }
 
-    # Optional but useful: parse C4 references + government ID
+    # -------------------------------------------------------
+    # Fix key name: parser used 'license_valid_until' but the
+    # rest of the codebase (autoFillForm2, db_to_pds_prefill)
+    # expects 'license_date'. Normalise here.
+    # -------------------------------------------------------
+    for elig in data["civil_service_eligibility"]:
+        if "license_valid_until" in elig:
+            elig["license_date"] = elig.pop("license_valid_until")
+
+    # -------------------------------------------------------
+    # Page 4 (Sheet C4) — References, Gov't ID, Declarations
+    # -------------------------------------------------------
     if c4:
+        # ---- References (Item 41) -------------------------
+        ref_row = find_row_any(c4, 1, 60, r"REFERENCES?.*\(Person not", merged_lookup=m4)
+        if ref_row < 0: 
+            ref_row = find_row_any(c4, 1, 60, r"REFERENCES", merged_lookup=m4)
+
+        ref_data_start = ref_row + 2 if ref_row > 0 else 4
         data["references"] = parse_table(
             c4,
-            52,
-            54,
+            ref_data_start,
+            ref_data_start + 2,  # Read exactly 3 rows (e.g. 52, 53, 54)
             {
-                "name": 1,
-                "address": 6,
-                "contact": 7,
+                "name":    1,
+                "address": 5,
+                "contact": 9,
             },
             required_keys="name",
             merged_lookup=m4,
+            row_filter=lambda row: row.get("name") not in ("", None),
         )
 
+        # ---- Government-Issued ID (Item 42) ---------------
+        gov_id_row = find_row_any(c4, 1, 80, r"Government Issued ID", merged_lookup=m4)
+        gov_id_data_row = gov_id_row + 2 if gov_id_row > 0 else -1
         data["government_id"] = {
-            "type": get_val(c4, 61, 4, m4),
-            "number": get_val(c4, 62, 4, m4),
-            "date_place_of_issuance": get_val(c4, 64, 4, m4),
+            "type":                  get_val(c4, gov_id_data_row, 1, m4)  if gov_id_data_row > 0 else "",
+            "number":                get_val(c4, gov_id_data_row, 5, m4)  if gov_id_data_row > 0 else "",
+            "date_place_of_issuance":get_val(c4, gov_id_data_row, 9, m4)  if gov_id_data_row > 0 else "",
         }
 
-    # basic sanity log
-    surname = data["personal_info"].get("surname", "")
-    first_name = data["personal_info"].get("first_name", "")
-    if surname or first_name:
-        logger.info("PDS parsed successfully: %s, %s", surname, first_name)
+        # ---- Declarations (Items 34-40) -------------------
+        # Locate each question label and read answer + detail
+        def _decl_read(ws, merged, question_pattern, start=1, stop=100):
+            """Find a declaration question row and return (yes_no, detail)."""
+            r = find_row_any(ws, start, stop, question_pattern, merged_lookup=merged)
+            if r < 0:
+                return "", ""
+            # Yes/No is typically in col 12-13
+            yn_raw = get_val(ws, r, 12, merged) or get_val(ws, r, 13, merged) or ""
+            yn = "yes" if str(yn_raw).strip().upper() in ("YES", "Y", "X", "✓", "✔") else ""
+            # Because detail box placement is highly variable and often spans multiple rows
+            # below the question, we leave detail string blank to avoid grabbing question text.
+            return yn, ""
+
+        decl_start = 1
+        decl_stop  = gov_id_row - 1 if gov_id_row > 0 else 80
+
+        yn34a, det34a = _decl_read(c4, m4, r"within the third degree",  decl_start, decl_stop)
+        yn34b, det34b = _decl_read(c4, m4, r"within the fourth degree", decl_start, decl_stop)
+        yn35a, det35a = _decl_read(c4, m4, r"guilty of any administrative offense", decl_start, decl_stop)
+        yn35b, det35b = _decl_read(c4, m4, r"criminally charged before any court",  decl_start, decl_stop)
+        yn36,  det36  = _decl_read(c4, m4, r"convicted of any crime",               decl_start, decl_stop)
+        yn37,  det37  = _decl_read(c4, m4, r"separated from the service",           decl_start, decl_stop)
+        yn38a, det38a = _decl_read(c4, m4, r"candidate in a national or local",     decl_start, decl_stop)
+        yn38b, det38b = _decl_read(c4, m4, r"resigned from the government service", decl_start, decl_stop)
+        yn39,  det39  = _decl_read(c4, m4, r"immigrant or permanent resident",      decl_start, decl_stop)
+        yn40a, det40a = _decl_read(c4, m4, r"member of any indigenous group",       decl_start, decl_stop)
+        yn40b, det40b = _decl_read(c4, m4, r"person with disability",               decl_start, decl_stop)
+        yn40c, det40c = _decl_read(c4, m4, r"solo parent",                          decl_start, decl_stop)
+
+        data["declarations"] = {
+            # Yes/No answers (stored for form radio pre-selection)
+            "q34a": yn34a, "q34b": yn34b,
+            "q35a": yn35a, "q35b": yn35b,
+            "q36":  yn36,  "q37":  yn37,
+            "q38a": yn38a, "q38b": yn38b,
+            "q39":  yn39,
+            "q40a": yn40a, "q40b": yn40b, "q40c": yn40c,
+            # Detail fields (matched to DB column names autoFillForm4 reads)
+            "related_appointing_authority_3rd_degree": det34a,
+            "related_appointing_authority_4th_degree": det34b,
+            "administrative_offense_details":          det35a,
+            "criminal_charge_details":                 det35b,
+            "conviction_details":                     det36,
+            "separation_details":                     det37,
+            "election_candidacy_details":             det38a,
+            "resignation_campaign_details":           det38b,
+            "immigrant_status_country":               det39,
+            "indigenous_group":                       det40a,
+            "pwd_id":                                 det40b,
+            "solo_parent_id":                         det40c,
+        }
     else:
-        logger.warning("PDS parsed, but core personal info fields were blank.")
+        # Sheet C4 not found — leave declarations/references/gov_id empty
+        data["declarations"] = {}
+        data["references"]   = []
+        data["government_id"] = {
+            "type": "", "number": "", "date_place_of_issuance": ""
+        }
 
     return data

@@ -229,15 +229,16 @@
             <button type="button" class="add-btn" id="addTrainingBtn">➕ Add training / L&D</button>
 
             <div class="section-title">VIII. OTHER INFORMATION</div>
+            {% set oi = prefill.other_information or {} %}
             <div class="row">
                 <div class="col-md-4">
-                    <div class="field-group"><label>31. SKILLS & HOBBIES</label><textarea name="skills_hobbies" placeholder="..." rows="3">{{ prefill.other_information.skills|join(', ') if prefill and prefill.other_information.skills is iterable else '' }}</textarea></div>
+                    <div class="field-group"><label>31. SKILLS & HOBBIES</label><textarea name="skills_hobbies" placeholder="..." rows="3">{{ oi.skills|join(', ') if oi.skills is iterable else '' }}</textarea></div>
                 </div>
                 <div class="col-md-4">
-                    <div class="field-group"><label>32. DISTINCTIONS</label><textarea name="distinctions" placeholder="..." rows="3">{{ prefill.other_information.distinctions|join(', ') if prefill and prefill.other_information.distinctions is iterable else '' }}</textarea></div>
+                    <div class="field-group"><label>32. DISTINCTIONS</label><textarea name="distinctions" placeholder="..." rows="3">{{ oi.distinctions|join(', ') if oi.distinctions is iterable else '' }}</textarea></div>
                 </div>
                 <div class="col-md-4">
-                    <div class="field-group"><label>33. MEMBERSHIPS</label><textarea name="memberships" placeholder="..." rows="3">{{ prefill.other_information.memberships|join(', ') if prefill and prefill.other_information.memberships is iterable else '' }}</textarea></div>
+                    <div class="field-group"><label>33. MEMBERSHIPS</label><textarea name="memberships" placeholder="..." rows="3">{{ oi.memberships|join(', ') if oi.memberships is iterable else '' }}</textarea></div>
                 </div>
             </div>
 
@@ -254,9 +255,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Check if server requested to clear local storage (stale excel data)
+        {% if clear_ls %}
+        localStorage.removeItem('pds_prefill_data');
+        {% endif %}
+
         if (localStorage.getItem('pds_prefill_data')) {
             const banner = document.getElementById('manualBindBanner');
-            if (banner) banner.style.display = 'flex';
+            if (banner) banner.style.display = 'none';
+            autoFillForm3();
         }
     });
 

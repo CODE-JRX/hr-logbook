@@ -151,48 +151,78 @@
             </div>
             {% endif %}
 
+            {% set declarations = prefill.declarations or {} %}
+            {% set references = prefill.references or [] %}
+            {% set gov_id = prefill.government_id or {} %}
+
             <div class="section-title">IV. DECLARATIONS</div>
             <div class="question-block">
-                <div class="q-prompt">34. Are you related to any authority?</div>
+                <div class="q-prompt">34. a. Within the third degree?</div>
                 <div class="yes-no">
-                    <label><input name="q34a" type="radio" value="yes"/> Yes</label>
-                    <label><input checked="" name="q34a" type="radio" value="no"/> No</label>
+                    <label><input name="q34a" type="radio" value="yes" {% if declarations.related_appointing_authority_3rd_degree %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.related_appointing_authority_3rd_degree %}checked{% endif %} name="q34a" type="radio" value="no"/> No</label>
                 </div>
                 <div class="detail-line">
-                    <input name="details_34" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                    <input name="decl_related_3rd" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;" value="{{ declarations.related_appointing_authority_3rd_degree or '' }}"/>
+                </div>
+                <div class="q-prompt mt-3">b. Within the fourth degree?</div>
+                <div class="yes-no">
+                    <label><input name="q34b" type="radio" value="yes" {% if declarations.related_appointing_authority_4th_degree %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.related_appointing_authority_4th_degree %}checked{% endif %} name="q34b" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line">
+                    <input name="decl_related_4th" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;" value="{{ declarations.related_appointing_authority_4th_degree or '' }}"/>
                 </div>
             </div>
 
             <div class="question-block">
-                <div class="q-prompt">35. Administrative offense or criminally charged?</div>
+                <div class="q-prompt">35. a. Found guilty of any administrative offense?</div>
                 <div class="yes-no">
-                    <label><input name="q35a" type="radio" value="yes"/> Yes</label>
-                    <label><input checked="" name="q35a" type="radio" value="no"/> No</label>
+                    <label><input name="q35a" type="radio" value="yes" {% if declarations.administrative_offense_details %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.administrative_offense_details %}checked{% endif %} name="q35a" type="radio" value="no"/> No</label>
                 </div>
                 <div class="detail-line">
-                    <input name="details_35" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                    <input name="decl_admin_offense" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;" value="{{ declarations.administrative_offense_details or '' }}"/>
+                </div>
+                <div class="q-prompt mt-3">b. Criminally charged before any court?</div>
+                <div class="yes-no">
+                    <label><input name="q35b" type="radio" value="yes" {% if declarations.criminal_charge_details %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.criminal_charge_details %}checked{% endif %} name="q35b" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line gap-2">
+                    <input name="decl_criminal_charge" placeholder="If YES, give details" type="text" class="form-control mb-2" style="border-radius:20px; flex: 1 1 100%;" value="{{ declarations.criminal_charge_details or '' }}">
+                    <input name="decl_criminal_date" type="date" class="form-control" style="border-radius:20px; max-width: 200px;" title="Date Filed" value="{{ declarations.criminal_charge_date or '' }}">
+                    <input name="decl_criminal_status" placeholder="Status of Case" type="text" class="form-control" style="border-radius:20px; flex: 1;" value="{{ declarations.criminal_charge_status or '' }}">
                 </div>
             </div>
 
             <div class="question-block">
-                <div class="q-prompt">38. Candidate in election?</div>
+                <div class="q-prompt">38. a. Candidate in any election?</div>
                 <div class="yes-no">
-                    <label><input name="q38a" type="radio" value="yes"/> Yes</label>
-                    <label><input checked="" name="q38a" type="radio" value="no"/> No</label>
+                    <label><input name="q38a" type="radio" value="yes" {% if declarations.election_candidacy_details %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.election_candidacy_details %}checked{% endif %} name="q38a" type="radio" value="no"/> No</label>
                 </div>
                 <div class="detail-line">
-                    <input name="details_38a" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                    <input name="decl_election" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;" value="{{ declarations.election_candidacy_details or '' }}"/>
+                </div>
+                <div class="q-prompt mt-3">b. Resigned from service to campaign?</div>
+                <div class="yes-no">
+                    <label><input name="q38b" type="radio" value="yes" {% if declarations.resignation_campaign_details %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.resignation_campaign_details %}checked{% endif %} name="q38b" type="radio" value="no"/> No</label>
+                </div>
+                <div class="detail-line">
+                    <input name="decl_resignation_campaign" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;" value="{{ declarations.resignation_campaign_details or '' }}"/>
                 </div>
             </div>
 
             <div class="question-block">
                 <div class="q-prompt">39. Immigrant status?</div>
                 <div class="yes-no">
-                    <label><input name="q39" type="radio" value="yes"/> Yes</label>
-                    <label><input checked="" name="q39" type="radio" value="no"/> No</label>
+                    <label><input name="q39" type="radio" value="yes" {% if declarations.immigrant_status_country %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.immigrant_status_country %}checked{% endif %} name="q39" type="radio" value="no"/> No</label>
                 </div>
                 <div class="detail-line">
-                    <input name="details_39" placeholder="If YES, give country" type="text" class="form-control" style="border-radius:20px;"/>
+                    <input name="decl_immigrant_country" placeholder="If YES, give country" type="text" class="form-control" style="border-radius:20px;" value="{{ declarations.immigrant_status_country or '' }}"/>
                 </div>
             </div>
 
@@ -202,26 +232,26 @@
                     <div>
                         <label class="fw-bold small">IP Member?</label>
                         <div class="yes-no" style="gap: 15px; margin: 0.2rem 0;">
-                            <label><input name="q40a" type="radio" value="yes"/> Y</label>
-                            <label><input checked="" name="q40a" type="radio" value="no"/> N</label>
+                            <label><input name="q40a" type="radio" value="yes" {% if declarations.indigenous_group %}checked{% endif %}/> Y</label>
+                            <label><input {% if not declarations.indigenous_group %}checked{% endif %} name="q40a" type="radio" value="no"/> N</label>
                         </div>
-                        <input name="details_40a" placeholder="Specify" type="text" class="form-control form-control-sm" style="border-radius:15px;">
+                        <input name="decl_indigenous_group" placeholder="Specify" type="text" class="form-control form-control-sm" style="border-radius:15px;" value="{{ declarations.indigenous_group or '' }}">
                     </div>
                     <div>
                         <label class="fw-bold small">PWD?</label>
                         <div class="yes-no" style="gap: 15px; margin: 0.2rem 0;">
-                            <label><input name="q40b" type="radio" value="yes"/> Y</label>
-                            <label><input checked="" name="q40b" type="radio" value="no"/> N</label>
+                            <label><input name="q40b" type="radio" value="yes" {% if declarations.pwd_id %}checked{% endif %}/> Y</label>
+                            <label><input {% if not declarations.pwd_id %}checked{% endif %} name="q40b" type="radio" value="no"/> N</label>
                         </div>
-                        <input name="details_40b" placeholder="ID No." type="text" class="form-control form-control-sm" style="border-radius:15px;">
+                        <input name="decl_pwd_id" placeholder="ID No." type="text" class="form-control form-control-sm" style="border-radius:15px;" value="{{ declarations.pwd_id or '' }}">
                     </div>
                     <div>
                         <label class="fw-bold small">Solo Parent?</label>
                         <div class="yes-no" style="gap: 15px; margin: 0.2rem 0;">
-                            <label><input name="q40c" type="radio" value="yes"/> Y</label>
-                            <label><input checked="" name="q40c" type="radio" value="no"/> N</label>
+                            <label><input name="q40c" type="radio" value="yes" {% if declarations.solo_parent_id %}checked{% endif %}/> Y</label>
+                            <label><input {% if not declarations.solo_parent_id %}checked{% endif %} name="q40c" type="radio" value="no"/> N</label>
                         </div>
-                        <input name="details_40c" placeholder="ID No." type="text" class="form-control form-control-sm" style="border-radius:15px;">
+                        <input name="decl_solo_parent_id" placeholder="ID No." type="text" class="form-control form-control-sm" style="border-radius:15px;" value="{{ declarations.solo_parent_id or '' }}">
                     </div>
                 </div>
             </div>
@@ -229,22 +259,22 @@
             <div class="question-block">
                 <div class="q-prompt">36. Have you ever been convicted of any crime?</div>
                 <div class="yes-no">
-                    <label><input name="q36" type="radio" value="yes"/> Yes</label>
-                    <label><input checked="" name="q36" type="radio" value="no"/> No</label>
+                    <label><input name="q36" type="radio" value="yes" {% if declarations.conviction_details %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.conviction_details %}checked{% endif %} name="q36" type="radio" value="no"/> No</label>
                 </div>
                 <div class="detail-line">
-                    <input name="details_36" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                    <input name="decl_conviction" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;" value="{{ declarations.conviction_details or '' }}"/>
                 </div>
             </div>
 
             <div class="question-block">
                 <div class="q-prompt">37. Have you ever been separated from the service?</div>
                 <div class="yes-no">
-                    <label><input name="q37" type="radio" value="yes"/> Yes</label>
-                    <label><input checked="" name="q37" type="radio" value="no"/> No</label>
+                    <label><input name="q37" type="radio" value="yes" {% if declarations.separation_details %}checked{% endif %}/> Yes</label>
+                    <label><input {% if not declarations.separation_details %}checked{% endif %} name="q37" type="radio" value="no"/> No</label>
                 </div>
                 <div class="detail-line">
-                    <input name="details_37" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;"/>
+                    <input name="decl_separation" placeholder="If YES, give details" type="text" class="form-control" style="border-radius:20px;" value="{{ declarations.separation_details or '' }}"/>
                 </div>
             </div>
 
@@ -257,10 +287,11 @@
             </style>
             <div class="ref-grid">
                 {% for i in range(3) %}
+                {% set ref = references[i] if i < references|length else {} %}
                 <div class="ref-card">
-                    <input name="ref_name[]" placeholder="Full Name" type="text" class="form-control">
-                    <input name="ref_address[]" placeholder="Address" type="text" class="form-control">
-                    <input name="ref_tel_no[]" placeholder="Telephone/Mobile No." type="text" class="form-control">
+                    <input name="ref_name[]" placeholder="Full Name" type="text" class="form-control" value="{{ ref.name or '' }}">
+                    <input name="ref_address[]" placeholder="Address" type="text" class="form-control" value="{{ ref.address or '' }}">
+                    <input name="ref_tel_no[]" placeholder="Telephone/Mobile No." type="text" class="form-control" value="{{ ref.contact or '' }}">
                 </div>
                 {% endfor %}
             </div>
@@ -270,15 +301,15 @@
                 <div class="row align-items-center">
                     <div class="col-md-4">
                         <label class="fw-bold small">ID Type:</label>
-                        <input name="gov_issued_id" placeholder="Passport / GSIS / SSS" type="text" class="form-control mt-1" style="border-radius:20px;"/>
+                        <input name="gov_issued_id" placeholder="Passport / GSIS / SSS" type="text" class="form-control mt-1" style="border-radius:20px;" value="{{ gov_id.type or '' }}"/>
                     </div>
                     <div class="col-md-4">
                         <label class="fw-bold small">ID Number:</label>
-                        <input name="id_no" placeholder="Number" type="text" class="form-control mt-1" style="border-radius:20px;"/>
+                        <input name="id_no" placeholder="Number" type="text" class="form-control mt-1" style="border-radius:20px;" value="{{ gov_id.number or '' }}"/>
                     </div>
                     <div class="col-md-4">
                         <label class="fw-bold small">Date/Place of Issuance:</label>
-                        <input name="date_place_issuance" placeholder="dd/mm/yyyy / Place" type="text" class="form-control mt-1" style="border-radius:20px;"/>
+                        <input name="date_place_issuance" placeholder="dd/mm/yyyy / Place" type="text" class="form-control mt-1" style="border-radius:20px;" value="{{ gov_id.date_place_of_issuance or '' }}"/>
                     </div>
                 </div>
             </div>
@@ -341,6 +372,12 @@
 
             <div class="d-flex justify-content-between mt-4">
                 <a href="/employee/pds/3" class="btn btn-outline-secondary btn-step"><i class="fas fa-arrow-left me-2"></i> Previous Step</a>
+                
+                <!-- DEBUG: Dump form data to console -->
+                <button type="button" class="btn btn-warning btn-step me-2" onclick="debugFormData()" title="Debug: Check form values before submit">
+                    <i class="fas fa-bug me-1"></i> Debug Form
+                </button>
+                
                 <button class="btn btn-success btn-step" type="submit" id="submitPdsBtn">
                     {% if session.editing_employee_id %}
                         Update PDS Record <i class="fas fa-save ms-2"></i>
@@ -355,9 +392,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Check if server requested to clear local storage (stale excel data)
+        {% if clear_ls %}
+        localStorage.removeItem('pds_prefill_data');
+        {% endif %}
+
         if (localStorage.getItem('pds_prefill_data')) {
             const banner = document.getElementById('manualBindBanner');
-            if (banner) banner.style.display = 'flex';
+            if (banner) banner.style.display = 'none';
+            autoFillForm4();
         }
 
         const form = document.getElementById('pdsFinalForm');
@@ -417,6 +460,31 @@
         };
     });
 
+    function debugFormData() {
+        const formData = new FormData(document.getElementById('pdsFinalForm'));
+        const debugData = {};
+        for (let [key, value] of formData.entries()) {
+            debugData[key] = value;
+        }
+        console.log('=== PDS Page 4 Form Data Debug ===');
+        console.log('Declarations fields:', {
+            decl_related_3rd: debugData['decl_related_3rd'],
+            decl_related_4th: debugData['decl_related_4th'],
+            decl_admin_offense: debugData['decl_admin_offense'],
+            decl_criminal_charge: debugData['decl_criminal_charge'],
+            decl_conviction: debugData['decl_conviction'],
+            // ... add more as needed
+        });
+        console.log('Radio states:', {
+            q34a: debugData['q34a'],
+            q35a: debugData['q35a'],
+            // ... key radios
+        });
+        console.log('Full formData:', debugData);
+        console.log('Session editing ID:', {{ session.get('editing_employee_id', 'null') }});
+        alert('Check browser console (F12) for full form data dump. Fill a declaration field and click Debug again.');
+    }
+
     function autoFillForm4() {
         const raw = localStorage.getItem('pds_prefill_data');
         if (!raw) return showAlert("No Excel data found.", "No Data", "info-circle", "warning");
@@ -450,6 +518,48 @@
             if (t) t.value = gid.type || '';
             if (n) n.value = gid.number || '';
             if (i) i.value = gid.date_place_of_issuance || '';
+        }
+
+        // Declarations (page IV)
+        if (data.declarations) {
+            const dec = data.declarations;
+
+            // Helper: set a plain text/select element
+            const setVal = (name, v) => {
+                const el = document.querySelector(`[name="${name}"]`);
+                if (el) el.value = v || '';
+            };
+
+            // Helper: check the correct radio for Yes/No questions
+            const setRadio = (name, v) => {
+                if (!v) return;
+                const radios = document.querySelectorAll(`[name="${name}"]`);
+                radios.forEach(r => { if (r.value.toLowerCase() === v.toLowerCase()) r.checked = true; });
+            };
+
+            // Yes/No radio buttons (q34a … q40c)
+            setRadio('q34a', dec.q34a); setRadio('q34b', dec.q34b);
+            setRadio('q35a', dec.q35a); setRadio('q35b', dec.q35b);
+            setRadio('q36',  dec.q36);  setRadio('q37',  dec.q37);
+            setRadio('q38a', dec.q38a); setRadio('q38b', dec.q38b);
+            setRadio('q39',  dec.q39);
+            setRadio('q40a', dec.q40a); setRadio('q40b', dec.q40b); setRadio('q40c', dec.q40c);
+
+            // Detail text fields
+            setVal('decl_related_3rd',         dec.related_appointing_authority_3rd_degree);
+            setVal('decl_related_4th',         dec.related_appointing_authority_4th_degree);
+            setVal('decl_admin_offense',       dec.administrative_offense_details);
+            setVal('decl_criminal_charge',     dec.criminal_charge_details);
+            setVal('decl_criminal_date',       dec.criminal_charge_date);
+            setVal('decl_criminal_status',     dec.criminal_charge_status);
+            setVal('decl_conviction',          dec.conviction_details);
+            setVal('decl_separation',          dec.separation_details);
+            setVal('decl_election',            dec.election_candidacy_details);
+            setVal('decl_resignation_campaign',dec.resignation_campaign_details);
+            setVal('decl_immigrant_country',   dec.immigrant_status_country);
+            setVal('decl_indigenous_group',    dec.indigenous_group);
+            setVal('decl_pwd_id',              dec.pwd_id);
+            setVal('decl_solo_parent_id',      dec.solo_parent_id);
         }
 
         showAlert("PDS Page 4 (References & ID) fields populated!", "Form Populated", "magic", "success");

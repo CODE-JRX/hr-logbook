@@ -23,7 +23,7 @@ def get_employees_filtered(search=None, limit=25):
                 search_param = f"%{search}%"
                 params = [search_param, search_param, search_param, search_param]
             
-            query += " ORDER BY surname ASC LIMIT %s"
+            query += " ORDER BY id DESC LIMIT %s"
             params.append(int(limit))
             
             cursor.execute(query, params)
@@ -34,8 +34,13 @@ def get_employees_filtered(search=None, limit=25):
 
 def delete_employee(id):
     try:
+        import os
         with get_db_cursor(commit=True) as cursor:
-            # Delete from dependent tables first due to foreign key constraints
+            # 1. Fetch file paths before deletion
+            cursor.execute("SELECT pds_excel_path, signature_path FROM pds_personal_information WHERE id = %s", (id,))
+            emp = cursor.fetchone()
+            
+            # 2. Delete from dependent tables first due to foreign key constraints
             tables = [
                 'pds_spouse', 'pds_parents', 'pds_children', 'pds_education',
                 'pds_work_experience', 'pds_civil_service_eligibility', 'pds_voluntary_work',
@@ -44,7 +49,30 @@ def delete_employee(id):
             for table in tables:
                 cursor.execute(f"DELETE FROM {table} WHERE personal_info_id = %s", (id,))
             
+            # 3. Delete from main table
             cursor.execute("DELETE FROM pds_personal_information WHERE id = %s", (id,))
+            
+            # 4. Clean up filesystem
+            if emp:
+                file_fields = ['pds_excel_path', 'signature_path', 'photo', 'thumbmark', 'signature']
+                for file_field in file_fields:
+                    path = emp.get(file_field)
+                    if path:
+                        # Convert web path to absolute disk path if it's relative to static
+                        if path.startswith('/static/') or path.startswith('static/'):
+                            # remove leading slash for joining
+                            rel_path = path if not path.startswith('/') else path[1:]
+                            abs_path = os.path.join(os.getcwd(), rel_path)
+                        else:
+                            abs_path = path # assume absolute or direct relative
+                            
+                        try:
+                            if os.path.exists(abs_path) and os.path.isfile(abs_path):
+                                os.remove(abs_path)
+                                logger.info(f"Deleted file: {abs_path}")
+                        except Exception as fe:
+                            logger.error(f"Failed to delete file {abs_path}: {fe}")
+
             return True
     except Exception as e:
         logger.error(f"Error deleting employee {id}: {e}")
@@ -101,6 +129,11 @@ def get_employee_full_pds(id):
             
             cursor.execute("SELECT * FROM pds_oath WHERE personal_info_id = %s", (id,))
             data['oath'] = cursor.fetchone()
+            
+            # Debug: Count declarations for verification
+            cursor.execute("SELECT COUNT(*) as decl_count FROM pds_declarations WHERE personal_info_id = %s", (id,))
+            decl_count = cursor.fetchone()
+            logger.info(f"Employee {id} has {decl_count['decl_count'] if decl_count else 0} declarations records")
             
             return data
     except Exception as e:

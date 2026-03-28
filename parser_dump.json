@@ -1,0 +1,50 @@
+{
+  "references": [
+    {
+      "name": "NOEL B. BEGNALEN",
+      "address": "NOEL B. BEGNALEN",
+      "contact": "09177945744"
+    },
+    {
+      "name": "CHRISTOPHER JOHN R. LLANDA",
+      "address": "CHRISTOPHER JOHN R. LLANDA",
+      "contact": "09067844957"
+    },
+    {
+      "name": "EXCEL PHILIP B. GUIDANG",
+      "address": "EXCEL PHILIP B. GUIDANG",
+      "contact": "09951263154"
+    }
+  ],
+  "government_id": {
+    "type": "",
+    "number": "",
+    "date_place_of_issuance": ""
+  },
+  "declarations": {
+    "q34a": "",
+    "q34b": "",
+    "q35a": "",
+    "q35b": "",
+    "q36": "",
+    "q37": "",
+    "q38a": "",
+    "q38b": "",
+    "q39": "",
+    "q40a": "",
+    "q40b": "",
+    "q40c": "",
+    "related_appointing_authority_3rd_degree": "",
+    "related_appointing_authority_4th_degree": "",
+    "administrative_offense_details": "",
+    "criminal_charge_details": "",
+    "conviction_details": "",
+    "separation_details": "",
+    "election_candidacy_details": "",
+    "resignation_campaign_details": "",
+    "immigrant_status_country": "",
+    "indigenous_group": "",
+    "pwd_id": "",
+    "solo_parent_id": ""
+  }
+}

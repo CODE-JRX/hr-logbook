@@ -722,13 +722,31 @@
 
       // Delete confirmation modal
       let deleteId = null;
+      let deleteType = null;
+      
       window.confirmDelete = function (button) {
         deleteId = button.getAttribute('data-id');
+        deleteType = button.getAttribute('data-type') || 'client'; // default to client
         const name = button.getAttribute('data-name');
         const clientNameElement = document.getElementById('clientName');
+        const deleteModalLabel = document.getElementById('deleteModalLabel');
+        const modalMessage = document.querySelector('#deleteModal .modal-body p.mb-0');
+        const modalWarning = document.querySelector('#deleteModal .modal-body small.text-danger');
+
         if (clientNameElement) {
           clientNameElement.textContent = name;
         }
+
+        if (deleteType === 'employee') {
+          if (deleteModalLabel) deleteModalLabel.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete Employee';
+          if (modalMessage) modalMessage.innerHTML = 'Delete employee <strong>' + name + '</strong>?';
+          if (modalWarning) modalWarning.textContent = 'This action will also delete all their PDS data and cannot be undone.';
+        } else {
+          if (deleteModalLabel) deleteModalLabel.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete';
+          if (modalMessage) modalMessage.innerHTML = 'Delete <strong>' + name + '</strong>?';
+          if (modalWarning) modalWarning.textContent = 'This action cannot be undone.';
+        }
+
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
         deleteModal.show();
       };
@@ -753,7 +771,11 @@
         confirmDeleteBtn.addEventListener('click', function () {
           this.blur(); // Explicit blur to prevent accessibility warning during navigation/hide
           if (deleteId) {
-            window.location.href = '/delete/' + deleteId;
+            if (deleteType === 'employee') {
+              window.location.href = '/admin/employee/delete/' + deleteId;
+            } else {
+              window.location.href = '/delete/' + deleteId;
+            }
           }
         });
       }
@@ -868,7 +890,7 @@
     // Global Modal Focus Management to fix aria-hidden conflict
     document.addEventListener('DOMContentLoaded', function () {
       const modals = document.querySelectorAll('.modal');
-      modals.forEach(modal => {
+      modals.forEach(function(modal) {
         // Set inert on modals that are not currently shown
         if (!modal.classList.contains('show')) {
           modal.setAttribute('inert', '');
@@ -891,14 +913,16 @@
       });
 
       // Unified Flash Message Handling via Modal
-      {% with messages = get_flashed_messages() %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
       const successModalEl = document.getElementById('successModal');
       const successMsgEl = document.getElementById('successMessage');
       if (successModalEl && successMsgEl) {
-        // Use JSON.parse with escaped JSON string to avoid Prettier formatting issues
-        const allMessages = JSON.parse('{{ messages | tojson | forceescape }}');
-        successMsgEl.textContent = allMessages.join('\n');
+        let msgHtml = '';
+        {% for category, message in messages %}
+          msgHtml += '<div class="alert alert-{{ category if category != "message" else "info" }} mb-2">{{ message | replace("'", "\\'") }}</div>';
+        {% endfor %}
+        successMsgEl.innerHTML = msgHtml;
 
         const successModal = new bootstrap.Modal(successModalEl);
         successModal.show();

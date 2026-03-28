@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}View Employee — ASIST/UA Logbook{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <h4 class="mb-1">Personal Information</h4>
+      <p class="text-muted mb-3">Employee ID: {{ pds.personal_info.id }}</p>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <strong>Name</strong><br>
+          {{ pds.personal_info.surname }}, {{ pds.personal_info.first_name }} {{ pds.personal_info.middle_name or '' }}
+        </div>
+        <div class="col-md-4">
+          <strong>Birth</strong><br>
+          {{ pds.personal_info.date_of_birth or 'N/A' }} — {{ pds.personal_info.place_of_birth or 'N/A' }}
+        </div>
+        <div class="col-md-4">
+          <strong>Contact</strong><br>
+          {{ pds.personal_info.mobile_no or 'N/A' }} · {{ pds.personal_info.email or 'N/A' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Children</h5>
+      {% if pds.children %}
+      <ul class="list-group list-group-flush">
+        {% for c in pds.children %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ c.full_name or 'Unnamed' }}
+            <span class="text-muted">{{ c.date_of_birth or 'N/A' }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-muted mb-0">No children recorded.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Education</h5>
+      {% if pds.education %}
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead><tr><th>Level</th><th>School</th><th>Degree</th><th>From</th><th>To</th></tr></thead>
+          <tbody>
+            {% for e in pds.education %}
+            <tr>
+              <td>{{ e.level }}</td>
+              <td>{{ e.school_name }}</td>
+              <td>{{ e.degree_course }}</td>
+              <td>{{ e.from_year }}</td>
+              <td>{{ e.to_year }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No education records.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Work Experience</h5>
+      {% if pds.work_experience %}
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead><tr><th>From</th><th>To</th><th>Position</th><th>Department/Agency</th><th>Status</th><th>Gov Service</th></tr></thead>
+          <tbody>
+            {% for w in pds.work_experience %}
+            <tr>
+              <td>{{ w.date_from }}</td>
+              <td>{{ w.date_to }}</td>
+              <td>{{ w.position_title }}</td>
+              <td>{{ w.department_agency_company }}</td>
+              <td>{{ w.status_of_appointment }}</td>
+              <td>{{ w.gov_service }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No work experience recorded.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <a href="{{ url_for('employee_bp.manage_employees') }}" class="btn btn-outline-secondary">Back to Manage Employees</a>
+</div>
+{% endblock %}

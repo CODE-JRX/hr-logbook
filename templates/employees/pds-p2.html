@@ -272,9 +272,15 @@
 <!-- Floating FAB removed - using Banner at top instead -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Check if server requested to clear local storage (stale excel data)
+        {% if clear_ls %}
+        localStorage.removeItem('pds_prefill_data');
+        {% endif %}
+
         if (localStorage.getItem('pds_prefill_data')) {
             const banner = document.getElementById('manualBindBanner');
-            if (banner) banner.style.display = 'flex';
+            if (banner) banner.style.display = 'none';
+            autoFillForm2();
         }
     });
 
