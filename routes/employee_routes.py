@@ -96,58 +96,12 @@ def pds_test():
     """Standalone page to test PDS Excel parsing — shows extracted JSON."""
     return render_template('admin/pds_test.html')
 
-@employee_bp.route('/employee/pds/1', methods=['GET', 'POST'])
+@employee_bp.route('/employee/pds/1', methods=['GET'])
 def pds_p1():
-    if request.method == 'POST':
-        session['pds_p1'] = request.form.to_dict(flat=False)
-        return redirect(url_for('employee_bp.pds_p2'))
     prefill = session.get('pds_excel_prefill', {})
     clear_ls = session.pop('clear_local_storage', False)
     return render_template('employees/pds-p1.html', prefill=prefill, clear_ls=clear_ls)
 
-@employee_bp.route('/employee/pds/2', methods=['GET', 'POST'])
-def pds_p2():
-    if request.method == 'POST':
-        session['pds_p2'] = request.form.to_dict(flat=False)
-        return redirect(url_for('employee_bp.pds_p3'))
-    prefill = session.get('pds_excel_prefill', {})
-    clear_ls = session.pop('clear_local_storage', False)
-    return render_template('employees/pds-p2.html', prefill=prefill, clear_ls=clear_ls)
-
-@employee_bp.route('/employee/pds/3', methods=['GET', 'POST'])
-def pds_p3():
-    if request.method == 'POST':
-        session['pds_p3'] = request.form.to_dict(flat=False)
-        return redirect(url_for('employee_bp.pds_p4'))
-    prefill = session.get('pds_excel_prefill', {})
-    clear_ls = session.pop('clear_local_storage', False)
-    return render_template('employees/pds-p3.html', prefill=prefill, clear_ls=clear_ls)
-
-@employee_bp.route('/employee/pds/4', methods=['GET', 'POST'])
-def pds_p4():
-    if request.method == 'POST':
-        form_data = request.form.to_dict(flat=False)
-        
-        # Handle signature upload
-        if 'signature_image' in request.files:
-            file = request.files['signature_image']
-            if file and file.filename != '':
-                upload_dir = 'static/uploads/signatures'
-                if not os.path.exists(upload_dir):
-                    os.makedirs(upload_dir)
-                
-                ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'png'
-                filename = f"sig_{int(time.time())}_{secure_filename(file.filename)}"
-                filepath = os.path.join(upload_dir, filename)
-                file.save(filepath)
-                # Store path in form data so it's picked up by submit logic
-                form_data['signature_path'] = [f"/static/uploads/signatures/{filename}"]
-
-        session['pds_p4'] = form_data
-        return redirect(url_for('employee_bp.pds_submit'))
-    prefill = session.get('pds_excel_prefill', {})
-    clear_ls = session.pop('clear_local_storage', False)
-    return render_template('employees/pds-p4.html', prefill=prefill, clear_ls=clear_ls)
 
 def _coerce_first(val):
     """Return the first element if list-like, otherwise the value itself."""
@@ -508,8 +462,7 @@ def add_employee_start():
     session.pop('editing_employee_id', None)
     session.pop('pds_excel_prefill', None)
     # Clear any partially filled form pages in session
-    for p in ['pds_p1', 'pds_p2', 'pds_p3', 'pds_p4']:
-        session.pop(p, None)
+    session.pop('pds_p1', None)
     session['clear_local_storage'] = True
     return redirect(url_for('employee_bp.pds_p1'))
 
@@ -526,8 +479,7 @@ def edit_employee_start(id):
     session['editing_employee_id'] = id
     
     # Clear any previous form-step session data to avoid mixed states
-    for k in ('pds_p1', 'pds_p2', 'pds_p3', 'pds_p4'):
-        session.pop(k, None)
+    session.pop('pds_p1', None)
         
     session['clear_local_storage'] = True
     return redirect(url_for('employee_bp.pds_p1', is_edit=1))
@@ -543,10 +495,6 @@ def admin_delete_employee(id):
 @employee_bp.route('/employee/pds/submit', methods=['GET', 'POST'])
 def pds_submit():
     data = {}
-    if 'pds_p1' in session: data.update(session['pds_p1'])
-    if 'pds_p2' in session: data.update(session['pds_p2'])
-    if 'pds_p3' in session: data.update(session['pds_p3'])
-    if 'pds_p4' in session: data.update(session['pds_p4'])
     if request.method == 'POST':
         data.update(request.form.to_dict(flat=False))
         
@@ -559,6 +507,15 @@ def pds_submit():
             personal_info_id = session.get('editing_employee_id')
             is_edit = personal_info_id is not None
             
+            # Check for PDS file requirement on new employee
+            temp_path = session.get('pds_excel_temp_path', None)
+            if not is_edit and not temp_path:
+                msg = "A PDS Excel file must be uploaded for new employees."
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+                    return jsonify({'success': False, 'error': msg}), 400
+                flash(msg, 'danger')
+                return redirect(url_for('employee_bp.pds_p1'))
+            
             # 1. pds_personal_information
             pinfo_data = build_personal_info_payload(data)
             cols = list(pinfo_data.keys())
@@ -568,195 +525,30 @@ def pds_submit():
                 if cols:
                     sets = ", ".join([f"{c} = %s" for c in cols])
                     cursor.execute(f"UPDATE pds_personal_information SET {sets} WHERE id = %s", vals + [personal_info_id])
-                # Clear all related tables to re-insert fresh data (Delete & Re-insert strategy)
-                tables_to_clear = [
-                    'pds_spouse', 'pds_parents', 'pds_children', 'pds_education',
-                    'pds_work_experience', 'pds_civil_service_eligibility', 'pds_voluntary_work',
-                    'pds_training', 'pds_other_information', 'pds_declarations', 'pds_references', 'pds_oath'
-                ]
-                for t in tables_to_clear:
-                    cursor.execute(f"DELETE FROM {t} WHERE personal_info_id = %s", (personal_info_id,))
             else:
                 placeholders = ', '.join(['%s'] * len(cols))
                 cursor.execute(f"INSERT INTO pds_personal_information ({', '.join(cols)}) VALUES ({placeholders})", vals)
                 personal_info_id = cursor.lastrowid
-            # 2. Insert single-row tables (schema-matched automatically)
-            single_row_tables = [
-                'pds_spouse', 'pds_parents', 'pds_other_information', 'pds_declarations', 'pds_oath'
-            ]
-            for table in single_row_tables:
-                # Custom mapping for spouse/parents because field names differ from DB columns
-                if table == 'pds_spouse':
-                    spouse_map = {
-                        'surname': 'spouse_surname',
-                        'first_name': 'spouse_first_name',
-                        'middle_name': 'spouse_middle_name',
-                        'name_extension': 'spouse_name_extension',
-                        'occupation': 'spouse_occupation',
-                        'employer': 'spouse_employer',
-                        'business_address': 'spouse_biz_address',
-                        'telephone_no': 'spouse_tel_no',
-                    }
-                    table_data = {col: _coerce_first(data.get(src)) for col, src in spouse_map.items()}
-                elif table == 'pds_parents':
-                    parents_map = {
-                        'father_surname': 'father_surname',
-                        'father_first_name': 'father_first_name',
-                        'father_middle_name': 'father_middle_name',
-                        'father_name_extension': 'father_name_extension',
-                        'mother_maiden_surname': 'mother_surname',
-                        'mother_first_name': 'mother_first_name',
-                        'mother_middle_name': 'mother_middle_name',
-                    }
-                    table_data = {col: _coerce_first(data.get(src)) for col, src in parents_map.items()}
-                elif table == 'pds_other_information':
-                    other_map = {
-                        'special_skills_hobbies': 'skills_hobbies',
-                        'non_academic_distinctions': 'distinctions',
-                        'membership_associations': 'memberships',
-                    }
-                    table_data = {col: _coerce_first(data.get(src)) for col, src in other_map.items()}
-                elif table == 'pds_declarations':
-                    declarations_map = {
-                        # Yes/No radio answers (stored for reporting)
-                        'q34a_answer': 'q34a',
-                        'q34b_answer': 'q34b',
-                        'q35a_answer': 'q35a',
-                        'q35b_answer': 'q35b',
-                        'q36_answer':  'q36',
-                        'q37_answer':  'q37',
-                        'q38a_answer': 'q38a',
-                        'q38b_answer': 'q38b',
-                        'q39_answer':  'q39',
-                        'q40a_answer': 'q40a',
-                        'q40b_answer': 'q40b',
-                        'q40c_answer': 'q40c',
-                        # Detail text fields
-                        'related_appointing_authority_3rd_degree': 'decl_related_3rd',
-                        'related_appointing_authority_4th_degree': 'decl_related_4th',
-                        'administrative_offense_details': 'decl_admin_offense',
-                        'criminal_charge_details': 'decl_criminal_charge',
-                        'criminal_charge_date': 'decl_criminal_date',
-                        'criminal_charge_status': 'decl_criminal_status',
-                        'conviction_details': 'decl_conviction',
-                        'separation_details': 'decl_separation',
-                        'election_candidacy_details': 'decl_election',
-                        'resignation_campaign_details': 'decl_resignation_campaign',
-                        'immigrant_status_country': 'decl_immigrant_country',
-                        'indigenous_group': 'decl_indigenous_group',
-                        'pwd_id': 'decl_pwd_id',
-                        'solo_parent_id': 'decl_solo_parent_id',
-                    }
-                    table_data = {col: _coerce_first(data.get(src)) for col, src in declarations_map.items()}
-                    logger.info(f"Inserting declarations for personal_info_id={personal_info_id}: {table_data}")
-                elif table == 'pds_oath':
-
-                    oath_map = {
-                        'government_id': 'gov_issued_id',
-                        'id_number': 'id_no',
-                        'issuance_date_place': 'date_place_issuance',
-                        'signature': 'signature_path',
-                        'date_signed': 'date_signed',
-                        'thumbmark': 'thumbmark',
-                    }
-                    table_data = {col: _coerce_first(data.get(src)) for col, src in oath_map.items()}
-                else:
-                    table_data = match_data_to_schema(cursor, table, data)
-                # Always insert declarations even if sparse (NULLs allowed)
-                if table == 'pds_declarations' or any((v is not None and str(v).strip() != '') for v in table_data.values()):
-                    table_data['personal_info_id'] = personal_info_id
-                    t_cols = list(table_data.keys())
-                    t_vals = list(table_data.values())
-                    t_placeholders = ', '.join(['%s'] * len(t_cols))
-                    cursor.execute(f"INSERT INTO {table} ({', '.join(t_cols)}) VALUES ({t_placeholders})", t_vals)
-
-            # 3. Insert multi-row tables — explicit form-field→DB-column mappings
-            insert_rows_with_mapping(cursor, 'pds_children', data, {
-                'full_name': 'child_fullname[]',
-                'date_of_birth': 'child_dob[]'
-            }, personal_info_id)
-
-            insert_rows_with_mapping(cursor, 'pds_education', data, {
-                'level': 'level[]',
-                'school_name': 'name_of_school[]',
-                'degree_course': 'basic_education_degree_course[]',
-                'from_year': 'period_from[]',
-                'to_year': 'period_to[]',
-                'highest_level_units': 'highest_level_units_earned[]',
-                'year_graduated': 'year_graduated[]',
-                'scholarship_honors': 'scholarship_academic_honors[]'
-            }, personal_info_id)
-
-            insert_rows_with_mapping(cursor, 'pds_civil_service_eligibility', data, {
-                'eligibility': 'eligibility[]',
-                'rating': 'elig_rating[]',
-                'date_of_exam': 'elig_date[]',
-                'place_of_exam': 'elig_place[]',
-                'license_number': 'elig_license_no[]',
-                'valid_until': 'elig_validity[]'
-            }, personal_info_id)
-
-            insert_rows_with_mapping(cursor, 'pds_work_experience', data, {
-                'date_from': 'work_from[]',
-                'date_to': 'work_to[]',
-                'position_title': 'work_position[]',
-                'department_agency_company': 'work_company[]',
-                'monthly_salary': 'work_monthly_salary[]',
-                'salary_job_pay_grade': 'work_salary_grade[]',
-                'status_of_appointment': 'work_status[]',
-                'gov_service': 'work_govt_service[]'
-            }, personal_info_id)
-            # Set is_present flag for work rows where date_to was 'PRESENT'
-            _fix_work_is_present(cursor, personal_info_id, data)
-
-            insert_rows_with_mapping(cursor, 'pds_voluntary_work', data, {
-                'organization': 'voluntary_organization[]',
-                'date_from': 'voluntary_period_from[]',
-                'date_to': 'voluntary_period_to[]',
-                'hours': 'voluntary_hours[]',
-                'position': 'voluntary_position[]'
-            }, personal_info_id)
-
-            insert_rows_with_mapping(cursor, 'pds_training', data, {
-                'title': 'training_title[]',
-                'date_from': 'training_period_from[]',
-                'date_to': 'training_period_to[]',
-                'hours': 'training_hours[]',
-                'type': 'training_type[]',
-                'conducted_by': 'training_sponsor[]'
-            }, personal_info_id)
-
-            insert_rows_with_mapping(cursor, 'pds_references', data, {
-                'full_name': 'ref_name[]',
-                'address': 'ref_address[]',
-                'contact': 'ref_tel_no[]'
-            }, personal_info_id)
-                
+            
             # Session cleanup only on full success
-            session.pop('pds_p1', None)
-            session.pop('pds_p2', None)
-            session.pop('pds_p3', None)
-            session.pop('pds_p4', None)
             session.pop('editing_employee_id', None)
             session.pop('pds_excel_prefill', None)
-            session.pop('pds_excel_temp_path', None)
             
             # Move temp Excel file to permanent location if it exists
-            temp_path = session.pop('pds_excel_temp_path', None)
-            if temp_path and os.path.exists(temp_path):
+            # BUGFIX: do not pop early, otherwise temp_path receives None
+            final_temp_path = session.pop('pds_excel_temp_path', None)
+            if final_temp_path and os.path.exists(final_temp_path):
                 permanent_dir = 'static/uploads/employee_pds'
                 if not os.path.exists(permanent_dir):
                     os.makedirs(permanent_dir)
-                ext = temp_path.rsplit('.', 1)[1].lower() if '.' in temp_path else 'xlsx'
+                ext = final_temp_path.rsplit('.', 1)[1].lower() if '.' in final_temp_path else 'xlsx'
                 final_filename = f"pds_{personal_info_id}_{int(time.time())}.{ext}"
                 final_path = os.path.join(permanent_dir, final_filename)
-                os.rename(temp_path, final_path)
+                os.rename(final_temp_path, final_path)
                 
                 # Update DB with final path
                 db_path = f"/static/uploads/employee_pds/{final_filename}"
                 cursor.execute("UPDATE pds_personal_information SET pds_excel_path = %s WHERE id = %s", (db_path, personal_info_id))
-            
-            session.pop('pds_excel_prefill', None)
             
             msg = "PDS record updated successfully!" if is_edit else "PDS successfully submitted!"
             
@@ -863,202 +655,4 @@ def debug_excel():
 
 
 
-@employee_bp.route('/api/employees/pds', methods=['POST'])
-def api_submit_pds_json():
-    """
-    Accepts the parsed JSON structure from the Excel import and inserts
-    it into the database tables.
-    """
-    payload = request.get_json()
-    if not payload or 'pdsData' not in payload:
-        return jsonify({'error': 'No pdsData in request body'}), 400
 
-    pds = payload['pdsData']
-
-    try:
-        with get_db_cursor(commit=True) as cursor:
-
-            # ── 1. personal_information ──────────────────────────────────
-            pi = pds.get('personal_info', {})
-            res = pi.get('residential_address', {})
-            perm = pi.get('permanent_address', {})
-            cursor.execute("""
-                INSERT INTO pds_personal_information
-                (surname, first_name, middle_name, name_extension, date_of_birth,
-                 place_of_birth, civil_status, height, weight, blood_type,
-                 gsis_no, pagibig_no, philhealth_no, sss_no, tin_no, agency_employee_no,
-                 mobile_no, email,
-                 res_house_no, res_street, res_barangay, res_city, res_province, res_zip_code,
-                 perm_house_no, perm_street, perm_barangay, perm_city, perm_province, perm_zip_code)
-                VALUES (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s,%s, %s,%s, %s,%s,%s,%s,%s,%s, %s,%s,%s,%s,%s,%s)
-            """, (
-                pi.get('surname'), pi.get('first_name'), pi.get('middle_name'), pi.get('name_extension'),
-                pi.get('date_of_birth') or None, pi.get('place_of_birth'), pi.get('civil_status'),
-                pi.get('height'), pi.get('weight'), pi.get('blood_type'),
-                pi.get('gsis_no'), pi.get('pagibig_no'), pi.get('philhealth_no'),
-                pi.get('sss_no'), pi.get('tin_no'), pi.get('agency_employee_no'),
-                pi.get('mobile_no'), pi.get('email_address'),
-                res.get('house_no'), res.get('street'), res.get('barangay'), res.get('city'), res.get('province'), res.get('zip_code'),
-                perm.get('house_no'), perm.get('street'), perm.get('barangay'), perm.get('city'), perm.get('province'), perm.get('zip_code'),
-            ))
-            personal_info_id = cursor.lastrowid
-
-            # ── 2. spouse ────────────────────────────────────────────────
-            fb = pds.get('family_background', {})
-            spouse = fb.get('spouse', {})
-            if any(spouse.values()):
-                cursor.execute("""
-                    INSERT INTO pds_spouse (personal_info_id, surname, first_name, middle_name,
-                        occupation, employer, business_address, telephone_no)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-                """, (personal_info_id, spouse.get('surname'), spouse.get('first_name'),
-                      spouse.get('middle_name'), spouse.get('occupation'),
-                      spouse.get('employer_name'), spouse.get('business_address'), spouse.get('telephone_no')))
-
-            # ── 3. parents ───────────────────────────────────────────────
-            father = fb.get('father', {})
-            mother = fb.get('mother', {})
-            if any(father.values()) or any(mother.values()):
-                cursor.execute("""
-                    INSERT INTO pds_parents (personal_info_id,
-                        father_surname, father_first_name, father_middle_name,
-                        mother_maiden_surname, mother_first_name, mother_middle_name)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s)
-                """, (personal_info_id,
-                      father.get('surname'), father.get('first_name'), father.get('middle_name'),
-                      mother.get('maiden_surname'), mother.get('first_name'), mother.get('middle_name')))
-
-            # ── 4. declarations ──────────────────────────────────────────
-            decl = pds.get('declarations', {}) or {}
-            if any(decl.values()):
-                cursor.execute("""
-                    INSERT INTO pds_declarations
-                    (personal_info_id, related_appointing_authority_3rd_degree, related_appointing_authority_4th_degree,
-                     administrative_offense_details, criminal_charge_details, criminal_charge_date, criminal_charge_status,
-                     conviction_details, separation_details, election_candidacy_details, resignation_campaign_details,
-                     immigrant_status_country, indigenous_group, pwd_id, solo_parent_id)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                """, (
-                    personal_info_id,
-                    decl.get('related_appointing_authority_3rd_degree'),
-                    decl.get('related_appointing_authority_4th_degree'),
-                    decl.get('administrative_offense_details'),
-                    decl.get('criminal_charge_details'),
-                    _clean_date(decl.get('criminal_charge_date')),
-                    decl.get('criminal_charge_status'),
-                    decl.get('conviction_details'),
-                    decl.get('separation_details'),
-                    decl.get('election_candidacy_details'),
-                    decl.get('resignation_campaign_details'),
-                    decl.get('immigrant_status_country'),
-                    decl.get('indigenous_group'),
-                    decl.get('pwd_id'),
-                    decl.get('solo_parent_id')
-                ))
-
-            # ── 5. children ──────────────────────────────────────────────
-            for child in fb.get('children', []):
-                cursor.execute("""
-                    INSERT INTO pds_children (personal_info_id, full_name, date_of_birth)
-                    VALUES (%s,%s,%s)
-                """, (personal_info_id, child.get('name'), child.get('date_of_birth') or None))
-
-            # ── 5. education ─────────────────────────────────────────────
-            for edu in pds.get('educational_background', []):
-                def _year(val):
-                    import re
-                    if val is None:
-                        return None
-                    if isinstance(val, (int, float)):
-                        try:
-                            return int(val)
-                        except Exception:
-                            return None
-                    s = str(val)
-                    m = re.search(r"(\\d{4})", s)
-                    return m.group(1) if m else None
-                cursor.execute("""
-                    INSERT INTO pds_education (personal_info_id, level, school_name, degree_course,
-                        from_year, to_year, highest_level_units, year_graduated, scholarship_honors)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                """, (personal_info_id, edu.get('level'), edu.get('school_name'), edu.get('degree'),
-                      _year(edu.get('from')), _year(edu.get('to')), edu.get('highest_level'),
-                      _year(edu.get('year_graduated')), edu.get('scholarships')))
-
-            # ── 6. civil service eligibility ─────────────────────────────
-            for elig in pds.get('civil_service_eligibility', []):
-                cursor.execute("""
-                    INSERT INTO pds_civil_service_eligibility
-                    (personal_info_id, eligibility, rating, exam_date, exam_place, license_number, license_date)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s)
-                """, (personal_info_id, elig.get('eligibility'), elig.get('rating'),
-                      elig.get('exam_date') or None, elig.get('exam_place'),
-                      elig.get('license_number'), elig.get('license_date') or None))
-
-            # ── 7. work experience ───────────────────────────────────────
-            for work in pds.get('work_experience', []):
-                to_val = work.get('to')
-                if isinstance(to_val, str) and to_val.strip().upper() == 'PRESENT':
-                    to_val = None
-                cursor.execute("""
-                    INSERT INTO pds_work_experience
-                    (personal_info_id, date_from, date_to, position_title, department_agency_company,
-                     status_of_appointment, gov_service)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s)
-                """, (personal_info_id, work.get('from') or None, to_val,
-                      work.get('position'), work.get('department'),
-                      work.get('appointment_status'), work.get('govt_service')))
-
-            # ── 8. voluntary work ────────────────────────────────────────
-            for vol in pds.get('voluntary_work', []):
-                def _d(v): return _clean_date(v)
-                cursor.execute("""
-                    INSERT INTO pds_voluntary_work
-                    (personal_info_id, organization, date_from, date_to, hours, position)
-                    VALUES (%s,%s,%s,%s,%s,%s)
-                """, (personal_info_id, vol.get('organization'),
-                      _d(vol.get('from')), _d(vol.get('to')),
-                      vol.get('hours'), vol.get('position')))
-
-            # ── 9. training / L&D ────────────────────────────────────────
-            for trn in pds.get('training_programs', []):
-                def _d(v): return _clean_date(v)
-                cursor.execute("""
-                    INSERT INTO pds_training
-                    (personal_info_id, title, date_from, date_to, hours, type, conducted_by)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s)
-                """, (personal_info_id, trn.get('title'),
-                      _d(trn.get('from')), _d(trn.get('to')),
-                      trn.get('hours'), trn.get('type'), trn.get('conducted_by')))
-
-            # ── 10. other information ─────────────────────────────────────
-            oi = pds.get('other_information', {})
-            cursor.execute("""
-                INSERT INTO pds_other_information
-                (personal_info_id, special_skills_hobbies, non_academic_distinctions, membership_associations)
-                VALUES (%s,%s,%s,%s)
-            """, (personal_info_id,
-                  ', '.join(oi.get('skills', [])),
-                  ', '.join(oi.get('distinctions', [])),
-                  ', '.join(oi.get('memberships', []))))
-
-            # 11. references
-            for ref in pds.get('references', []):
-                cursor.execute("""
-                    INSERT INTO pds_references (personal_info_id, full_name, address, contact)
-                    VALUES (%s,%s,%s,%s)
-                """, (personal_info_id, ref.get('name'), ref.get('address'), ref.get('contact')))
-
-            # 12. government ID / oath block
-            gid = pds.get('government_id', {}) or {}
-            if any(gid.values()):
-                cursor.execute("""
-                    INSERT INTO pds_oath (personal_info_id, government_id, id_number, issuance_date_place)
-                    VALUES (%s,%s,%s,%s)
-                """, (personal_info_id, gid.get('type'), gid.get('number'), gid.get('date_place_of_issuance')))
-
-        return jsonify({'success': True, 'personal_info_id': personal_info_id})
-
-    except Exception as e:
-        logger.error(f"Error saving PDS JSON to DB: {e}")
-        return jsonify({'error': str(e)}), 500

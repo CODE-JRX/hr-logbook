@@ -3,98 +3,59 @@
 
 {% block content %}
 <div class="container py-4">
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-      <h4 class="mb-1">Personal Information</h4>
-      <p class="text-muted mb-3">Employee ID: {{ pds.personal_info.id }}</p>
-      <div class="row g-3">
-        <div class="col-md-4">
-          <strong>Name</strong><br>
-          {{ pds.personal_info.surname }}, {{ pds.personal_info.first_name }} {{ pds.personal_info.middle_name or '' }}
+  <!-- Top Action Bar -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+          <a href="{{ url_for('employee_bp.manage_employees') }}" class="btn btn-outline-secondary me-2"><i class="fas fa-arrow-left me-1"></i> Back</a>
+          <h2 class="d-inline mb-0 text-primary fw-bold" style="vertical-align: middle;">Employee Record</h2>
+      </div>
+      <div>
+          {% if pds.personal_info.pds_excel_path %}
+          <a href="{{ pds.personal_info.pds_excel_path }}" target="_blank" class="btn btn-success shadow-sm px-4 fw-bold" style="border-radius: 30px;">
+              <i class="fas fa-file-excel me-2"></i> Download Full PDS Excel
+          </a>
+          {% else %}
+          <button class="btn btn-secondary shadow-sm px-4 fw-bold" style="border-radius: 30px;" disabled>
+              <i class="fas fa-file-excel me-2"></i> No PDS File Available
+          </button>
+          {% endif %}
+      </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4" style="border-radius: 15px; border-left: 5px solid var(--primary-color) !important;">
+    <div class="card-body p-4">
+      <h4 class="mb-4 text-secondary border-bottom pb-2">Personal Information</h4>
+      <div class="row g-4">
+        <div class="col-md-3">
+            <span class="text-muted small text-uppercase fw-bold d-block mb-1">Employee ID</span>
+            <span class="fw-bold fs-5">{{ pds.personal_info.id }}</span>
+        </div>
+        <div class="col-md-5">
+            <span class="text-muted small text-uppercase fw-bold d-block mb-1">Full Name</span>
+            <span class="fw-bold fs-5">{{ pds.personal_info.surname }}, {{ pds.personal_info.first_name }} {{ pds.personal_info.middle_name or '' }}</span>
         </div>
         <div class="col-md-4">
-          <strong>Birth</strong><br>
-          {{ pds.personal_info.date_of_birth or 'N/A' }} — {{ pds.personal_info.place_of_birth or 'N/A' }}
+            <span class="text-muted small text-uppercase fw-bold d-block mb-1">Agency Employee No.</span>
+            <span class="fw-bold fs-5">{{ pds.personal_info.agency_employee_no or 'N/A' }}</span>
+        </div>
+        
+        <div class="col-md-3">
+          <span class="text-muted small text-uppercase fw-bold d-block mb-1">Birth Info</span>
+          {{ pds.personal_info.date_of_birth or 'N/A' }}<br>
+          <small class="text-muted">{{ pds.personal_info.place_of_birth or 'N/A' }}</small>
+        </div>
+        <div class="col-md-5">
+          <span class="text-muted small text-uppercase fw-bold d-block mb-1">Contact Information</span>
+          <i class="fas fa-phone fa-fw text-muted"></i> {{ pds.personal_info.mobile_no or 'N/A' }}<br>
+          <i class="fas fa-envelope fa-fw text-muted"></i> {{ pds.personal_info.email or 'N/A' }}
         </div>
         <div class="col-md-4">
-          <strong>Contact</strong><br>
-          {{ pds.personal_info.mobile_no or 'N/A' }} · {{ pds.personal_info.email or 'N/A' }}
+          <span class="text-muted small text-uppercase fw-bold d-block mb-1">Sex & Civil Status</span>
+          {{ pds.personal_info.sex or 'N/A' }} · {{ pds.personal_info.civil_status or 'N/A' }}
         </div>
       </div>
     </div>
   </div>
 
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-      <h5 class="mb-3">Children</h5>
-      {% if pds.children %}
-      <ul class="list-group list-group-flush">
-        {% for c in pds.children %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ c.full_name or 'Unnamed' }}
-            <span class="text-muted">{{ c.date_of_birth or 'N/A' }}</span>
-          </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p class="text-muted mb-0">No children recorded.</p>
-      {% endif %}
-    </div>
-  </div>
-
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-      <h5 class="mb-3">Education</h5>
-      {% if pds.education %}
-      <div class="table-responsive">
-        <table class="table table-sm">
-          <thead><tr><th>Level</th><th>School</th><th>Degree</th><th>From</th><th>To</th></tr></thead>
-          <tbody>
-            {% for e in pds.education %}
-            <tr>
-              <td>{{ e.level }}</td>
-              <td>{{ e.school_name }}</td>
-              <td>{{ e.degree_course }}</td>
-              <td>{{ e.from_year }}</td>
-              <td>{{ e.to_year }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <p class="text-muted mb-0">No education records.</p>
-      {% endif %}
-    </div>
-  </div>
-
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-      <h5 class="mb-3">Work Experience</h5>
-      {% if pds.work_experience %}
-      <div class="table-responsive">
-        <table class="table table-sm">
-          <thead><tr><th>From</th><th>To</th><th>Position</th><th>Department/Agency</th><th>Status</th><th>Gov Service</th></tr></thead>
-          <tbody>
-            {% for w in pds.work_experience %}
-            <tr>
-              <td>{{ w.date_from }}</td>
-              <td>{{ w.date_to }}</td>
-              <td>{{ w.position_title }}</td>
-              <td>{{ w.department_agency_company }}</td>
-              <td>{{ w.status_of_appointment }}</td>
-              <td>{{ w.gov_service }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <p class="text-muted mb-0">No work experience recorded.</p>
-      {% endif %}
-    </div>
-  </div>
-
-  <a href="{{ url_for('employee_bp.manage_employees') }}" class="btn btn-outline-secondary">Back to Manage Employees</a>
 </div>
 {% endblock %}

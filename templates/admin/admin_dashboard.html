@@ -273,13 +273,6 @@
                     <span><i class="fas fa-users me-2"></i> Manage Record Records</span>
                     <i class="fas fa-chevron-right small opacity-50"></i>
                 </a>
-                <button type="button" onclick="document.getElementById('importTrigger').click()" class="btn btn-outline-success text-start d-flex align-items-center justify-content-between p-3" style="border-radius: 12px; border-style: dashed; font-weight:600;">
-                    <span><i class="fas fa-file-excel me-2"></i> Bulk Import PDS</span>
-                    <i class="fas fa-upload small opacity-50"></i>
-                </button>
-                <form id="dashImportForm" action="/import_pds" method="POST" enctype="multipart/form-data" style="display:none;">
-                    <input type="file" name="file" id="importTrigger" onchange="this.form.submit()">
-                </form>
             </div>
           </div>
 

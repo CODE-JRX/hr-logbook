@@ -3,50 +3,15 @@
 
 {% block head_extra %}
 <style>
-    .section-card {
-        background: var(--card-bg);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border-color);
-        margin-bottom: 2rem;
-        overflow: hidden;
-    }
-    .section-card-header {
-        background: white;
-        color: var(--text-color);
-        padding: 1.2rem 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    [data-theme="dark"] .section-card-header { background: #1a1a1a; }
-    .section-card-header h5 { margin: 0; font-weight: 700; color: #1e293b; font-size: 1.15rem; }
-    [data-theme="dark"] .section-card-header h5 { color: #f1f5f9; }
-    .section-card-body { padding: 1.5rem; }
-
-    /* Action buttons */
-    .action-btn {
-        padding: 0.6rem 1.4rem;
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-    }
-
-    /* Employee table */
+    /* Employee table specific refinements */
     .emp-table th { 
         font-size: 0.75rem; 
         text-transform: uppercase; 
         letter-spacing: 0.5px; 
         color: var(--neutral-color); 
-        background-color: rgba(0,0,0,0.02) !important;
     }
-    [data-theme="dark"] .emp-table th { background-color: rgba(255,255,255,0.03) !important; }
-    
     .emp-table td { vertical-align: middle; }
+    
     .name-badge {
         background: linear-gradient(135deg, rgba(20, 99, 255, 0.1), rgba(20, 99, 255, 0.05));
         color: var(--primary-color);
@@ -68,32 +33,31 @@
 {% block content %}
 <div class="container py-3">
 
-    <!-- ──────────────────── Employee Table ──────────────────── -->
-    <div class="section-card">
-        <div class="section-card-header">
-            <h5><i class="fas fa-users me-2"></i> Employee Records</h5>
-            <div class="d-flex gap-2">
-                <a href="/employee/pds/1" class="btn btn-outline-primary btn-sm fw-bold d-inline-flex align-items-center gap-1" style="border-radius:8px; padding: 0.5rem 1rem;">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-users me-2"></i> Employee Records</h5>
+            <div>
+                <a href="/employee/pds/1" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
                     <i class="fas fa-plus"></i>
                     <span class="d-none d-md-inline">Add PDS Manually</span>
                 </a>
             </div>
         </div>
-        <!-- Search Bar Reference from Client Records -->
-        <div class="section-card-body border-bottom" style="background: rgba(0,0,0,0.01);">
-            <div class="row">
+        
+        <!-- Search Bar Standardized base on Client Records -->
+        <div class="card-body border-bottom">
+            <div class="row g-3 align-items-end">
                 <div class="col-md-12">
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" class="form-control border-start-0 ps-0" id="empSearch" placeholder="Search by name, ID, or email..." onkeyup="filterEmployees()">
-                    </div>
+                    <label for="empSearch" class="form-label"><i class="fas fa-search"></i> Search</label>
+                    <input type="text" class="form-control" id="empSearch" placeholder="Search by name, ID, or email..." onkeyup="filterEmployees()">
                 </div>
             </div>
         </div>
-        <div class="section-card-body" style="padding: 0.5rem 1.5rem 1.5rem;">
+
+        <div class="card-body p-0">
             {% if employees %}
             <div class="table-responsive">
-                <table class="table table-hover align-middle table-sm emp-table">
+                <table class="table table-hover align-middle mb-0 emp-table">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
@@ -120,17 +84,17 @@
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a href="/admin/employee/view/{{ emp.id }}"
-                                       class="btn btn-outline-info btn-sm d-inline-flex align-items-center" title="View">
+                                       class="btn btn-outline-info" title="View">
                                         <i class="fas fa-eye me-1"></i>
                                         <span class="d-none d-md-inline">View</span>
                                     </a>
                                     <a href="/admin/employee/edit/{{ emp.id }}"
-                                       class="btn btn-outline-primary btn-sm d-inline-flex align-items-center mx-1" title="Edit">
+                                       class="btn btn-outline-primary mx-1" title="Edit">
                                         <i class="fas fa-pencil-alt me-1"></i>
                                         <span class="d-none d-md-inline">Edit</span>
                                     </a>
                                     <button type="button"
-                                        class="btn btn-outline-danger btn-sm d-inline-flex align-items-center"
+                                        class="btn btn-outline-danger"
                                         onclick='confirmDelete(this)'
                                         data-id='{{ emp.id }}'
                                         data-name='{{ emp.surname }}, {{ emp.first_name }}'
@@ -147,11 +111,14 @@
                 </table>
             </div>
             {% else %}
-            <div class="alert alert-info mt-3">
-                <i class="fas fa-info-circle me-2"></i> No employee records found. Add one manually or import from Excel above.
+            <div class="card-body">
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i> No employee records found. Add one manually or import from Excel above.
+                </div>
             </div>
             {% endif %}
         </div>
+    </div>
 </div>
 {% endblock %}
 

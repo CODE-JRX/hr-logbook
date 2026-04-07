@@ -32,10 +32,7 @@ _last_pool_error = None
 # Expected database tables for schema validation
 REQUIRED_TABLES = [
     'admins', 'clients', 'csm_form', 'face_embeddings', 'logs', 'offices',
-    'pds_personal_information', 'pds_spouse', 'pds_parents', 'pds_children',
-    'pds_education', 'pds_work_experience', 'pds_civil_service_eligibility',
-    'pds_voluntary_work', 'pds_training', 'pds_other_information',
-    'pds_declarations', 'pds_references', 'pds_oath'
+    'pds_personal_information'
 ]
 
 def _create_pool(retry_count=0, max_retries=3):

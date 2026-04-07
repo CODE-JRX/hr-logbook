@@ -175,37 +175,51 @@
     [data-theme="dark"] .file-label { color: #93c5fd; }
     .file-hint { color: #64748b; font-size: 0.85rem; }
     
-    #statusOverlay {
-        display: none;
-        position: absolute; inset: 0;
-        background: rgba(255,255,255,0.9);
-        z-index: 20;
-        align-items: center; justify-content: center;
-        flex-direction: column;
-        border-radius: 12px;
-    }
-    [data-theme="dark"] #statusOverlay { background: rgba(15,23,42,0.9); }
     
-    .spinner-custom {
-        width: 60px; height: 60px;
-        border: 4px solid rgba(59, 130, 246, 0.1);
-        border-left: 4px solid #3b82f6;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+
+    #statusBar {
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+        border-radius: 12px;
+        margin-top: 1rem;
+        font-size: 0.92rem;
+        font-weight: 600;
     }
+    .status-loading {
+        background: #1e3a5f;
+        border: 1px solid #3b82f6;
+        color: #93c5fd;
+    }
+    .status-ok {
+        background: #052e16;
+        border: 1px solid #16a34a;
+        color: #86efac;
+    }
+    .status-warn {
+        background: #451a03;
+        border: 1px solid #d97706;
+        color: #fcd34d;
+    }
+    .status-error {
+        background: #3f0f0f;
+        border: 1px solid #dc2626;
+        color: #fca5a5;
+    }
+    .spinner { animation: spin 0.8s linear infinite; display: inline-block; }
     @keyframes spin { 
         0% { transform: rotate(0deg); } 
         100% { transform: rotate(360deg); } 
     }
 </style>
+
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="form-container">
-        <form action="/employee/pds/1" method="POST">
+        <form id="pdsForm" action="{{ url_for('employee_bp.pds_submit') }}" method="POST">
             {% if session.editing_employee_id %}
             <h2>UPDATE EMPLOYEE RECORD</h2>
             <div class="sheet-badge bg-primary text-white">EDITING ID: {{ session.editing_employee_id }}</div>
@@ -246,74 +260,16 @@
 
                     <div class="upload-zone" id="uploadZone">
                         <input type="file" id="pdsExcelFile" style="position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10;" accept=".xlsx,.xls">
-                        
-                        <div id="statusOverlay">
-                            <div class="spinner-custom"></div>
-                            <div class="fw-bold text-primary" id="statusMessage">Processing Excel File...</div>
-                        </div>
-
                         <div id="dropPrompt">
                             <div class="upload-icon"><i class="fas fa-file-excel"></i></div>
                             <div class="file-label" id="uploadLabel">Drag your PDS Excel here</div>
                             <div class="file-hint mt-1">or click to browse from your computer</div>
                         </div>
-
-                        <div id="fileSelectedView" style="display:none; position: relative; z-index: 20;">
-                            <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-                                <i class="fas fa-file-excel fa-2x text-success"></i>
-                                <span class="fw-bold text-success" id="selectedFileName">filename.xlsx</span>
-                            </div>
-                            <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill" onclick="triggerUpload()">
-                                    <i class="fas fa-file-import me-2"></i> Start Extraction
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary rounded-pill" onclick="cancelSelection()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
                     </div>
-
-                    <div id="extractionSummary" class="mt-4 p-3 bg-light rounded-3" style="display:none; border: 1px solid #d1e3f8;">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:32px; height:32px;">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-bold">Extraction Complete!</div>
-                                    <div class="small text-muted" id="summaryText">We found records for [Name]</div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm" onclick="autoFillForm1()">
-                                <i class="fas fa-magic me-2"></i> Bind to Page 1
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            {% if not session.editing_employee_id %}
-            <!-- Manual Bind Card -->
-            <div id="manualBindBanner" class="card border-0 shadow-sm mb-4 p-3" style="border-radius:20px; display:none; background: linear-gradient(135deg, #fff9f0, #fff2dd); border-left: 5px solid #f59e0b !important;">
-                <div class="card-body p-1 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width:45px; height:45px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245,158,11,0.3);">
-                            <i class="fas fa-magic"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1 fw-bold text-dark">Unsaved Excel Data Found!</h6>
-                            <p class="mb-0 small text-muted">A PDS Excel file was recently uploaded. Click the button to populate the textboxes.</p>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <button type="button" class="btn btn-warning px-4 py-2 fw-bold rounded-pill shadow-sm" onclick="autoFillForm1()">
-                            <i class="fas fa-file-import me-2"></i> Bind Data to Form
-                        </button>
-                        <button type="button" class="btn btn-link text-muted p-2" onclick="document.getElementById('manualBindBanner').style.display='none'" title="Dismiss">
-                            <i class="fas fa-times fa-lg"></i>
-                        </button>
+                    
+                    <div id="statusBar">
+                        <i id="statusIcon" class="fas fa-circle-notch spinner"></i>
+                        <span id="statusText">Uploading…</span>
                     </div>
                 </div>
             </div>
@@ -406,145 +362,10 @@
                 <div class="field-group"><label>21. E-MAIL ADDRESS</label><input name="email" type="email" value="{{ (prefill.personal_info.email_address if prefill else '') or '' }}"/></div>
             </div>
 
-            <div class="section-title">II. FAMILY BACKGROUND</div>
-            <div class="address-block">
-                <div class="address-title">22. SPOUSE</div>
-                <div class="grid-4">
-                    <div class="field-group"><label>Surname</label><input name="spouse_surname" type="text" value="{{ (prefill.family_background.spouse.surname if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>First Name</label><input name="spouse_first_name" type="text" value="{{ (prefill.family_background.spouse.first_name if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>Middle Name</label><input name="spouse_middle_name" type="text" value="{{ (prefill.family_background.spouse.middle_name if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>Occupation</label><input name="spouse_occupation" type="text" value="{{ (prefill.family_background.spouse.occupation if prefill else '') or '' }}"/></div>
-                </div>
-                <div class="grid-3 mt-2">
-                    <div class="field-group"><label>Employer/Biz Name</label><input name="spouse_employer" type="text" value="{{ (prefill.family_background.spouse.employer if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>Biz Address</label><input name="spouse_biz_address" type="text" value="{{ (prefill.family_background.spouse.biz_address if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>Telephone No.</label><input name="spouse_tel_no" type="text" value="{{ (prefill.family_background.spouse.tel_no if prefill else '') or '' }}"/></div>
-                </div>
-            </div>
-
-            <div class="address-block mt-3">
-                <div class="address-title">24. FATHER'S NAME</div>
-                <div class="grid-3">
-                    <div class="field-group"><label>Surname</label><input name="father_surname" type="text" value="{{ (prefill.family_background.father.surname if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>First Name</label><input name="father_first_name" type="text" value="{{ (prefill.family_background.father.first_name if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>Middle Name</label><input name="father_middle_name" type="text" value="{{ (prefill.family_background.father.middle_name if prefill else '') or '' }}"/></div>
-                </div>
-            </div>
-
-            <div class="address-block mt-2">
-                <div class="address-title">25. MOTHER'S MAIDEN NAME</div>
-                <div class="grid-3">
-                    <div class="field-group"><label>Surname</label><input name="mother_surname" type="text" value="{{ (prefill.family_background.mother.maiden_surname if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>First Name</label><input name="mother_first_name" type="text" value="{{ (prefill.family_background.mother.first_name if prefill else '') or '' }}"/></div>
-                    <div class="field-group"><label>Middle Name</label><input name="mother_middle_name" type="text" value="{{ (prefill.family_background.mother.middle_name if prefill else '') or '' }}"/></div>
-                </div>
-            </div>
-
-            <div class="children-section">
-                <div class="address-title d-flex justify-content-between align-items-center">
-                    <span>23. NAME OF CHILDREN (Write full name and list all)</span>
-                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="addChildRow()">
-                        <i class="fas fa-plus me-1"></i> Add Child
-                    </button>
-                </div>
-                <div id="childrenRowsContainer" class="mt-2">
-                    {% if prefill and prefill.family_background.children %}
-                        {% for child in prefill.family_background.children %}
-                        <div class="row g-2 mb-2 child-row align-items-center">
-                            <div class="col-8">
-                                <input name="child_fullname[]" placeholder="Full Name" type="text" class="form-control form-control-sm" style="border-radius:10px;" value="{{ child.name or '' }}">
-                            </div>
-                            <div class="col-3">
-                                <input name="child_dob[]" placeholder="dd/mm/yyyy" type="text" class="form-control form-control-sm" style="border-radius:10px;" value="{{ child.dob or '' }}">
-                            </div>
-                            <div class="col-1 text-end">
-                                <button type="button" class="btn btn-sm text-danger" onclick="this.closest('.child-row').remove()"><i class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <script>
-                function addChildRow() {
-                    const container = document.getElementById('childrenRowsContainer');
-                    const div = document.createElement('div');
-                    div.className = 'row g-2 mb-2 child-row align-items-center';
-                    div.innerHTML = `
-                        <div class="col-8">
-                            <input name="child_fullname[]" placeholder="Full Name" type="text" class="form-control form-control-sm" style="border-radius:10px;">
-                        </div>
-                        <div class="col-3">
-                            <input name="child_dob[]" placeholder="dd/mm/yyyy" type="text" class="form-control form-control-sm" style="border-radius:10px;">
-                        </div>
-                        <div class="col-1 text-end">
-                            <button type="button" class="btn btn-sm text-danger" onclick="this.closest('.child-row').remove()"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                }
-                // Initial row if empty
-                document.addEventListener('DOMContentLoaded', () => {
-                    const container = document.getElementById('childrenRowsContainer');
-                    if (container && container.children.length === 0) addChildRow();
-                });
-            </script>
-
-            <div class="section-title">III. EDUCATIONAL BACKGROUND</div>
-            <div class="table-responsive mt-3">
-                <style>
-                    .edu-table th { font-size: 0.7rem; vertical-align: middle; padding: 0.4rem; background: #f0f4f8; color: #1f3a68; }
-                    .edu-table td { padding: 0.2rem; }
-                    .edu-table input { border: 1px solid #c0d1e5; border-radius: 4px; padding: 0.3rem 0.5rem; width: 100%; font-size: 0.85rem; }
-                    [data-theme="dark"] .edu-table th { background: #2c3e5c; color: #eee; border-color: #444; }
-                    [data-theme="dark"] .edu-table td { border-color: #444; }
-                    [data-theme="dark"] .edu-table input { background: #2c2c2c; border-color: #555; color: #eee; }
-                </style>
-                <table class="table table-bordered edu-table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2">LEVEL</th>
-                            <th rowspan="2">NAME OF SCHOOL</th>
-                            <th rowspan="2">BASIC EDUCATION/DEGREE/COURSE</th>
-                            <th colspan="2">PERIOD ATTENDANCE</th>
-                            <th rowspan="2">HIGHEST LEVEL / UNITS EARNED</th>
-                            <th rowspan="2">YEAR GRADUATED</th>
-                            <th rowspan="2">SCHOLARSHIP / HONORS</th>
-                        </tr>
-                        <tr>
-                            <th>FROM</th>
-                            <th>TO</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% set levels = ['ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE STUDIES'] %}
-                        {% for level_name in levels %}
-                        {% set entry = none %}
-                        {% if prefill and prefill.educational_background %}
-                            {% for edu in prefill.educational_background %}
-                                {% if edu.level == level_name %}{% set entry = edu %}{% endif %}
-                            {% endfor %}
-                        {% endif %}
-                        <tr>
-                            <td><strong>{{ level_name }}</strong><input type="hidden" name="level[]" value="{{ level_name }}"></td>
-                            <td><input type="text" name="name_of_school[]" value="{{ entry.school if entry else '' }}"></td>
-                            <td><input type="text" name="basic_education_degree_course[]" value="{{ entry.degree if entry else '' }}"></td>
-                            <td><input type="text" name="period_from[]" value="{{ entry.from if entry else '' }}"></td>
-                            <td><input type="text" name="period_to[]" value="{{ entry.to if entry else '' }}"></td>
-                            <td><input type="text" name="highest_level_units_earned[]" value="{{ entry.units if entry else '' }}"></td>
-                            <td><input type="text" name="year_graduated[]" value="{{ entry.graduated if entry else '' }}"></td>
-                            <td><input type="text" name="scholarship_academic_honors[]" value="{{ entry.honors if entry else '' }}"></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="page-label">CS FORM 212 (Revised 2025), Page 1 of 4</div>
+            <div class="page-label">CS FORM 212 (Revised 2025), PDS Data Profile</div>
 
             <div class="d-flex justify-content-end mt-4">
-                <button class="btn btn-primary btn-step" type="submit">Next Step <i class="fas fa-arrow-right ms-2"></i></button>
+                <button class="btn btn-success btn-step shadow-sm fw-bold px-4" type="submit" id="submitBtn"><i class="fas fa-save me-2"></i> Submit Employee Record</button>
             </div>
         </form>
     </div>
@@ -553,7 +374,7 @@
 <!-- Floating FAB removed - using Banner at top instead -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if server requested to clear local storage (stale excel data)
+    // Check if server requested to clear local storage
     {% if clear_ls %}
     localStorage.removeItem('pds_prefill_data');
     {% endif %}
@@ -564,67 +385,61 @@ document.addEventListener('DOMContentLoaded', () => {
     {% endif %}
 
     if (localStorage.getItem('pds_prefill_data')) {
-        const banner = document.getElementById('manualBindBanner');
-        if (banner) banner.style.display = 'none';
         autoFillForm1();
     }
 
-    // Excel Upload Logic
-    const dropZone = document.getElementById('uploadZone');
+    // Excel Upload Logic - matching pds_test.html
     const fileInput = document.getElementById('pdsExcelFile');
-    const dropPrompt = document.getElementById('dropPrompt');
-    const fileSelectedView = document.getElementById('fileSelectedView');
-    const selectedFileName = document.getElementById('selectedFileName');
-    const statusOverlay = document.getElementById('statusOverlay');
-    const extractionSummary = document.getElementById('extractionSummary');
-    const summaryText = document.getElementById('summaryText');
+    const dropZone = document.getElementById('uploadZone');
+    const statusBar = document.getElementById('statusBar');
+    const statusIcon = document.getElementById('statusIcon');
+    const statusText = document.getElementById('statusText');
 
-    let currentFile = null;
-
-    dropZone.addEventListener('dragover', e => {
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-    });
-
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-
-    dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-        if (e.dataTransfer.files[0]) {
-            currentFile = e.dataTransfer.files[0];
-            showFileSelected();
-        }
-    });
-
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files[0]) {
-            currentFile = fileInput.files[0];
-            showFileSelected();
-        }
-    });
-
-    window.cancelSelection = () => {
-        currentFile = null;
-        fileInput.value = '';
-        dropPrompt.style.display = 'block';
-        fileSelectedView.style.display = 'none';
-        extractionSummary.style.display = 'none';
-    };
-
-    function showFileSelected() {
-        if (!currentFile) return;
-        dropPrompt.style.display = 'none';
-        extractionSummary.style.display = 'none';
-        triggerUpload();
+    if (fileInput && dropZone) {
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files[0]) uploadFile(fileInput.files[0]);
+        });
+        
+        dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]);
+        });
     }
 
-    window.triggerUpload = () => {
-        if (!currentFile) return;
-        
-        statusOverlay.style.display = 'flex';
+    function setStatus(state, msg) {
+        if (!statusBar) return;
+        statusBar.style.display = 'flex';
+        statusBar.className = '';
+
+        if (state === 'loading') {
+            statusBar.classList.add('status-loading');
+            statusIcon.className = 'fas fa-circle-notch spinner';
+        } else if (state === 'ok') {
+            statusBar.classList.add('status-ok');
+            statusIcon.className = 'fas fa-check-circle';
+        } else if (state === 'warn') {
+            statusBar.classList.add('status-warn');
+            statusIcon.className = 'fas fa-triangle-exclamation';
+        } else {
+            statusBar.classList.add('status-error');
+            statusIcon.className = 'fas fa-times-circle';
+        }
+
+        statusText.textContent = msg;
+    }
+
+    function uploadFile(file) {
+        setStatus('loading', `Reading "${file.name}"...`);
         const fd = new FormData();
-        fd.append('file', currentFile);
+        fd.append('file', file);
 
         fetch('/api/employees/upload-pds-excel', {
             method: 'POST',
@@ -632,49 +447,35 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(r => r.json())
         .then(res => {
-            statusOverlay.style.display = 'none';
             if (res.success) {
-                localStorage.setItem('pds_prefill_data', JSON.stringify(res.data));
-                const pi = res.data.personal_info || {};
-                const name = `${pi.surname || ''}, ${pi.first_name || ''}`.trim();
-                summaryText.textContent = `Extracted data for: ${name || 'Unknown'}`;
-                extractionSummary.style.display = 'block';
-                fileSelectedView.style.display = 'none';
-                
-                // Automate data binding immediately
-                autoFillForm1();
-                
                 if (res.warning) {
-                    showAlert("Warning: " + res.warning + "\n\nPartial data was extracted.", "Extraction Warning", "exclamation-triangle", "warning");
+                    setStatus('warn', `Parsed with warning: ${res.warning}`);
                 } else {
-                    showAlert("Excel data extracted successfully! Click 'Bind to Page 1' to fill the inputs.", "Extraction Success", "check-circle", "success");
+                    setStatus('ok', `"${file.name}" parsed successfully.`);
                 }
+                localStorage.setItem('pds_prefill_data', JSON.stringify(res.data || {}));
+                autoFillForm1();
             } else {
-                showAlert(res.error || "Failed to parse file", "Import Error", "times-circle", "danger");
-                cancelSelection();
+                setStatus('error', res.error || "Failed to parse file");
             }
         })
         .catch(err => {
-            statusOverlay.style.display = 'none';
-            showAlert(err.message, "Critical Error", "bug", "danger");
-            cancelSelection();
+            setStatus('error', "Critical Error: " + err.message);
         });
-    };
+    }
 });
 
 function autoFillForm1() {
     const raw = localStorage.getItem('pds_prefill_data');
-    if (!raw) return showAlert("No Excel data found in local storage.", "No Data", "info-circle", "warning");
+    if (!raw) return;
     let data;
     try {
         data = JSON.parse(raw);
     } catch (e) {
         localStorage.removeItem('pds_prefill_data');
-        const banner = document.getElementById('manualBindBanner');
-        if (banner) banner.style.display = 'none';
-        return showAlert("Invalid cached data cleared. Re-upload Excel if needed.", "Cache Error", "exclamation-circle", "danger");
+        return;
     }
-    if (!data) return showAlert("No Excel data found in local storage.", "No Data", "info-circle", "warning");
+    if (!data) return;
     
     // Personal Info
     const pi = data.personal_info || {};
@@ -685,7 +486,7 @@ function autoFillForm1() {
         'name_extension': pi.name_extension,
         'date_of_birth': pi.date_of_birth,
         'place_of_birth': pi.place_of_birth,
-        'sex': pi.sex_at_birth, // Fixed to match excel_parser key
+        'sex': pi.sex_at_birth,
         'civil_status': pi.civil_status,
         'height': pi.height,
         'weight': pi.weight,
@@ -696,11 +497,9 @@ function autoFillForm1() {
         'sss_no': pi.sss_no,
         'tin_no': pi.tin_no,
         'agency_employee_no': pi.agency_employee_no,
-        'country_citizenship': pi.citizenship, // Adjusted for country_citizenship
+        'country_citizenship': pi.citizenship,
         'mobile_no': pi.mobile_no,
         'email': pi.email_address,
-        
-        // Residential Address
         'res_house_no': pi.residential_address?.house_no,
         'res_street': pi.residential_address?.street,
         'res_subdivision': pi.residential_address?.subdivision,
@@ -708,40 +507,19 @@ function autoFillForm1() {
         'res_city': pi.residential_address?.city,
         'res_province': pi.residential_address?.province,
         'res_zip_code': pi.residential_address?.zip_code,
-        
-        // Permanent Address
         'perm_house_no': pi.permanent_address?.house_no,
         'perm_street': pi.permanent_address?.street,
         'perm_subdivision': pi.permanent_address?.subdivision,
         'perm_barangay': pi.permanent_address?.barangay,
         'perm_city': pi.permanent_address?.city,
         'perm_province': pi.permanent_address?.province,
-        'perm_zip_code': pi.permanent_address?.zip_code,
-        
-        // Family
-        'spouse_surname': data.family_background?.spouse?.surname,
-        'spouse_first_name': data.family_background?.spouse?.first_name,
-        'spouse_middle_name': data.family_background?.spouse?.middle_name,
-        'spouse_occupation': data.family_background?.spouse?.occupation,
-        'spouse_employer': data.family_background?.spouse?.employer_name,
-        'spouse_biz_address': data.family_background?.spouse?.business_address,
-        'spouse_tel_no': data.family_background?.spouse?.telephone_no,
-        
-        'father_surname': data.family_background?.father?.surname,
-        'father_first_name': data.family_background?.father?.first_name,
-        'father_middle_name': data.family_background?.father?.middle_name,
-        
-        'mother_surname': data.family_background?.mother?.maiden_surname,
-        'mother_first_name': data.family_background?.mother?.first_name,
-        'mother_middle_name': data.family_background?.mother?.middle_name,
+        'perm_zip_code': pi.permanent_address?.zip_code
     };
 
     for (let name in mapping) {
         const input = document.querySelector(`[name="${name}"]`);
-        if (input) {
-            if (mapping[name]) {
-                input.value = mapping[name];
-            }
+        if (input && mapping[name]) {
+            input.value = mapping[name];
         }
     }
     
@@ -749,9 +527,9 @@ function autoFillForm1() {
     if (pi.sex_at_birth) {
         const sexSel = document.querySelector('select[name="sex"]');
         if (sexSel) {
-            const val = pi.sex_at_birth.trim();
+            const val = pi.sex_at_birth.trim().toLowerCase();
             for (let opt of sexSel.options) {
-                if (opt.text.toLowerCase() === val.toLowerCase()) {
+                if (opt.text.toLowerCase() === val) {
                     sexSel.value = opt.text;
                     break;
                 }
@@ -762,65 +540,52 @@ function autoFillForm1() {
     if (pi.civil_status) {
         const civSel = document.querySelector('select[name="civil_status"]');
         if (civSel) {
-            const val = pi.civil_status.trim();
+            const val = pi.civil_status.trim().toLowerCase();
             for (let opt of civSel.options) {
-                if (val.toLowerCase().includes(opt.text.toLowerCase())) {
+                if (val.includes(opt.text.toLowerCase())) {
                     civSel.value = opt.text;
                     break;
                 }
             }
         }
     }
-    
-    // Children
-    const children = data.family_background?.children;
-    if (Array.isArray(children) && children.length) {
-        const container = document.getElementById('childrenRowsContainer');
-        container.innerHTML = ''; // clear initial
-        children.forEach(child => {
-            const div = document.createElement('div');
-            div.className = 'row g-2 mb-2 child-row align-items-center';
-            div.innerHTML = `
-                <div class="col-8"><input name="child_fullname[]" value="${child.name || ''}" type="text" class="form-control form-control-sm"></div>
-                <div class="col-3"><input name="child_dob[]" value="${child.date_of_birth || ''}" type="text" class="form-control form-control-sm"></div>
-                <div class="col-1 text-end"><button type="button" class="btn btn-sm text-danger" onclick="this.closest('.child-row').remove()"><i class="fas fa-trash-alt"></i></button></div>
-            `;
-            container.appendChild(div);
-        });
-    }
 
-    // Education
-    const edu_bg = data.educational_background;
-    if (Array.isArray(edu_bg) && edu_bg.length) {
-        console.log("PDS: Found education records:", edu_bg.length);
-        edu_bg.forEach(edu => {
-            const levelRows = document.querySelectorAll(`input[name="level[]"]`);
-            levelRows.forEach(row => {
-               const targetLevel = row.value.toUpperCase();
-               const extractedLevel = (edu.level || "").toUpperCase();
-               
-               // More flexible matching: e.g. "ELEMENTARY" matches "ELEMENTARY SCHOOL"
-               if(extractedLevel && (extractedLevel.includes(targetLevel) || targetLevel.includes(extractedLevel))) {
-                   const tr = row.closest('tr');
-                   if (tr) {
-                       console.log("PDS: Binding level", targetLevel);
-                       tr.querySelector('[name="name_of_school[]"]').value = edu.school_name || '';
-                       tr.querySelector('[name="basic_education_degree_course[]"]').value = edu.degree || '';
-                       tr.querySelector('[name="period_from[]"]').value = edu.from || '';
-                       tr.querySelector('[name="period_to[]"]').value = edu.to || '';
-                       tr.querySelector('[name="highest_level_units_earned[]"]').value = edu.highest_level || '';
-                       tr.querySelector('[name="year_graduated[]"]').value = edu.year_graduated || '';
-                       tr.querySelector('[name="scholarship_academic_honors[]"]').value = edu.scholarships || '';
-                   }
-               }
-            });
-        });
-    }
-
-console.log("Form populated successfully!");
-    // Hide summary after bind to keep it clean
-    const summary = document.getElementById('extractionSummary');
-    if (summary) summary.style.display = 'none';
+    console.log("Form populated successfully!");
 }
+
+// Hijack form submission for AJAX
+document.getElementById('pdsForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
+    btn.disabled = true;
+
+    fetch(this.action, {
+        method: this.method,
+        body: new FormData(this),
+        headers: { 
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            showAlert(res.message || "Saved successfully", "Success", "check-circle", "success");
+            setTimeout(() => { window.location.href = '/admin/manage-employees'; }, 1500);
+        } else {
+            showAlert(res.error || 'Submission failed.', "Error", "times-circle", "danger");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error("Submit error:", err);
+        showAlert('Network error occurred: ' + err.message, "Error", "exclamation-circle", "danger");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+});
 </script>
 {% endblock %}

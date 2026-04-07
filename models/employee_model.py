@@ -40,15 +40,6 @@ def delete_employee(id):
             cursor.execute("SELECT pds_excel_path, signature_path FROM pds_personal_information WHERE id = %s", (id,))
             emp = cursor.fetchone()
             
-            # 2. Delete from dependent tables first due to foreign key constraints
-            tables = [
-                'pds_spouse', 'pds_parents', 'pds_children', 'pds_education',
-                'pds_work_experience', 'pds_civil_service_eligibility', 'pds_voluntary_work',
-                'pds_training', 'pds_other_information', 'pds_declarations', 'pds_references', 'pds_oath'
-            ]
-            for table in tables:
-                cursor.execute(f"DELETE FROM {table} WHERE personal_info_id = %s", (id,))
-            
             # 3. Delete from main table
             cursor.execute("DELETE FROM pds_personal_information WHERE id = %s", (id,))
             
@@ -88,53 +79,6 @@ def get_employee_full_pds(id):
             data['personal_info'] = cursor.fetchone()
             if not data['personal_info']:
                 return None
-                
-            # 2. Family & Dependents
-            cursor.execute("SELECT * FROM pds_spouse WHERE personal_info_id = %s", (id,))
-            data['spouse'] = cursor.fetchone()
-            
-            cursor.execute("SELECT * FROM pds_parents WHERE personal_info_id = %s", (id,))
-            data['parents'] = cursor.fetchone()
-            
-            cursor.execute("SELECT * FROM pds_children WHERE personal_info_id = %s", (id,))
-            data['children'] = cursor.fetchall()
-            
-            # 3. Education
-            cursor.execute("SELECT * FROM pds_education WHERE personal_info_id = %s", (id,))
-            data['education'] = cursor.fetchall()
-            
-            # 4. Eligibility & Work
-            cursor.execute("SELECT * FROM pds_civil_service_eligibility WHERE personal_info_id = %s", (id,))
-            data['eligibility'] = cursor.fetchall()
-            
-            cursor.execute("SELECT * FROM pds_work_experience WHERE personal_info_id = %s", (id,))
-            data['work_experience'] = cursor.fetchall()
-            
-            # 5. Voluntary & Training
-            cursor.execute("SELECT * FROM pds_voluntary_work WHERE personal_info_id = %s", (id,))
-            data['voluntary'] = cursor.fetchall()
-            
-            cursor.execute("SELECT * FROM pds_training WHERE personal_info_id = %s", (id,))
-            data['training'] = cursor.fetchall()
-            
-            # 6. Others
-            cursor.execute("SELECT * FROM pds_other_information WHERE personal_info_id = %s", (id,))
-            data['other_info'] = cursor.fetchone()
-            
-            cursor.execute("SELECT * FROM pds_declarations WHERE personal_info_id = %s", (id,))
-            data['declarations'] = cursor.fetchone()
-            
-            cursor.execute("SELECT * FROM pds_references WHERE personal_info_id = %s", (id,))
-            data['references'] = cursor.fetchall()
-            
-            cursor.execute("SELECT * FROM pds_oath WHERE personal_info_id = %s", (id,))
-            data['oath'] = cursor.fetchone()
-            
-            # Debug: Count declarations for verification
-            cursor.execute("SELECT COUNT(*) as decl_count FROM pds_declarations WHERE personal_info_id = %s", (id,))
-            decl_count = cursor.fetchone()
-            logger.info(f"Employee {id} has {decl_count['decl_count'] if decl_count else 0} declarations records")
-            
             return data
     except Exception as e:
         logger.error(f"Error fetching full PDS for {id}: {e}")
